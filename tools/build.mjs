@@ -52,6 +52,43 @@ for (const key of ['id', 'accent', 'slot']) {
   });
 }
 
+/* 新增产品时最容易漏的一步：用了新的 accent / slot，
+   却没有在 index.html 的 CSS 里加对应的令牌与规则。
+   那样生成出来的 HTML 引用不存在的颜色和栅格位置 ——
+   页面不会报错，只会安静地少一块颜色、错一个位置。
+   所以在生成前就对一遍 CSS。
+
+   注意：只搜 <style> 块。index.html 里同时有 CSS 和生成出来的 HTML，
+   整文件搜索会被自己刚生成的内容满足（slot-d 出现在 HTML 里就算"找到了"），
+   检查就永远通过、等于没查。 */
+
+const fullSource = readFileSync(HTML_PATH, 'utf8');
+const styleMatch = fullSource.match(/<style>([\s\S]*?)<\/style>/);
+if (!styleMatch) {
+  console.error('✗ index.html 里找不到 <style> 块，无法核对 accent / slot 是否有样式');
+  process.exit(2);
+}
+const cssSource = styleMatch[1];
+
+const hasToken = name => new RegExp('--' + name + ':\\s*[^;]+;').test(cssSource);
+const hasSlotClass = slot => new RegExp('\\.slot-' + slot + '\\s*(,|\\{)').test(cssSource);
+
+for (const p of products) {
+  if (!hasToken(p.accent)) {
+    problems.push(
+      `products(${p.id}) 用了 accent="${p.accent}"，但 CSS 里没有 --${p.accent} 令牌。\n` +
+      `      请在 :root 与 :root[data-theme="light"] 各加一个（深色/浅色两个值），\n` +
+      `      并在 tools/contrast-audit.py 的令牌清单里登记，否则对比度不受检。`
+    );
+  }
+  if (!hasSlotClass(p.slot)) {
+    problems.push(
+      `products(${p.id}) 用了 slot="${p.slot}"，但 CSS 里没有 .slot-${p.slot} 规则。\n` +
+      `      请加一条栅格位置（12 列里占几列），参考现有 .slot-a / .slot-b / .slot-c。`
+    );
+  }
+}
+
 if (problems.length) {
   console.error('data/products.json 有问题，未生成：');
   problems.forEach(p => console.error('  ✗ ' + p));
@@ -131,16 +168,19 @@ ${links}
 }
 
 // 4) 敬请期待
+//    只生成 <li>，自己不要再套一层 <ul>：外层已经是
+//    <ul class="planned reveal">，生成器再套一层就成了 ul 嵌 ul ——
+//    flex 布局失效、条目竖着堆成一列（页面凭空高 300 多像素）。
 function genPlanned() {
-  const items = data.planned.items
-    .map(it => `      <li><p class="p-k">${esc(it.k)}</p><p class="p-s">${esc(it.s)}</p></li>`).join('\n');
-  return `    <ul class="planned reveal">\n${items}\n    </ul>`;
+  return data.planned.items
+    .map(it => `      <li><p class="p-k">${esc(it.k)}</p><p class="p-s">${esc(it.s)}</p></li>`)
+    .join('\n');
 }
 
 /* ---------------------------------------------------------------- 404.html
 
    整份生成，不是只填一段 —— 免得 404 页的颜色/字体跟主页各走各的。
-   色值、字体子集都从 index.html 现场读，主页改了这里自动跟上。 */
+   色值、字体子集、站点图标都从 index.html 现场读，主页改了这里自动跟上。 */
 
 function gen404() {
   const src = readFileSync(HTML_PATH, 'utf8');
@@ -151,6 +191,8 @@ function gen404() {
   };
   const fontB64 = src.match(/src: url\(data:font\/woff2;base64,([A-Za-z0-9+/=]+)\)/);
   if (!fontB64) throw new Error('index.html 里找不到词标字体（404 页要用）');
+  const icon = src.match(/<link rel="icon" href="([^"]+)">/);
+  if (!icon) throw new Error('index.html 里找不到站点图标（404 页要用）');
   const hair = 'rgba(232, 234, 237, .12)';
 
   const links = products.map(p =>
@@ -166,7 +208,7 @@ function gen404() {
 <meta name="robots" content="noindex">
 <meta name="color-scheme" content="dark light">
 <meta name="theme-color" content="${tok('bg')}">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230C0D0F'/%3E%3Crect x='7' y='7' width='18' height='1.5' fill='%23E2603F'/%3E%3Crect x='7' y='15.25' width='18' height='1.5' fill='%23C0D5AC'/%3E%3Crect x='7' y='23.5' width='18' height='1.5' fill='%236FBFAE'/%3E%3C/svg%3E">
+<link rel="icon" href="${icon[1]}">
 <script>
 /* 与主页同一套主题逻辑，键名也一样：从主页跳到 404 不会突然变色 */
 (function () {
@@ -274,6 +316,53 @@ for (const r of REGIONS) {
 if (missing.length) {
   console.error('index.html 里找不到这些生成区的标记：' + missing.join(', '));
   console.error('标记必须成对存在：<!-- @generated:名字 --> … <!-- @generated:end -->');
+  process.exit(2);
+}
+
+/* 结构自检：生成的内容不能自带**外层容器本身**。
+   踩过一次：genPlanned 自己带了 <ul class="planned">，被塞进外层已有的
+   <ul class="planned"> 里，变成 ul 嵌 ul —— flex 布局失效、条目竖成一列，
+   页面凭空高 300 多像素，而所有门禁都是绿的（没有一条规则会因此报错）。
+
+   判据是「标签 + class 都相同」，不能只看标签：
+   生成区里本来就有重复单元（slots 的 <article>、noscript 的
+   <div class="map-panel">），那些是对的；错的只有"把外层容器又写了一遍"。
+   只看标签会把重复单元一起误杀。 */
+
+const structProblems = [];
+
+// 每个生成区外层容器的 标签 + class（已存在于手写 HTML 里）
+const OUTER = {
+  slots:    { tag: 'div', cls: 'slots' },
+  noscript: { tag: 'div', cls: 'map' },
+  planned:  { tag: 'ul',  cls: 'planned' },
+  data:     null,             // JS 变量声明，没有容器概念
+};
+
+for (const r of REGIONS) {
+  const outer = OUTER[r.name];
+  if (outer) {
+    const re = new RegExp('<' + outer.tag + '\\b[^>]*\\bclass\\s*=\\s*"([^"]*)"', 'gi');
+    let m;
+    while ((m = re.exec(r.body)) !== null) {
+      if (m[1].split(/\s+/).includes(outer.cls)) {
+        structProblems.push(
+          `生成区 ${r.name} 里又写了一遍外层容器 <${outer.tag} class="${outer.cls}">。\n` +
+          `      外层已经有它了，生成器只应产出容器**内部**的内容` +
+          `（重复单元如 <li>/<article> 可以，容器本身不行）。`
+        );
+        break;
+      }
+    }
+  }
+  if (r.body.includes('@generated:')) {
+    structProblems.push(`生成区 ${r.name} 的内容里又出现了 @generated 标记`);
+  }
+}
+
+if (structProblems.length) {
+  console.error('生成内容的结构有问题，未写入：');
+  structProblems.forEach(p => console.error('  ✗ ' + p));
   process.exit(2);
 }
 

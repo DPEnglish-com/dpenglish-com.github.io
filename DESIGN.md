@@ -197,6 +197,29 @@
 
 `prefers-reduced-motion: reduce` 时全部动画降为 `1e-05s`、取消位移（实测）。
 
+### 2.7 站点图标
+
+一个「人」字，浅色底、深墨笔画 —— 与图版里那具人形同一个意象，
+也是母站唯一的图形标记（此前是深底三条杠的产品色码）。
+
+| 项 | 值 |
+|---|---|
+| 视图框 / 图形 | `32×32`，两笔 `2.8` 宽的圆头路径（撇、捺在顶上交汇） |
+| 底 | `#F3F3F1` —— 浅色主题的 `--bg` |
+| 笔画 | `#101214` —— 浅色主题的 `--ink` |
+| 形式 | 内联 `data:image/svg+xml`，零外部请求（与词标子集同一套做法） |
+| 一致性 | `404.html` 的图标由 `tools/build.mjs` 从 `index.html` 现场读，不各写一份 |
+
+**不随主题切换**：标签栏、收藏夹、分享卡片多半是浅底，标记要能在浅底上站住；
+做两套色会让同一个站在不同地方有两种样子。底色固定取浅色主题的 `--bg`。
+
+**为什么画路径而不是排字**：图标要在 16px 下自己成字，
+不能依赖访客机器上装没装某个中文字体（见 §3 第 11 条）。
+撇捺用圆头笔端，形状由路径本身决定，本机与 CI 渲染一致。
+
+**页面上的三条杠没有动**：首屏那条三段色码（`--wb/--pe/--wl`）是三个产品的
+读数线，属于版式（见 §2.5），不是站点标记；§6 的动效门禁也依赖它。
+
 ---
 
 ## 3. 禁止项
@@ -274,7 +297,60 @@
 | 面板去掉外框（原来在外框里再套一个外框，是卡片套卡片） | CSS |
 | `<noscript>` 清单同构改写为介绍式 | HTML |
 
-文件从 60,016 字节降到 **54,476 字节**，行数 1306 → 1173。
+砍掉第三层当时，文件从 60,016 字节降到 54,476 字节（1306 → 1173 行）。
+之后补社交分享标签（og:*）、生成标记与生成内容，现为 **56,240 字节 /
+1214 行**；`404.html` 另 7,093 字节。
+
+### 4.3 2026-09-27 单一数据源
+
+**问题**：一个产品的信息原本写在三个地方 —— 图版 `DATA`、产品槽位、
+`<noscript>` 清单。三处各写一遍同样的平台/版本/体积，改一处漏两处，
+页面就会自相矛盾。
+
+**做法**：`data/products.json` 是唯一数据源，`tools/build.mjs` 生成到
+`index.html` 的四处加 `404.html` 全文。
+
+| 生成区 | 标记 | 产出 |
+|---|---|---|
+| 图版数据 | `/* @generated:data */` | 驱动人形地图的 `var DATA` |
+| 产品槽位 | `<!-- @generated:slots -->` | 7/5 不对称的三个 `<article>` |
+| 无 JS 清单 | `<!-- @generated:noscript -->` | `<noscript>` 里的等价介绍 |
+| 敬请期待 | `<!-- @generated:planned -->` | 占位条目 |
+| `404.html` | 整份生成 | 色值与词标字体现场从 `index.html` 读 |
+
+**能推出来的值不重复写**：`domain`（「思辨 · 论证 — Web · Android ·
+内测包 · 13.66 MB」）由 `k + platform + version + size` 拼出，JSON 里没有。
+
+**生成前先校验**。新增产品最容易漏的不是数据本身，是配套的样式：
+
+| 会拦下的 | 为什么 |
+|---|---|
+| 改了 JSON 但忘了重新生成 | 页面安静地显示旧数据；`--check` 指出第一处差异在第几行 |
+| `id` / `accent` / `slot` 撞车 | 它们是人形区域、颜色、栅格位置的键 |
+| 用了新 `accent` 但 CSS 里没 `--x` 令牌 | 页面不报错，只是少一块颜色 |
+| 用了新 `slot` 但 CSS 里没 `.slot-x` 规则 | 页面不报错，只是错一个位置 |
+| 链接不是 `https:` / 缺字段 / `id` 格式不对 | 上线后才发现就晚了 |
+
+最后两条有个坑值得记：`index.html` 里**同时有 CSS 和生成出来的 HTML**，
+所以校验必须只搜 `<style>` 块 —— 整文件搜会被自己刚生成的内容满足
+（`slot-d` 出现在 HTML 里就算"找到了"），检查永远通过、等于没查。
+
+`@generated` 标记之外的内容照常手改，生成器不碰。
+
+**一个值得记的坑**：生成器写的第一版 `genPlanned()` 自己带了
+`<ul class="planned reveal">`，被塞进外层已有的 `<ul class="planned reveal">`
+里，变成 `ul` 嵌 `ul` —— flex 布局失效、条目从一行竖成一列，
+页面凭空高 320px。
+
+关键在于**八道门当时全是绿的**：标签配平、对比度、溢出、重叠、
+无障碍、设计规则，没有一条会因此报错。它是"结构错了但语法没错"。
+
+所以生成器加了一道结构自检：生成区里不得再写一遍**外层容器**
+（标签与 class 都相同才算）。判据特意不是"只看标签" ——
+`slots` 生成的就是一组 `<article>`、`noscript` 生成的是多个
+`<div class="map-panel">`，那些是重复单元，本来就该有。
+
+对应地，`verify.mjs` 的第 0 道门除了查同步，也覆盖这类结构问题。
 
 ---
 
@@ -330,55 +406,47 @@ MVP 默认逐条接续。改后说的是同一件事，只是用产品自己的�
 ## 6. 验收（改完必须跑）
 
 ```bash
-cd /Users/ywlukiya/Projects/hub-preview
-
-# 1) 静态令牌对比度（退出码 0 = 全部达标）
-python3 tools/contrast-audit.py index.html
-
-# 2) 真实浏览器渲染审计：8 档视口 × 明暗两套 = 12 组合
-#    对比度 / 横向溢出 / 元素重叠 / sticky / 触控目标 / 禁用 JS
-node tools/render-audit.mjs index.html
-
-# 3) 图版交互：点部位出应用 / 人形跟随 / 层脊生长 / 面包屑退回 / 键盘可达
-node tools/map-interact.mjs index.html /tmp/map-i 1440 dark
-
-# 4) 动画时序：人形逐条绘制（不是一帧到位）、取消选中不重播
-node tools/map-anim.mjs index.html /tmp/map-anim dark
-
-# 5) design-stack 检测器（退出码 0 = 无主要问题）
-bash "$DSH_HOME/skills/design-stack/scripts/design-check" index.html
-
-# 6) 边界路径：390px 移动端交互 / reduced-motion / 禁用 JS
-node tools/edge-cases.mjs index.html
-
-# 7) 分段截图，逐张人眼复核
-node tools/map-visual.mjs index.html /tmp/mv 1440 dark
-node tools/map-visual.mjs index.html /tmp/mv-light 1440 light
+npm ci                  # 只为审计工具装依赖（impeccable），不进线上产物
+node tools/verify.mjs   # 八道门一次跑完，约 40 秒
 ```
 
-**当前状态**：以上七项全部通过。
+本机和 CI 是**同一条命令**（`.github/workflows/verify.yml`）。
+一项失败不影响后面的继续跑，最后汇总，一次看到全部问题。
 
-**这几个脚本也能直接跑线上**（传 URL 即可，第 7 项除外）：
+| 门 | 查什么 |
+|---|---|
+| 0 | 生成物与 `data/products.json` 同步 |
+| 1 | 静态令牌对比度（`tools/contrast-audit.py`） |
+| 2 | 真实渲染：8 视口 × 明暗 = 12 组合（对比度/溢出/重叠/sticky/触控目标/禁用 JS） |
+| 3 | 图版交互：点部位出应用、人形跟随、层脊生长、面包屑退回、键盘可达 |
+| 4 | 动画时序：人形逐条绘制（不是一帧到位）、取消选中不重播 |
+| 5 | 边界路径：390px 移动端 / reduced-motion / 禁用 JS |
+| 6 | 设计规则检测（`tools/design-lint.mjs`，impeccable 引擎） |
+| 7 | `cramped-padding` 豁免依据复核（`tools/measure-exemptions.mjs`） |
 
 ```bash
-LIVE=https://dpenglish-com.github.io/
-node tools/render-audit.mjs "$LIVE"
-node tools/map-interact.mjs "$LIVE" /tmp/live 1440 dark
-node tools/map-anim.mjs "$LIVE" /tmp/live-anim dark
-node tools/edge-cases.mjs "$LIVE"
+node tools/verify.mjs --no-browser      # 跳过需要 Chrome 的四项，约 1 秒
+node tools/verify.mjs --target URL      # 对线上跑（渲染/交互/动画/边界四项）
 ```
 
-传 URL 就直用，传路径才拼 `file://`。就绪判据是**轮询到图版真的渲染出来**
-（`tools/wait-ready.mjs`），不是猜一个固定毫秒数 —— 本地 173ms 就绪，
-线上要过网络，固定睡眠会偶发拿到空 DOM。
-禁用 JS 那一段不能用轮询（求值不了），改用 `Page.loadEventFired`。
-另核对六个外链全部 HTTP 200（2026-09-27）。
+**当前状态**：八项全部通过（本机实测 40–57 秒）。另核对线上六个外链全部 HTTP 200。
 
-检测器唯一的持续 finding 是 `cramped-padding`（5 条），
-已在 `.impeccable/config.json` 附可复现证据豁免：真实 `padding` 是 115.2px，
-检测器没有解析 `clamp()`，把"解析不出"当成了"没有"。
-这与 Wenbian / WorkoutLoop 已记录的同类误判是同一根因。
+**关于 Chrome 位置**：`tools/chrome.mjs` 按 `$CHROME_PATH` → 各平台常见路径
+→ `PATH` 解析。CI（Ubuntu）与 macOS 因此共用同一套脚本。
+**显式设了 `CHROME_PATH` 却指不到文件会直接报错** —— 静默回退到别的
+浏览器，会让人以为 CI 用的是自己指定的那个。
 
+**关于就绪判据**：脚本不睡固定毫秒，而是轮询到图版真的渲染出来
+（`tools/wait-ready.mjs`）。本地 173ms 就绪，线上要过网络 ——
+固定睡眠会偶发拿到空 DOM。禁用 JS 那一段不能用轮询（求值不了），
+改用 `Page.loadEventFired`。
+
+**关于设计规则豁免**：`cramped-padding` 的 5 条全部是检测器误判，
+分三类（`clamp()` 没解析 / li 盒子贴边≠文字贴边 / 绝对定位装饰层无文字）。
+证据不再抄在文档里，而是由 `tools/measure-exemptions.mjs` 现场重测 ——
+**豁免依据一旦不成立就报错退出**，避免豁免变成掩盖问题。
+`tools/design-lint.mjs` 用 `--no-config` 拿完整结果再自己过滤，
+所以输出里能看到「引擎报 5 条 / 豁免 5 条」，新实例不会静默消失。
 ---
 
 ## 7. 上线状态与下一步
@@ -415,13 +483,17 @@ node tools/edge-cases.mjs "$LIVE"
 （1648 字节）——单页站没有跨页缓存收益，保住"零外部请求"更值。
 其余（色板、字阶、动效、栅格、语义结构）已与生产一致。
 
+**2026-09-27 完成的三项**：
+
+1. **`data/products.json` 单一数据源**（见 §4.3）—— 加产品只改一处
+2. **`404.html`** —— 整份由生成器产出，色值与词标字体从 `index.html` 现场读
+3. **CI 门禁** —— `.github/workflows/verify.yml`，push/PR 都跑八道门
+
 **尚未做**：
 
-1. 多页拆分（`404.html`）
-2. `data/products.json` 单一数据源 + 构建脚本注入（新增产品只改一处；
-   现在要改三处：图版 DATA、产品槽位、`<noscript>` 清单）
-3. 自托管中文字体子集与 `unicode-range`
-4. CI 门禁：把审计脚本接进 GitHub Actions
+1. 自托管中文字体子集与 `unicode-range`（正文，400/700 各约 33 KB）
+2. 线上可用性监测（现在是改完手动跑 `npm run verify -- --target https://...`）
+3. 多页拆分（目前首页 + 404 两页够用）
 
 **ThoughtLab 下架（2026-09-26 已完成）**：母站不再收录，两个 GitHub 仓库
 （公开 + 私有）均已删除，线上站点全部 URL 返回 404。删除前已做完整镜像备份，
