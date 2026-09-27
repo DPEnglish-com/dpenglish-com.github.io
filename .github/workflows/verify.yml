@@ -20,9 +20,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Node 版本有讲究：审计脚本用全局 WebSocket 连 CDP。
+      # Node 20 没有这个全局（要 --experimental-websocket），
+      # Node 22+ 才是默认可用。原先写 20，CI 上五个脚本全部
+      # 报 "WebSocket is not defined" —— 而本机是 Node 24，
+      # 本地从来不会暴露这个问题。
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: npm
 
       - uses: actions/setup-python@v5

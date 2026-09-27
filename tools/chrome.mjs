@@ -11,6 +11,28 @@
 
 import { existsSync } from 'node:fs';
 
+/* Node 版本先查一遍。
+   这些脚本用全局 WebSocket 连 CDP：Node 22+ 默认有，Node 20 没有
+   （要 --experimental-websocket）。不查的话，报出来的是
+   "WebSocket is not defined"，看不出跟 Node 版本有关 ——
+   CI 上就这么白排查过一轮（本机是 Node 24，本地永远不暴露）。
+   每个用浏览器的脚本都 import 本文件，所以在这一个地方拦最省事。 */
+const NODE_VERSION = process.versions.node;
+const NODE_MAJOR = Number(NODE_VERSION.split('.')[0]);
+if (NODE_MAJOR < 22) {
+  throw new Error(
+    `需要 Node 22 或更高（当前 v${NODE_VERSION}）。\n` +
+    '  原因：审计脚本用全局 WebSocket 连 Chrome DevTools Protocol，\n' +
+    '  Node 22+ 才默认提供；Node 20 要加 --experimental-websocket。'
+  );
+}
+if (typeof WebSocket !== 'function') {
+  throw new Error(
+    `当前 Node v${NODE_VERSION} 没有全局 WebSocket。\n` +
+    '  请升级到 Node 22+，或用 `node --experimental-websocket` 运行。'
+  );
+}
+
 const CANDIDATES = [
   process.env.CHROME_PATH,
   // macOS
