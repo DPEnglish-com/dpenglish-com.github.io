@@ -1,14 +1,20 @@
 // 收尾校验：移动端交互 / 减少动效 / 禁用 JS 三条路径。
+// 目标可以是本地文件，也可以是线上 URL。
 import { spawn } from 'node:child_process';
 import { resolve } from 'node:path';
+import { sleep, waitReady } from './wait-ready.mjs';
 const [target='index.html'] = process.argv.slice(2);
 const CHROME='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const PORT=9391; const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-const url='file://'+resolve(target);
+const PORT=9391;
+// 传 URL 就照用，传路径才当本地文件。/^https?:/ 判断，避免把 URL 拼成
+// "file:///.../https:/..." 这种不存在的路径。
+const url = /^https?:\/\//.test(target) ? target : 'file://' + resolve(target);
 const chrome=spawn(CHROME,['--headless=new',`--remote-debugging-port=${PORT}`,`--user-data-dir=/tmp/chrome-fg-${PORT}`,'--no-first-run','--no-default-browser-check','--disable-gpu','--hide-scrollbars','--force-color-profile=srgb','--window-size=1440,1000','about:blank'],{stdio:'ignore'});
-class CDP{constructor(ws){this.ws=ws;this.id=0;this.pending=new Map();}
+class CDP{constructor(ws){this.ws=ws;this.id=0;this.pending=new Map();this.onEvent=null;}
  static async connect(p){for(let i=0;i<40;i++){try{const r=await fetch(`http://127.0.0.1:${p}/json/version`);return new CDP((await r.json()).webSocketDebuggerUrl);}catch{await sleep(250);}}throw new Error('no chrome');}
- async open(){return new Promise((res,rej)=>{this.sock=new WebSocket(this.ws);this.sock.onopen=res;this.sock.onerror=rej;this.sock.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&this.pending.has(m.id)){const{res,rej}=this.pending.get(m.id);this.pending.delete(m.id);m.error?rej(new Error(m.error.message)):res(m.result);}};});}
+ async open(){return new Promise((res,rej)=>{this.sock=new WebSocket(this.ws);this.sock.onopen=res;this.sock.onerror=rej;this.sock.onmessage=e=>{const m=JSON.parse(e.data);
+   if(m.id&&this.pending.has(m.id)){const{res,rej}=this.pending.get(m.id);this.pending.delete(m.id);m.error?rej(new Error(m.error.message)):res(m.result);}
+   else if(m.method&&this.onEvent){this.onEvent(m.method);}};});}
  send(m,p={},s){const id=++this.id;return new Promise((res,rej)=>{this.pending.set(id,{res,rej});this.sock.send(JSON.stringify({id,method:m,params:p,sessionId:s}));});}}
 const cdp=await CDP.connect(PORT); await cdp.open();
 const {targetId}=await cdp.send('Target.createTarget',{url:'about:blank'});
@@ -20,7 +26,7 @@ const fails=[]; const ck=(ok,m)=>{console.log(`  ${ok?'PASS':'FAIL'}  ${m}`); if
 // ---------- A) 移动端 390px：人形收起，三层照常展开 ----------
 console.log('\n=== A) 移动端 390px 交互 ===');
 await cdp.send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:2,mobile:true},sessionId);
-await cdp.send('Page.navigate',{url},sessionId); await sleep(900);
+await cdp.send('Page.navigate',{url},sessionId); await waitReady(ev);
 const mob = await ev(`(function(){
   var f=document.querySelector('.map-figure');
   return { figDisplay: getComputedStyle(f).display,
@@ -53,7 +59,7 @@ ck(!mob2.oflow, '390px 展开后不应横向溢出');
 console.log('\n=== B) prefers-reduced-motion: reduce ===');
 await cdp.send('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false},sessionId);
 await cdp.send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]},sessionId);
-await cdp.send('Page.navigate',{url},sessionId); await sleep(1000);
+await cdp.send('Page.navigate',{url},sessionId); await waitReady(ev);
 await ev(`document.getElementById('map').scrollIntoView({block:'start'})`); await sleep(500);
 const rm = await ev(`(function(){
   var bad=0, tot=0;
@@ -77,7 +83,17 @@ await cdp.send('Emulation.setEmulatedMedia',{features:[]},sessionId);
 // ---------- C) 禁用 JS ----------
 console.log('\n=== C) 禁用 JS 的等价内容 ===');
 await cdp.send('Emulation.setScriptExecutionDisabled',{value:true},sessionId);
-await cdp.send('Page.navigate',{url},sessionId); await sleep(900);
+// 这一段不能用 waitReady：脚本已被禁用，Runtime.evaluate 求值不了。
+// 改用 Page.loadEventFired 事件等文档真的加载完（线上要过网络）。
+const loaded = new Promise(r => {
+  const t = setTimeout(() => r('timeout'), 20000);
+  cdp.onEvent = (method) => { if (method === 'Page.loadEventFired') { clearTimeout(t); r('load'); } };
+});
+await cdp.send('Page.navigate',{url},sessionId);
+const how = await loaded;
+cdp.onEvent = null;
+if (how === 'timeout') console.log('  警告：等到 loadEventFired 超时，仍继续检查');
+else await sleep(300);   // 让 <noscript> 布局稳定
 const nojs = await ev(`(function(){
   var root=document.getElementById('map-root');
   var ns=document.querySelector('noscript');

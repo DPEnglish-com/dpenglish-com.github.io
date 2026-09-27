@@ -2,12 +2,13 @@
 import { spawn } from 'node:child_process';
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { sleep, waitReady } from './wait-ready.mjs';
 
 const [target = 'index.html', outDir = '/tmp/map-visual', W = '1440', THEME = 'dark'] = process.argv.slice(2);
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const PORT = 9361;
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-const url = 'file://' + resolve(target);
+// 传 URL 就照用，传路径才当本地文件
+const url = /^https?:\/\//.test(target) ? target : 'file://' + resolve(target);
 mkdirSync(outDir, { recursive: true });
 
 const chrome = spawn(CHROME, [
@@ -56,8 +57,8 @@ try {
   await cdp.send('Runtime.enable', {}, sessionId);
   await cdp.send('Emulation.setDeviceMetricsOverride', { width: +W, height: 1200, deviceScaleFactor: 2, mobile: false }, sessionId);
   await cdp.send('Page.navigate', { url }, sessionId);
-  await sleep(900);
   const ev = async (e) => (await cdp.send('Runtime.evaluate', { expression: e, returnByValue: true, awaitPromise: true }, sessionId)).result.value;
+  await waitReady(ev);
 
   await ev(`document.documentElement.setAttribute('data-theme','${THEME}')`);
   await ev(`document.getElementById('map').scrollIntoView({block:'start'})`);

@@ -3,6 +3,7 @@
 import { spawn } from 'node:child_process';
 import { writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { sleep, waitReady } from './wait-ready.mjs';
 
 const args = process.argv.slice(2);
 const target = args[0] ?? 'index.html';
@@ -12,10 +13,10 @@ const THEME = args[3] ?? 'dark';
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const PORT = 9339 + (Number(process.env.PORT_OFFSET) || 0);
 
-const url = 'file://' + resolve(target);
+// 传 URL 就照用，传路径才当本地文件
+const url = /^https?:\/\//.test(target) ? target : 'file://' + resolve(target);
 if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true });
 
-const sleep = ms => new Promise(r => setTimeout(r, ms));
 const profile = `/tmp/chrome-map-${PORT}`;
 
 const chrome = spawn(CHROME, [
@@ -69,10 +70,14 @@ try {
   await cdp.send('Emulation.setDeviceMetricsOverride',
     { width: W, height: 1000, deviceScaleFactor: 2, mobile: W < 700 }, sessionId);
   await cdp.send('Page.navigate', { url }, sessionId);
-  await sleep(900);
 
   const evalJs = async (expr) => (await cdp.send('Runtime.evaluate',
     { expression: expr, returnByValue: true, awaitPromise: true }, sessionId)).result.value;
+
+  // 不睡固定毫秒：线上要过网络，睡 900ms 可能文档还没解析完。
+  // 轮询到图版真的渲染出来为止（本地瞬间返回，线上多等一会儿）。
+  const rdy = await waitReady(evalJs);
+  console.log(`  就绪：${rdy.state}（${rdy.ms}ms）`);
 
   await evalJs(`document.documentElement.setAttribute('data-theme','${THEME}')`);
   await sleep(200);
