@@ -1,0 +1,85 @@
+{
+  "$comment": [
+    "母站唯一数据源。index.html 里三处产品信息（图版 DATA、产品槽位、<noscript> 清单）",
+    "都由 tools/build.mjs 从这里生成，改产品只改这个文件，然后 `node tools/build.mjs`。",
+    "",
+    "不要手改 index.html 里 @generated 标记之间的内容：下次生成会覆盖，",
+    "跑 `node tools/build.mjs --check` 会报不同步（CI 也跑这个）。",
+    "",
+    "事实基线：核对于 2026-09-26，取自各产品自己的线上页面与仓库文档。",
+    "不确定的写进 note 明说，不要写看起来漂亮的话。"
+  ],
+
+  "site": {
+    "verifiedOn": "2026-09-26",
+    "count": 3
+  },
+
+  "products": [
+    {
+      "id": "argue",
+      "part": "脑袋",
+      "k": "思辨 · 论证",
+      "accent": "wb",
+      "slot": "a",
+      "name": "问辩 Wenbian",
+      "short": "Web · Android",
+      "platform": "Web · Android",
+      "version": "内测包",
+      "size": "13.66 MB",
+      "desc": "你提出命题，它围绕你的实际发言继续推进，定位当前争议，每次只追问一个可以回答的问题。它不生产结论，只负责把你没说清的前提、没给出的证据和跳过的推理挑出来。",
+      "note": "需要账户（当前邀请制），账户与数据归属从第一版建立。",
+      "links": [
+        { "label": "前往站点", "href": "https://dpenglish-com.github.io/wenbian-site/" },
+        { "label": "下载 APK", "href": "https://dpenglish-com.github.io/wenbian-site/downloads/wenbian-android-debug.apk" }
+      ]
+    },
+    {
+      "id": "lang",
+      "part": "嘴巴",
+      "k": "语言 · 考试",
+      "accent": "pe",
+      "slot": "b",
+      "name": "PaperEcho 纸上回声",
+      "short": "Android · 1.2.28",
+      "platform": "Android 8.0+",
+      "version": "1.2.28",
+      "size": "5.48 MB",
+      "desc": "手机负责出题与朗读，答案写在纸上。从单词到听写、精听、长文与写作批改，六个环节共用同一份词库：你今天背的词，就是今天练习的材料。",
+      "note": "无需注册账户；词库、训练历史与复习记录只保存在你的设备上。需要联网。",
+      "links": [
+        { "label": "前往站点", "href": "https://dpenglish-com.github.io/paperecho-site/" },
+        { "label": "下载 APK", "href": "https://dpenglish-com.github.io/paperecho-site/downloads/PaperEcho.apk" }
+      ]
+    },
+    {
+      "id": "body",
+      "part": "身体",
+      "k": "训练 · 编排",
+      "accent": "wl",
+      "slot": "c",
+      "name": "WorkoutLoop",
+      "short": "Android · 0.1.0",
+      "platform": "Android",
+      "version": "0.1.0",
+      "size": "2.08 MB",
+      "desc": "训练计划按顺序循环推进，完成当前训练才进入下一项。音量键就能完成本组或暂停，手上有汗也不用点屏幕。漏练不产生日期债务。",
+      "note": "无账号；数据只存在你手机上。源码清单未声明 INTERNET 权限——界面文案里「无联网权限」的说法与此一致，但 WebDAV 同步的注释提到联网需求，此处按源码清单陈述。",
+      "links": [
+        { "label": "前往站点", "href": "https://dpenglish-com.github.io/workoutloop-site/" },
+        { "label": "下载 APK", "href": "https://dpenglish-com.github.io/workoutloop-site/downloads/WorkoutLoop-0.1.0-release.apk" }
+      ]
+    }
+  ],
+
+  "planned": {
+    "title": "敬请期待",
+    "note": "这几个方向想做，但还没有产品、没有日期。放在这里只是占位，不编造进度。",
+    "items": [
+      { "k": "注意力", "s": "还没开始" },
+      { "k": "财务", "s": "还没开始" },
+      { "k": "情绪", "s": "还没开始" },
+      { "k": "手艺", "s": "还没开始" }
+    ]
+  }
+}

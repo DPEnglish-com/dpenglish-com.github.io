@@ -1,0 +1,60 @@
+name: 验收
+
+# 每次改动都跑一遍八道门。设计约定见 DESIGN.md §6。
+#
+# 为什么要有这个：这些门原本靠人手动跑，漏跑一次就可能把对比度不达标、
+# 元素重叠、或者生成物不同步的东西推上线。第 0 道（生成物同步）尤其重要：
+# 改了 data/products.json 却忘了重新生成，页面会安静地显示旧数据。
+#
+# 本机和 CI 跑的是同一个入口：node tools/verify.mjs
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 安装依赖（只用于审计工具，不进线上产物）
+        run: npm ci --no-audit --no-fund
+
+      # chromium 走 apt：路径确定，比 snap 快。
+      # 装完把实际路径写进 CHROME_PATH —— tools/chrome.mjs 会优先用它，
+      # 指错就报错，不会静默换一个浏览器跑。
+      - name: 安装 Chromium
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq chromium-browser || sudo apt-get install -y -qq chromium
+          for c in /usr/bin/chromium-browser /usr/bin/chromium /usr/bin/google-chrome; do
+            if [ -x "$c" ]; then echo "CHROME_PATH=$c" >> "$GITHUB_ENV"; break; fi
+          done
+          echo "Chrome: $CHROME_PATH"
+          test -n "$CHROME_PATH" || { echo "::error::没找到可用的 Chromium"; exit 1; }
+
+      - name: 跑八道门
+        run: node tools/verify.mjs
+
+      - name: 失败时留下截图
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 失败截图
+          path: |
+            /tmp/verify-map/*.png
+            /tmp/verify-anim/*.png
+          if-no-files-found: ignore
+          retention-days: 7

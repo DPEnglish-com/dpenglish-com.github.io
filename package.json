@@ -1,0 +1,27 @@
+{
+  "name": "congtoudaojiao-hub",
+  "version": "1.0.0",
+  "private": true,
+  "description": "从头到脚 · 组织根站（https://dpenglish-com.github.io/）",
+  "type": "module",
+  "scripts": {
+    "build": "node tools/build.mjs",
+    "check": "node tools/build.mjs --check",
+    "verify": "node tools/verify.mjs",
+    "lint:design": "node tools/design-lint.mjs index.html"
+  },
+  "comment": [
+    "站点本身是零依赖的：index.html 单文件，CSS/JS/词标子集全部内联，",
+    "没有构建步骤，没有运行时依赖 —— 部署的就是仓库里那个文件。",
+    "",
+    "这里只放【开发期工具】的依赖，只被 tools/ 下的审计脚本使用，",
+    "不会进入线上产物。所以 site 零依赖 和 仓库有 devDependencies 并不矛盾。",
+    "impeccable 是设计规则检测器（design-stack skill 用的同一个引擎）。"
+  ],
+  "devDependencies": {
+    "impeccable": "^4.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

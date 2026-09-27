@@ -4,13 +4,13 @@ import { spawn } from 'node:child_process';
 import { writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { sleep, waitReady } from './wait-ready.mjs';
+import { CHROME } from './chrome.mjs';
 
 const args = process.argv.slice(2);
 const target = args[0] ?? 'index.html';
 const outDir = args[1] ?? '/tmp/map-interact';
 const W = Number(args[2] ?? 1440);
 const THEME = args[3] ?? 'dark';
-const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const PORT = 9339 + (Number(process.env.PORT_OFFSET) || 0);
 
 // 传 URL 就照用，传路径才当本地文件

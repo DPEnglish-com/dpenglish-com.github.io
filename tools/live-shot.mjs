@@ -4,9 +4,9 @@ import { spawn } from 'node:child_process';
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { sleep, waitReady } from './wait-ready.mjs';
+import { CHROME } from './chrome.mjs';
 
 const [target = 'index.html', outDir = '/tmp/live-shot', W = '1440', THEME = 'dark', EXPAND = ''] = process.argv.slice(2);
-const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const PORT = 9411;
 const url = /^https?:\/\//.test(target) ? target : 'file://' + resolve(target);
 mkdirSync(outDir, { recursive: true });
@@ -55,7 +55,8 @@ try {
     { width: +W, height: 1000, deviceScaleFactor: 1, mobile: +W < 700 }, sessionId);
   await cdp.send('Page.navigate', { url }, sessionId);
   const ev = async e => (await cdp.send('Runtime.evaluate', { expression: e, returnByValue: true, awaitPromise: true }, sessionId)).result.value;
-  const rdy = await waitReady(ev);
+  // 404 页没有图版，用它的主链接当判据
+  const rdy = await waitReady(ev, url.includes('404') ? { selector: '.home' } : {});
   console.log(`就绪：${rdy.state}（${rdy.ms}ms）`);
 
   await ev(`document.documentElement.setAttribute('data-theme','${THEME}')`);
