@@ -1,0 +1,34 @@
+{
+  "_comment": "design-stack Step 3 的豁免。每条都附可复现的证据，不是静默放过。证据由 tools/render-audit.mjs（真实浏览器 + computed style）产出。",
+
+  "detector": {
+    "ignoreRules": ["cramped-padding"],
+    "ignoreFiles": []
+  },
+
+  "_why_cramped_padding": [
+    "检测器报的 5 条全部指向 <section class=\"section wrap\">，理由是",
+    "「children flush against border-top on top (no inset)」——即认为",
+    "区块上边框与内容之间没有内缩。",
+    "",
+    "实测（tools/render-audit.mjs，CDP 读取 computed style，1440×900）：",
+    "  section.section 共 5 个，每个 padding-top = 115.2px、padding-bottom = 115.2px；",
+    "  区块 border-top 为 1px 细线，首个文本子元素距区块顶边 128px。",
+    "",
+    "也就是说真实内缩是 115.2px，而不是检测器认为的 0。",
+    "原因：内缩写在 .section 的 padding 简写里（padding: var(--step) 0，",
+    "--step = clamp(72px, 8vw, 128px)），检测器没有把 clamp() 解析成具体像素，",
+    "于是把「解析不出」当成了「没有」。这与 Wenbian / WorkoutLoop 两个仓库里",
+    "已记录的同类误判是同一个根因（那两个仓库分别用 padding-block 逻辑属性",
+    "与真实渲染审计证伪过）。",
+    "",
+    "1px 细线分区、且细线直接贴区块边界，是本项目设计语言的一部分：",
+    "母站沿用 PaperEcho / 问辩 / WorkoutLoop 三站的 hairline 分区习惯（见 DESIGN.md §3）。",
+    "把 115.2px 的内缩再加大只会让区块之间更空，不会解决这条 finding。"
+  ],
+
+  "_advisory_notes": [
+    "本文件只作用于 hub-preview 预览版。",
+    "PaperEcho / Wenbian / WorkoutLoop / thoughtlab 四个仓库各自独立判定，不受此处影响。"
+  ]
+}

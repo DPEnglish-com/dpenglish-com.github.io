@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://dpenglish-com.github.io/sitemap.xml
