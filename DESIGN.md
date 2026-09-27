@@ -489,6 +489,31 @@ node tools/verify.mjs --target URL      # 对线上跑（渲染/交互/动画/�
 2. **`404.html`** —— 整份由生成器产出，色值与词标字体从 `index.html` 现场读
 3. **CI 门禁** —— `.github/workflows/verify.yml`，push/PR 都跑八道门
 
+### 7.1 CI 头两次运行暴露的问题
+
+这两个都只有 CI 能暴露 —— 本机是 macOS + Node 24，本地永远不报：
+
+**一、Ubuntu 的 `chromium-browser` 是个 snap 过渡包**
+apt 报"装好了"，但 `/usr/bin/chromium-browser`、`/usr/bin/chromium`、
+`/usr/bin/google-chrome` 一个可执行文件都没有（真东西在 snap 里）。
+第一次运行就卡在这一步。
+
+改装修 Google 官方 deb，落在 `/usr/bin/google-chrome-stable`，
+装完先跑 `--version` 验证再往下走。
+
+**二、Node 20 没有全局 `WebSocket`**
+审计脚本用全局 `WebSocket` 连 CDP：Node 22+ 默认有，
+Node 20 要 `--experimental-websocket`。第二次运行五个脚本
+一起报 `WebSocket is not defined`。
+
+改 workflow 的 `node-version` 为 22、`engines` 同步为 `>=22`，
+并在 `tools/chrome.mjs` 加版本守卫（用浏览器的八个脚本都 import 它，
+一处拦全部），报"需要 Node 22 或更高（当前 v20.x）"并说明原因。
+
+**这两次失败是 CI 该有的样子**：装完立刻退出，而不是带着一个
+跑不起来的浏览器继续跑完剩下七道门、最后报一堆看不懂的错。
+第三次运行在 Ubuntu 上八道门全过，35.8 秒。
+
 **尚未做**：
 
 1. 自托管中文字体子集与 `unicode-range`（正文，400/700 各约 33 KB）
