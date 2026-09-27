@@ -4,7 +4,8 @@
 与本文冲突的改动，要么改本文，要么不改代码。
 
 技术栈：静态 HTML + CSS + 原生 JS，**零依赖、零构建、零外部请求**。
-当前状态：**预览版**（单文件 `index.html`，双击即看）。
+当前状态：**已上线**（<https://dpenglish-com.github.io/>）。
+单文件 `index.html`，本地双击也能看；CSS/JS/词标子集全部内联。
 
 与三个子站的关系：母站沿用 PaperEcho / 问辩 / WorkoutLoop 既有的
 `--bg/--ink/--hair` 命名习惯、hairline 分区、零阴影、等宽只用于真实测量值。
@@ -68,7 +69,7 @@
 
 - **不用 `color-mix()`**：它产出 `color(srgb …)` 形式，微信 X5 与旧内核解析不了。
   顶栏半透明底改用显式 `--bg-veil` 令牌。
-- **不用 `oklch()`**：预览版一律 sRGB 十六进制，把兼容性风险降到零。
+- **不用 `oklch()`**：一律 sRGB 十六进制，把兼容性风险降到零。
 
 ### 2.2 字体
 
@@ -356,6 +357,21 @@ node tools/map-visual.mjs index.html /tmp/mv-light 1440 light
 ```
 
 **当前状态**：以上七项全部通过。
+
+**这几个脚本也能直接跑线上**（传 URL 即可，第 7 项除外）：
+
+```bash
+LIVE=https://dpenglish-com.github.io/
+node tools/render-audit.mjs "$LIVE"
+node tools/map-interact.mjs "$LIVE" /tmp/live 1440 dark
+node tools/map-anim.mjs "$LIVE" /tmp/live-anim dark
+node tools/edge-cases.mjs "$LIVE"
+```
+
+传 URL 就直用，传路径才拼 `file://`。就绪判据是**轮询到图版真的渲染出来**
+（`tools/wait-ready.mjs`），不是猜一个固定毫秒数 —— 本地 173ms 就绪，
+线上要过网络，固定睡眠会偶发拿到空 DOM。
+禁用 JS 那一段不能用轮询（求值不了），改用 `Page.loadEventFired`。
 另核对六个外链全部 HTTP 200（2026-09-27）。
 
 检测器唯一的持续 finding 是 `cramped-padding`（5 条），
@@ -365,19 +381,47 @@ node tools/map-visual.mjs index.html /tmp/mv-light 1440 light
 
 ---
 
-## 7. 已知偏离与下一步
+## 7. 上线状态与下一步
 
-**预览版的刻意简化**：正文不内联思源黑体子集，走系统 CJK 栈
-（生产阶段自托管 400/700 子集，各约 33 KB）。其余（色板、字阶、动效、
-栅格、语义结构）与生产一致。
+**已上线（2026-09-27）**：
 
-**尚未做（预览通过后再做）**：
+| 项 | 值 |
+|---|---|
+| 线上地址 | **https://dpenglish-com.github.io/** |
+| 仓库 | `DPEnglish-com/dpenglish-com.github.io`（public） |
+| 发布方式 | GitHub Pages，`main` 分支根目录，legacy build（与三个子站一致） |
+| 首次上线提交 | `2f536ec` |
+| 线上 `index.html` 字节数 | 55,268（与本地逐字节一致，`diff` 已验证） |
 
-1. 多页拆分（`about.html`、`404.html`）与 `DESIGN.md` 之外的部署说明
-2. `data/products.json` 单一数据源 + 构建脚本注入（新增产品只改一处）
+根域名原先 404（未被占用），本次落位。选它的理由：它是三个子站的上一层，
+门户站放这里层级最自然，且以后加第四个产品仍是同一地址，不因改名而失效。
+
+随站点一起发布的文件：`assets/og.png`（1200×630 分享图）、
+`robots.txt`、`sitemap.xml`、`.nojekyll`、`README.md`。
+其中 `og.png` 由站点自己的令牌值与词标字体渲染，图与页面不会走样。
+
+**线上复测（对 `https://dpenglish-com.github.io/` 实跑，非本地）**：
+
+| 门禁 | 结果 |
+|---|---|
+| 真实渲染审计（8 视口 × 明暗 = 12 组合） | ✅ 通过 |
+| 图版交互（点部位出应用 / 人形跟随 / 面包屑） | ✅ 通过 |
+| 动画时序（人形逐条绘制、取消选中不重播） | ✅ 通过 |
+| 边界路径（390px / reduce / 禁用 JS） | ✅ 通过 |
+| 页面内 8 个链接 | ✅ 全部 HTTP 200 |
+
+**一处刻意的简化**：正文不内联思源黑体子集，走系统 CJK 栈
+（生产阶段自托管 400/700 子集，各约 33 KB）。词标子集继续 base64 内联
+（1648 字节）——单页站没有跨页缓存收益，保住"零外部请求"更值。
+其余（色板、字阶、动效、栅格、语义结构）已与生产一致。
+
+**尚未做**：
+
+1. 多页拆分（`404.html`）
+2. `data/products.json` 单一数据源 + 构建脚本注入（新增产品只改一处；
+   现在要改三处：图版 DATA、产品槽位、`<noscript>` 清单）
 3. 自托管中文字体子集与 `unicode-range`
-4. 根域名落位：新建 repo `dpenglish-com.github.io`（当前 404，未被占用）
-5. CI 门禁：把上面两条审计脚本接进 GitHub Actions
+4. CI 门禁：把审计脚本接进 GitHub Actions
 
 **ThoughtLab 下架（2026-09-26 已完成）**：母站不再收录，两个 GitHub 仓库
 （公开 + 私有）均已删除，线上站点全部 URL 返回 404。删除前已做完整镜像备份，
