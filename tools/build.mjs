@@ -11,7 +11,7 @@
 //   /* @generated:名字 */      …  /* @generated:end */
 // 标记之外的内容一律不碰。
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -41,6 +41,20 @@ products.forEach((p, i) => {
     if (!l.label || !l.href) problems.push(`${where}.links[${j}] 缺 label 或 href`);
     if (l.href && !/^https:\/\//.test(l.href)) problems.push(`${where}.links[${j}] 必须是 https: ${l.href}`);
   });
+  // media：字段要齐，路径要落在仓库里。写成 https:// 会打破"零外部请求"，
+  // 写成绝对路径会在子路径部署时 404 —— 两者都在生成前拦下。
+  if (!p.media || typeof p.media !== 'object') problems.push(`${where} 缺 media（video / poster / demo / demoNote）`);
+  else {
+    for (const f of ['video', 'poster', 'demo', 'demoNote']) {
+      if (!p.media[f] || typeof p.media[f] !== 'string') problems.push(`${where}.media 缺字段: ${f}`);
+    }
+    for (const f of ['video', 'poster', 'demo']) {
+      const v = p.media[f];
+      if (!v) continue;
+      if (/^([a-z]+:|\/)/i.test(v)) problems.push(`${where}.media.${f} 必须是仓库内的相对路径: ${v}`);
+      else if (!existsSync(join(ROOT, v))) problems.push(`${where}.media.${f} 指向的文件不存在: ${v}`);
+    }
+  }
 });
 
 // id / accent / slot 不能撞：它们分别是人形区域、颜色、栅格位置的键
@@ -115,6 +129,17 @@ function genSlots() {
       const arrow = i === 0 ? ' <span class="arw" aria-hidden="true">→</span>' : '';
       return `          <a href="${esc(l.href)}">${esc(l.label)}${arrow}</a>`;
     }).join('\n');
+    // 「查看视频」「在线试用」不是链接，是打开悬浮窗的按钮：写成 <a href> 的话，
+    // 中键或回车会直接跳到一段裸的 mp4 / 一个裸的 demo 页，那是另一条没人维护的路径。
+    // 地址与标题都挂在 data-* 上，脚本里不为任何产品写死内容。
+    const acts = `        <div class="slot-acts">
+          <button type="button" class="slot-act" data-open="video"
+                  data-src="${esc(p.media.video)}" data-poster="${esc(p.media.poster)}"
+                  data-title="${esc(p.name)} · 使用演示">查看视频</button>
+          <button type="button" class="slot-act" data-open="demo"
+                  data-src="${esc(p.media.demo)}" data-title="${esc(p.name)} · 在线试用"
+                  data-note="${esc(p.media.demoNote)}">在线试用</button>
+        </div>`;
     return `      <!-- ${esc(p.name)}：${esc(p.part)} -->
       <article class="slot slot-${esc(p.slot)} reveal" data-accent="${esc(p.accent)}">
         <p class="slot-domain">${esc(p.part)} · ${esc(p.k)}</p>
@@ -128,6 +153,7 @@ ${specs}
         <p class="slot-note">
           ${esc(p.note)}
         </p>
+${acts}
         <div class="slot-links">
 ${links}
         </div>

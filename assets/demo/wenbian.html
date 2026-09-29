@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>问辩 Wenbian · 在线试用</title>
+<!--
+  离线试用版。零外部请求、零依赖。
+  取值照 packages/ui/src/styles/tokens.css 与 quiet-debate.css（浅色）：
+    bg #fcfcfa · ink #262923 · muted #676d62 · line #e3e6de · soft #f2f4ee
+    accent #44603b · button #2f3c28 · on-button #fafcf5
+    栏宽 596px · 命题 31px/1.6/-0.7px · 正文 18px/1.95 · 发言者 12px + 5px 圆点
+    知识词：强调色 + 1px 底边；知识面板：1px 左竖线 + 17px 左内边距；输入区圆角 15px。
+  文案逐字取自 apps/web/src/lib/demo-content.ts 与 session-view.tsx，不编造。
+-->
+<style>
+:root{
+  --bg:#fcfcfa; --ink:#262923; --muted:#676d62; --line:#e3e6de; --soft:#f2f4ee;
+  --accent:#44603b; --button:#2f3c28; --on-button:#fafcf5;
+  --font:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",system-ui,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+  --col:596px; --radius-shell:16px; --radius-compose:15px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);
+  -webkit-font-smoothing:antialiased;font-size:15px;line-height:1.8}
+body{padding:26px 20px 44px}
+.wrap{max-width:1120px;margin:0 auto}
+
+/* hidden 要能在 display:flex/grid 的元素上生效 —— 光写 [hidden] 会被后面的 display 覆盖 */
+[hidden]{display:none !important}
+
+/* ── 页头 ── */
+.bar{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;
+  padding-bottom:16px;border-bottom:1px solid var(--line)}
+.bar h1{margin:0;font-size:26px;font-weight:600;letter-spacing:-.4px}
+.bar p{margin:6px 0 0;font-size:13px;color:var(--muted)}
+.toggle{display:flex;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.toggle button{appearance:none;border:0;background:transparent;color:var(--muted);
+  font-family:var(--font);font-size:13px;padding:9px 18px;cursor:pointer}
+.toggle button + button{border-left:1px solid var(--line)}
+.toggle button[aria-pressed="true"]{background:var(--button);color:var(--on-button)}
+.toggle button:focus-visible,button:focus-visible,textarea:focus-visible,
+input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hint{margin:14px 0 0;font-size:13px;color:var(--muted);min-height:20px}
+
+/* ── 设备 ── */
+.stage{margin-top:20px;display:flex;justify-content:center}
+.device{width:100%;display:flex;flex-direction:column;align-items:center}
+.device[data-device="phone"] .shell{max-width:412px}
+.device[data-device="tablet"] .shell{max-width:1000px}
+.shell{border:1px solid var(--line);border-radius:var(--radius-shell);background:var(--bg);
+  width:100%;padding:0;overflow:hidden}
+
+/* 头栏 */
+.head{display:flex;align-items:center;justify-content:space-between;
+  padding:20px 28px;border-bottom:1px solid var(--line)}
+.wordmark{font-size:17px;letter-spacing:3px;font-weight:500}
+.mode{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted)}
+.seg{display:flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.seg button{appearance:none;border:0;background:transparent;color:var(--muted);
+  font-family:var(--font);font-size:12px;padding:6px 12px;cursor:pointer}
+.seg button + button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--soft);color:var(--ink)}
+.gear{width:32px;height:32px;border:1px solid var(--line);border-radius:50%}
+
+/* 正文栏 */
+.col{padding:23px 28px 29px}
+.title{font-size:31px;line-height:1.6;letter-spacing:-.7px;font-weight:500;margin:0 0 37px;max-width:540px}
+
+.turn{margin-top:0}
+.spk{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-bottom:11px;height:16px}
+.spk i{width:5px;height:5px;border-radius:50%;background:var(--accent);display:block;flex:none}
+.stmt{margin:0;font-size:18px;line-height:1.95;letter-spacing:.1px;max-width:540px}
+.concept{color:var(--accent);border-bottom:1px solid transparent;cursor:pointer;background:none;
+  border-left:0;border-right:0;border-top:0;font:inherit;padding:0}
+.concept[aria-expanded="true"]{border-bottom-color:var(--accent)}
+.fup{margin:15px 0 0;font-size:14px;color:var(--muted);line-height:1.95;max-width:540px}
+.fup b{color:var(--ink);font-weight:600}
+
+/* 知识面板：左竖线由「那条线」变来 —— 产品里就是 1px 左线 */
+.panel{margin-top:21px;padding-left:17px;border-left:1px solid var(--line);max-width:540px}
+.panel.open{border-left-color:var(--accent)}
+.panel .pt{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.panel h2{margin:0;font-size:13px;font-weight:500}
+.panel .pt button{appearance:none;background:none;border:0;color:var(--muted);font-size:12px;
+  font-family:var(--font);cursor:pointer;padding:0}
+.panel p{margin:0;font-size:14px;line-height:1.9;color:var(--muted)}
+.panel .deeper{display:inline-block;margin-top:11px;font-size:12px;color:var(--accent);
+  background:none;border:0;font-family:var(--font);cursor:pointer;padding:0}
+
+/* 范围澄清 */
+.clar{margin-top:0;padding-left:17px;border-left:1px solid var(--line);max-width:540px}
+.clar .q{margin:0 0 14px;font-size:16px;line-height:1.9}
+.clar .q b{font-weight:600}
+.clar .rows{display:flex;flex-direction:column;gap:12px}
+.clar .row{display:grid;gap:5px;font-size:13px;color:var(--muted)}
+.clar select{appearance:none;width:100%;background:var(--bg);border:1px solid var(--line);
+  border-radius:6px;padding:8px 10px;font-family:var(--font);font-size:16px;color:var(--ink);height:41px}
+.clar .ok{margin-top:16px;height:36px;padding:0 16px;border-radius:7px;border:0;background:var(--accent);
+  color:var(--on-button);font-family:var(--font);font-size:12px;cursor:pointer}
+.clar .ok[disabled]{background:var(--line);color:var(--muted);cursor:not-allowed}
+.clar[hidden]{display:none}
+
+/* 用户发言 */
+.um{margin-top:29px;padding-top:23px;border-top:1px solid var(--line);max-width:540px}
+.um .lb{font-size:12px;color:var(--muted);margin-bottom:8px}
+.um p{margin:0;font-size:16px;line-height:1.9;white-space:pre-wrap}
+
+/* 输入区 */
+.compose{display:flex;align-items:flex-end;gap:13px;background:var(--soft);
+  border-radius:var(--radius-compose);padding:15px 14px 14px 18px;margin-top:31px;max-width:596px}
+.compose textarea{flex:1;min-width:0;min-height:61px;max-height:180px;resize:none;border:0;
+  background:transparent;font-family:var(--font);font-size:16px;line-height:1.8;color:var(--ink);outline:none}
+.send{width:35px;height:35px;border-radius:50%;background:var(--button);border:0;flex:none;cursor:pointer;
+  display:grid;place-items:center}
+.send i{width:0;height:0;border-left:14px solid var(--on-button);border-top:9px solid transparent;
+  border-bottom:9px solid transparent;display:block}
+.send[data-ready="true"]{background:var(--accent)}
+.send:disabled{cursor:not-allowed;opacity:.55}
+.note{margin:17px 0 0;font-size:11px;color:var(--muted);text-align:center;max-width:596px}
+
+/* 接续操作 */
+.actions{display:flex;align-items:center;gap:16px;margin-top:26px}
+.next{display:inline-flex;align-items:center;gap:9px;padding:8px 13px;border-radius:7px;border:0;
+  background:var(--button);color:var(--on-button);font-family:var(--font);font-size:12px;cursor:pointer}
+.join{font-size:12px;color:var(--muted);background:none;border:0;font-family:var(--font);cursor:pointer}
+.actions[hidden]{display:none}
+
+/* 平板上：正文栏 + 知识栏并排（产品自己 tablet-preview 的排法） */
+.device[data-device="tablet"] .cols{display:grid;grid-template-columns:1fr 340px;gap:34px;padding:23px 28px 29px}
+.device[data-device="tablet"] .col{padding:0}
+.device[data-device="tablet"] .side{border-left:1px solid var(--line);padding-left:26px}
+.device[data-device="tablet"] .panel{border-left:0;padding-left:0}
+.device[data-device="tablet"] .panel .pt{margin-bottom:9px}
+.device[data-device="phone"] .side{display:none}
+.device[data-device="phone"] .panel{display:block}
+.device[data-device="tablet"] .panel.inline{display:none}   /* 平板上面板去右栏，不留在正文里 */
+.stamp{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em}
+.side .empty{font-size:13px;color:var(--muted);line-height:1.9}
+.foot{margin-top:24px;padding-top:14px;border-top:1px solid var(--line);
+  font-size:12px;color:var(--muted);line-height:1.8}
+/* 窄屏：标题与切换器换行，别把「平板」两字挤成一列 */
+@media (max-width: 560px){
+  .bar{flex-direction:column;align-items:stretch;gap:14px}
+  .bar h1{font-size:22px}
+  .toggle{align-self:flex-start}
+  .toggle button{padding:9px 16px;white-space:nowrap}
+  body{padding:18px 14px 32px}
+}
+
+@media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="bar">
+    <div>
+      <h1>问辩 Wenbian</h1>
+      <p>你提出命题，它围绕你的实际发言继续推进，每次只追问一个可以回答的问题。</p>
+    </div>
+    <div class="toggle" role="group" aria-label="切换设备">
+      <button type="button" data-dev="phone" aria-pressed="true">手机</button>
+      <button type="button" data-dev="tablet" aria-pressed="false">平板</button>
+    </div>
+  </div>
+  <p class="hint" id="hint">手机：一栏到底，知识解释跟在发言下面。</p>
+
+  <div class="stage">
+    <div class="device" id="device" data-device="phone">
+      <div class="shell">
+        <div class="head">
+          <span class="wordmark">问辩</span>
+          <span class="mode">
+            <span class="seg" role="group" aria-label="讨论模式">
+              <button type="button" data-mode="human" aria-pressed="true">AI 与我</button>
+              <button type="button" data-mode="ai" aria-pressed="false">AI 与 AI</button>
+            </span>
+            <span class="gear" aria-hidden="true"></span>
+          </span>
+        </div>
+
+        <div class="cols">
+          <div class="col">
+            <h2 class="title" id="title">AI 时代，大学还值得读吗？</h2>
+
+            <!-- ① 范围澄清：开场就是它 —— 产品的第一件事是把命题问清楚 -->
+            <div class="clar" id="clar">
+              <p class="q"><b>这里的“大学”指的是哪一段？</b><br>本科与研究生阶段的价值判断可能完全不同。</p>
+              <div class="rows">
+                <label class="row">对象
+                  <select data-scope="object">
+                    <option>大学本科教育</option><option>研究生阶段</option><option>职业教育</option>
+                  </select></label>
+                <label class="row">地区
+                  <select data-scope="region">
+                    <option>中国大陆</option><option>北美</option><option>欧洲</option>
+                  </select></label>
+                <label class="row">时间范围
+                  <select data-scope="time">
+                    <option>未来十年</option><option>未来三到五年</option><option>更长的时间尺度</option>
+                  </select></label>
+              </div>
+              <button class="ok" id="confirmScope" type="button" disabled>确认范围</button>
+            </div>
+
+            <!-- ② 发言 -->
+            <div class="turn" id="turn1" hidden>
+              <div class="spk"><i></i>正方</div>
+              <p class="stmt">大学的价值，也许会从“传授答案”转向“训练<button class="concept" type="button" data-c="判断力" aria-expanded="false">判断力</button>”。当信息不完整、不同说法相互冲突时，<button class="concept" type="button" data-c="比较证据" aria-expanded="false">比较证据</button>、识别前提，再作出判断。</p>
+              <p class="fup"><b>但这是否只能在大学里完成？</b>我想先听听你的判断。</p>
+              <!-- 手机：解释跟在发言下面 -->
+              <div class="panel inline" id="panelPhone" hidden>
+                <div class="pt"><h2 id="pTitle">判断力</h2><button type="button" id="pClose">收起解释</button></div>
+                <p id="pBody"></p>
+                <button class="deeper" type="button" id="pDeeper">再解释一下“证据”</button>
+              </div>
+            </div>
+
+            <!-- ③ 你的发言与输入 -->
+            <div class="um" id="um" hidden>
+              <div class="lb">你</div><p id="umTx"></p>
+            </div>
+            <div class="compose" id="compose" hidden>
+              <textarea id="ta" rows="2" placeholder="写下你的判断，或者直接问它一个问题">我同意判断力重要，但工作里更看重的是能不能交付结果。</textarea>
+              <button class="send" id="send" type="button" data-ready="true" aria-label="发送"><i></i></button>
+            </div>
+            <p class="note" id="composeNote" hidden>真实发言 · 内容已保存，可继续恢复</p>
+
+            <!-- ④ AI 与 AI 模式下的接续 -->
+            <div class="actions" id="actions" hidden>
+              <button class="next" id="nextTurn" type="button">看反方回应 <span aria-hidden="true">→</span></button>
+              <button class="join" id="joinBtn" type="button">加入讨论</button>
+            </div>
+
+            <div class="turn" id="turn2" hidden>
+              <div class="spk"><i></i>反方</div>
+              <p class="stmt" id="stmt2"></p>
+            </div>
+          </div>
+
+          <!-- 平板：右栏 -->
+          <aside class="side" id="side">
+            <p class="stamp" id="sideStamp">知识解释</p>
+            <div id="sideBody"><p class="empty">点正文里的知识词（判断力 / 比较证据），解释会出现在这里。</p></div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot" id="foot">本机离线试用：这是产品一次真实会话的流程模拟，不是真实服务；正式版需要账户（当前邀请制）。</div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  // 文案逐字取自 apps/web/src/lib/demo-content.ts 与 session-view.tsx
+  var CONCEPTS = {
+    '判断力': { body: '当信息不完整，或不同说法相互冲突时，比较证据、识别前提，再作出判断。', deeper: '再解释一下“证据”' },
+    '比较证据': { body: '把不同来源的说法放在一起看：它们各自基于什么前提，哪些前提站得住，哪些只是被重复得多。', deeper: '再解释一下“前提”' }
+  };
+  var REPLY = '交付结果本身也需要判断力：在一堆可交付的选项里挑哪一个，是判断；什么时候停下来交付，也是判断。';
+  var OPPOSE = '也可以这样说：大学真正给的是“被追问的机会”。一个人自己练判断力，最难的不是结论，是没人追问他为什么这么想。';
+
+  var $ = function (id) { return document.getElementById(id); };
+  var device = $('device'), mode = 'human', scoped = false, opened = null;
+
+  var HINT = {
+    phone: '手机：一栏到底，知识解释跟在发言下面，输入区固定在底部。',
+    tablet: '平板：左边读发言，右边常驻知识栏 —— 解释不打断阅读，随时可以回头看。'
+  };
+  function setDevice(dev) {
+    device.dataset.device = dev;
+    Array.prototype.forEach.call(document.querySelectorAll('.toggle button'), function (x) {
+      x.setAttribute('aria-pressed', String(x.dataset.dev === dev));
+    });
+    $('hint').textContent = HINT[dev];
+    renderPanel();
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.toggle button'), function (b) {
+    b.addEventListener('click', function () { setDevice(b.dataset.dev); });
+  });
+  setDevice(window.innerWidth >= 760 ? 'tablet' : 'phone');
+
+  /* ---- 模式 ---- */
+  Array.prototype.forEach.call(document.querySelectorAll('[data-mode]'), function (b) {
+    b.addEventListener('click', function () {
+      mode = b.dataset.mode;
+      Array.prototype.forEach.call(document.querySelectorAll('[data-mode]'), function (x) {
+        x.setAttribute('aria-pressed', String(x === b));
+      });
+      $('actions').hidden = !(mode === 'ai' && scoped);
+      if (mode === 'ai') $('ta').placeholder = '加入之前，先写下你的立场';
+    });
+  });
+
+  /* ---- ① 范围澄清：三个都选过才放行 ---- */
+  var selects = Array.prototype.slice.call(document.querySelectorAll('[data-scope]'));
+  function checkScope() {
+    var chosen = selects.filter(function (s) { return s.dataset.touched === '1'; });
+    $('confirmScope').disabled = chosen.length < selects.length;
+  }
+  selects.forEach(function (s) {
+    s.addEventListener('change', function () { s.dataset.touched = '1'; checkScope(); });
+  });
+  $('confirmScope').addEventListener('click', function () {
+    scoped = true;
+    $('clar').hidden = true;
+    $('turn1').hidden = false;
+    $('compose').hidden = false;
+    $('composeNote').hidden = false;
+    $('actions').hidden = !(mode === 'ai');
+    var scope = selects.map(function (s) { return s.options[s.selectedIndex].textContent; }).join(' · ');
+    var t = document.createElement('p');
+    t.className = 'fup'; t.id = 'scopeLine';
+    t.innerHTML = '按你圈定的范围：<b>' + scope + '</b>。下面按这个范围推进。';
+    $('turn1').appendChild(t);
+    $('foot').textContent = '范围已确认。接下来是你的发言 —— 可以直接写下判断，也可以先点开“判断力”看它的解释。';
+  });
+
+  /* ---- ② 知识词 ---- */
+  function renderPanel() {
+    var isTab = device.dataset.device === 'tablet';
+    var phone = $('panelPhone'), side = $('sideBody'), stamp = $('sideStamp');
+    if (!opened) {
+      phone.hidden = true;
+      stamp.textContent = '知识解释';
+      side.innerHTML = '<p class="empty">点正文里的知识词（判断力 / 比较证据），解释会出现在这里。</p>';
+      return;
+    }
+    var c = CONCEPTS[opened];
+    phone.hidden = false;
+    phone.classList.add('open');
+    $('pTitle').textContent = opened;
+    $('pBody').textContent = c.body;
+    $('pDeeper').textContent = c.deeper;
+    stamp.textContent = '知识解释 · ' + opened;
+    side.innerHTML = '<h2 style="margin:0 0 8px;font-size:13px;font-weight:500">' + opened + '</h2>' +
+      '<p style="margin:0;font-size:14px;line-height:1.9;color:var(--muted)">' + c.body + '</p>' +
+      '<button class="deeper" type="button" data-deeper="1" style="margin-top:11px;font-size:12px;color:var(--accent);background:none;border:0;font-family:var(--font);cursor:pointer;padding:0">' + c.deeper + '</button>';
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.concept'), function (b) {
+    b.addEventListener('click', function () {
+      opened = (opened === b.dataset.c) ? null : b.dataset.c;
+      Array.prototype.forEach.call(document.querySelectorAll('.concept'), function (x) {
+        x.setAttribute('aria-expanded', String(x.dataset.c === opened));
+      });
+      renderPanel();
+    });
+  });
+  $('pClose').addEventListener('click', function () {
+    opened = null;
+    Array.prototype.forEach.call(document.querySelectorAll('.concept'), function (x) { x.setAttribute('aria-expanded', 'false'); });
+    renderPanel();
+  });
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest ? e.target.closest('[data-deeper], #pDeeper') : null;
+    if (!t) return;
+    var lbl = t.textContent;
+    var msg = lbl.indexOf('前提') >= 0
+      ? '前提是这段话成立所依赖的条件。换一个前提，同一个结论往往就不成立了。'
+      : '证据不是“有人这么说过”，而是可以被别人复核的材料：数据、文件、可重复的观察。';
+    if (t.id === 'pDeeper') $('pDeeper').textContent = msg;
+    else t.textContent = msg;
+  });
+
+  /* ---- ③ 发送 ---- */
+  var ta = $('ta'), send = $('send');
+  function syncSend() { send.dataset.ready = String(ta.value.trim().length > 0); }
+  ta.addEventListener('input', syncSend); syncSend();
+  function doSend() {
+    var v = ta.value.trim(); if (!v) return;
+    $('umTx').textContent = v;
+    $('um').hidden = false;
+    ta.value = ''; syncSend();
+    if (mode === 'ai') {
+      // AI 与 AI：双方各自继续，由用户决定何时看下一步
+      $('turn2').hidden = true;
+      $('actions').hidden = false;
+      $('nextTurn').disabled = false; $('nextTurn').style.opacity = '';
+      $('foot').textContent = 'AI 与 AI：你可以随时点「看反方回应」，也可以点「加入讨论」把自己的判断插进去。';
+    } else {
+      // AI 与我：对方立刻回应
+      $('stmt2').textContent = REPLY;
+      $('turn2').hidden = false;
+      $('turn2').querySelector('.spk').lastChild.nodeValue = '正方';
+      $('actions').hidden = true;
+      $('foot').textContent = '这是产品一次真实会话的流程模拟。本轮之后，它会就你这句发言继续追问一个可以回答的问题。';
+    }
+  }
+  send.addEventListener('click', doSend);
+  ta.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); doSend(); }
+  });
+  $('nextTurn').addEventListener('click', function () {
+    $('stmt2').textContent = OPPOSE;
+    $('turn2').hidden = false;
+    $('turn2').querySelector('.spk').lastChild.nodeValue = '反方';
+    $('nextTurn').disabled = true;
+    $('nextTurn').style.opacity = '.55';
+  });
+  $('joinBtn').addEventListener('click', function () { ta.focus(); });
+})();
+</script>
+</body>
+</html>

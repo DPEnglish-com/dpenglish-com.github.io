@@ -28,6 +28,9 @@ const GATES = [
   ['5) 边界路径', ['node', ['tools/edge-cases.mjs', TARGET]], true, true],
   ['6) 设计规则检测', ['node', ['tools/design-lint.mjs', 'index.html']], false, false],
   ['7) 豁免依据复核', ['node', ['tools/measure-exemptions.mjs']], true, false],
+  // 视频与在线试用是唯一"点开才加载"的东西，也唯一带焦点管理；
+  // 别的门都看不到它们（渲染门扫的是首屏，图版门只点人形）。
+  ['8) 悬浮窗与试用页', ['node', ['tools/modal-check.mjs', TARGET]], true, true],
 ];
 
 const results = [];

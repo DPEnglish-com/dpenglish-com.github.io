@@ -8,6 +8,9 @@
 - 单文件静态站：`index.html` 就是全部产物（CSS/JS/词标子集内联）
 - **零依赖、零构建、零外部请求**：没有 CDN、没有字体外链、没有分析脚本
 - `404.html` 与 `index.html` 的四处产品内容都由 `data/products.json` 生成
+- 每个产品两个动作：**查看视频**（`assets/video/*.mp4`，21–22 秒的使用演示片）
+  与**在线试用**（`assets/demo/*.html`，离线可交互、手机/平板两种布局）。
+  两个都开在同一个悬浮窗里；视频 `preload=none`、iframe 开窗才建 —— 不点开就不加载
 
 > `package.json` 里的依赖**只给审计工具用**，不进线上产物。
 > 部署的就是仓库里那几个静态文件，没有构建步骤。
@@ -49,7 +52,7 @@ npm ci            # 只为审计工具装依赖（impeccable）
 node tools/verify.mjs
 ```
 
-八道门一次跑完，约 40 秒；本机和 CI 是同一条命令。
+九道门一次跑完，约 4 分钟（五项要开 Chrome）；本机和 CI 是同一条命令。
 
 | 门 | 查什么 |
 |---|---|
@@ -61,9 +64,10 @@ node tools/verify.mjs
 | 5 | 边界路径：390px 移动端 / reduced-motion / 禁用 JS |
 | 6 | 设计规则检测（impeccable 引擎） |
 | 7 | `cramped-padding` 豁免依据复核 |
+| 8 | 悬浮窗与试用页：点开前零加载、窗口里装对了东西、Esc 与焦点归位、三份试用页能开且手机/平板真的换布局 |
 
 ```bash
-node tools/verify.mjs --no-browser      # 跳过需要 Chrome 的四项，约 1 秒
+node tools/verify.mjs --no-browser      # 跳过需要 Chrome 的五项，约 1 秒
 node tools/verify.mjs --target URL      # 对线上跑（渲染/交互/动画/边界四项）
 ```
 

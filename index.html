@@ -601,6 +601,58 @@ html:not(.js) #map-root { display: none; }
   .top, .codebar { display: none; }
   body { background: #fff; color: #000; }
 }
+
+/* ============================================================ 悬浮窗：视频与在线试用
+   两个按钮打开同一个壳，里面装的东西不同（<video> 或 <iframe>）。
+   契约内：1px 细线、--radius-panel、既有的三档时长；零阴影。
+   遮罩不用毛玻璃：顶栏那处 backdrop-filter 是唯一的例外，这里不是。
+   视频 preload=none、demo 的 iframe 在打开时才创建：不点开就一个字节都不加载。 */
+.modal { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: clamp(12px, 3vw, 40px); }
+.modal[hidden] { display: none; }
+.modal-veil { position: absolute; inset: 0; background: rgba(6, 7, 8, .72); border: 0; padding: 0; cursor: pointer; }
+:root[data-theme="light"] .modal-veil { background: rgba(24, 26, 28, .55); }
+.modal-box {
+  position: relative; width: 100%; max-width: 1120px; max-height: 100%;
+  display: flex; flex-direction: column;
+  background: var(--surface); border: 1px solid var(--hair-2); border-radius: var(--radius-panel);
+  animation: modal-in var(--dur-ui) var(--ease-out-expo) both;
+}
+.modal-box[data-kind="video"] { max-width: 940px; }
+@keyframes modal-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .modal-box { animation: none; } }
+.modal-head {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+  padding: 16px 18px; border-bottom: 1px solid var(--hair);
+}
+.modal-head h2 { margin: 0; font-size: 18px; font-weight: 500; }
+.modal-head p { margin: 5px 0 0; font-size: var(--t-micro); color: var(--ink-3); }
+.modal-x {
+  flex: none; width: 40px; height: 40px; display: grid; place-items: center;
+  background: none; border: 1px solid var(--hair-2); border-radius: var(--radius-ctl);
+  color: var(--ink-2); cursor: pointer; font-size: 18px; line-height: 1;
+  transition: color var(--dur-micro) var(--ease), border-color var(--dur-micro) var(--ease);
+}
+.modal-x:hover { color: var(--ink); border-color: var(--ink-3); }
+.modal-body { overflow: hidden; }
+.modal-body video { display: block; width: 100%; height: auto; background: #000; }
+.modal-body iframe { display: block; width: 100%; height: min(76vh, 780px); border: 0; background: var(--bg); }
+.modal-foot { padding: 12px 18px; border-top: 1px solid var(--hair); font-size: var(--t-micro); color: var(--ink-3); }
+.modal-foot[hidden] { display: none; }
+body.modal-open { overflow: hidden; }
+
+/* 两个动作按钮：和 .slot-links 同一套尺寸，只是它们是按钮而不是链接 */
+.slot-acts { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.slot-act {
+  font-size: var(--t-micro); font-family: var(--mono); color: var(--ink-2);
+  background: none; border: 1px solid var(--hair-2); border-radius: var(--radius-ctl);
+  padding: 11px 14px; min-height: 44px; display: inline-flex; align-items: center; gap: 8px;
+  cursor: pointer;
+  transition: color var(--dur-micro) var(--ease), border-color var(--dur-micro) var(--ease);
+}
+.slot-act:hover { color: var(--ink); border-color: var(--ink-3); }
+/* 产品颜色在母站只以 8px 点出现（面积 <2%），不铺成底色 */
+.slot-act::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--accent, var(--ink-3)); }
+.slot-act[data-open="demo"]::before { background: none; border: 1px solid var(--accent, var(--ink-3)); }
 </style>
 </head>
 
@@ -760,6 +812,14 @@ html:not(.js) #map-root { display: none; }
         <p class="slot-note">
           需要账户（当前邀请制），账户与数据归属从第一版建立。
         </p>
+        <div class="slot-acts">
+          <button type="button" class="slot-act" data-open="video"
+                  data-src="assets/video/wenbian.mp4" data-poster="assets/video/wenbian-poster.jpg"
+                  data-title="问辩 Wenbian · 使用演示">查看视频</button>
+          <button type="button" class="slot-act" data-open="demo"
+                  data-src="assets/demo/wenbian.html" data-title="问辩 Wenbian · 在线试用"
+                  data-note="范围澄清 → 正方发言 → 你回应 → 切 AI 与 AI">在线试用</button>
+        </div>
         <div class="slot-links">
           <a href="https://dpenglish-com.github.io/wenbian-site/">前往站点 <span class="arw" aria-hidden="true">→</span></a>
           <a href="https://dpenglish-com.github.io/wenbian-site/downloads/wenbian-android-debug.apk">下载 APK</a>
@@ -781,6 +841,14 @@ html:not(.js) #map-root { display: none; }
         <p class="slot-note">
           无需注册账户；词库、训练历史与复习记录只保存在你的设备上。需要联网。
         </p>
+        <div class="slot-acts">
+          <button type="button" class="slot-act" data-open="video"
+                  data-src="assets/video/paperecho.mp4" data-poster="assets/video/paperecho-poster.jpg"
+                  data-title="PaperEcho 纸上回声 · 使用演示">查看视频</button>
+          <button type="button" class="slot-act" data-open="demo"
+                  data-src="assets/demo/paperecho.html" data-title="PaperEcho 纸上回声 · 在线试用"
+                  data-note="听写 → 核对 → 词条 → 长文精读">在线试用</button>
+        </div>
         <div class="slot-links">
           <a href="https://dpenglish-com.github.io/paperecho-site/">前往站点 <span class="arw" aria-hidden="true">→</span></a>
           <a href="https://dpenglish-com.github.io/paperecho-site/downloads/PaperEcho.apk">下载 APK</a>
@@ -802,6 +870,14 @@ html:not(.js) #map-root { display: none; }
         <p class="slot-note">
           无账号；数据只存在你手机上。源码清单未声明 INTERNET 权限——界面文案里「无联网权限」的说法与此一致，但 WebDAV 同步的注释提到联网需求，此处按源码清单陈述。
         </p>
+        <div class="slot-acts">
+          <button type="button" class="slot-act" data-open="video"
+                  data-src="assets/video/workoutloop.mp4" data-poster="assets/video/workoutloop-poster.jpg"
+                  data-title="WorkoutLoop · 使用演示">查看视频</button>
+          <button type="button" class="slot-act" data-open="demo"
+                  data-src="assets/demo/workoutloop.html" data-title="WorkoutLoop · 在线试用"
+                  data-note="环 → 音量键完成本组 → 休息 → 队列推进">在线试用</button>
+        </div>
         <div class="slot-links">
           <a href="https://dpenglish-com.github.io/workoutloop-site/">前往站点 <span class="arw" aria-hidden="true">→</span></a>
           <a href="https://dpenglish-com.github.io/workoutloop-site/downloads/WorkoutLoop-0.1.0-release.apk">下载 APK</a>
@@ -1209,6 +1285,104 @@ html:not(.js) #map-root { display: none; }
     }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
     items.forEach(function (el) { io.observe(el); });
   }
+})();
+</script>
+
+<!-- 悬浮窗：查看视频 / 在线试用。壳只有这一个，内容由按钮上的 data-* 决定。 -->
+<div class="modal" id="modal" hidden>
+  <button class="modal-veil" type="button" data-close aria-label="关闭"></button>
+  <div class="modal-box" id="modalBox" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-head">
+      <div>
+        <h2 id="modalTitle"></h2>
+        <p id="modalSub" hidden></p>
+      </div>
+      <button class="modal-x" type="button" data-close aria-label="关闭">×</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <p class="modal-foot" id="modalFoot" hidden></p>
+  </div>
+</div>
+
+<script>
+/* 悬浮窗。两条硬规则：
+   1) 不点开不加载：视频的 src 在打开时才写上，demo 的 iframe 在打开时才创建。
+      三个片子加起来 6.3 MB，挂在首屏上就是让所有人替想看的人付流量。
+   2) 键盘可用、焦点不逃逸：Esc 关闭，Tab 在窗内循环，关掉之后焦点回到刚才那个按钮。 */
+(function () {
+  var modal = document.getElementById('modal');
+  var box = document.getElementById('modalBox');
+  var body = document.getElementById('modalBody');
+  var title = document.getElementById('modalTitle');
+  var sub = document.getElementById('modalSub');
+  var foot = document.getElementById('modalFoot');
+  var lastFocus = null;
+
+  var FOCUSABLE = 'a[href], button:not([disabled]), video, iframe, [tabindex]:not([tabindex="-1"])';
+
+  function open(btn) {
+    var kind = btn.getAttribute('data-open');
+    var src = btn.getAttribute('data-src');
+    lastFocus = btn;
+    title.textContent = btn.getAttribute('data-title') || '';
+    // 视频：写明它是什么、多长、有没有声音；这几件事观众点开之前就该知道
+    if (kind === 'video') {
+      sub.textContent = '21 秒 · 1080p · 无解说，只有现场音';
+      sub.hidden = false;
+      foot.textContent = '用真实操作录的：每一步都是产品自己的界面与文案。';
+      foot.hidden = false;
+      var v = document.createElement('video');
+      v.controls = true; v.playsInline = true; v.preload = 'none';
+      v.setAttribute('poster', btn.getAttribute('data-poster') || '');
+      v.setAttribute('src', src);
+      v.setAttribute('aria-label', title.textContent);
+      body.appendChild(v);
+      var p = v.play(); if (p && p.catch) { p.catch(function () {}); }
+    } else {
+      sub.textContent = btn.getAttribute('data-note') || '';
+      sub.hidden = !btn.getAttribute('data-note');
+      foot.textContent = '离线试用：本机就能走一遍，内容不出这个页面。右上角可切手机 / 平板两种布局。';
+      foot.hidden = false;
+      var f = document.createElement('iframe');
+      f.setAttribute('src', src);
+      f.setAttribute('title', title.textContent);
+      f.setAttribute('loading', 'eager');
+      body.appendChild(f);
+    }
+    box.setAttribute('data-kind', kind);
+    modal.hidden = false;
+    document.body.classList.add('modal-open');
+    var first = box.querySelector(FOCUSABLE);
+    if (first) first.focus();
+  }
+
+  function close() {
+    var v = body.querySelector('video');
+    if (v) { try { v.pause(); } catch (e) {} }
+    body.innerHTML = '';           // 视频与 iframe 都随壳一起丢掉，不留后台的播放器
+    modal.hidden = true;
+    document.body.classList.remove('modal-open');
+    if (lastFocus) { lastFocus.focus(); lastFocus = null; }
+  }
+
+  document.addEventListener('click', function (e) {
+    var openBtn = e.target.closest ? e.target.closest('.slot-act') : null;
+    if (openBtn) { open(openBtn); return; }
+    if (e.target.closest && e.target.closest('[data-close]')) close();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (modal.hidden) return;
+    if (e.key === 'Escape') { close(); return; }
+    if (e.key !== 'Tab') return;
+    var items = [].slice.call(box.querySelectorAll(FOCUSABLE)).filter(function (el) {
+      return el.offsetParent !== null || el.tagName === 'VIDEO' || el.tagName === 'IFRAME';
+    });
+    if (!items.length) return;
+    var first = items[0], last = items[items.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
 })();
 </script>
 </body>

@@ -98,6 +98,18 @@ try {
     const off = await ev(`window.__probe()`);
     samples.push({ t, off });
   }
+  /* 终点不取"起点 + 固定毫秒"，而等页面自己说画完了（.fig-ready）。
+     绘制起点由 IntersectionObserver 触发、随帧调度浮动，固定 1300ms 有时落在
+     最后一帧之前，读数停在 0.01 —— 那不是"没画完"，是采样点早了一帧。
+     等 .fig-ready 再读才是真终点；这条断言也就从"它在 1300ms 内结束"
+     变成"它一定会结束"，后者才是它想说的话。 */
+  let doneMs = null;
+  for (let i = 0; i < 60; i++) {
+    const ready = await ev(`document.getElementById('map-figure').classList.contains('fig-ready')`);
+    if (ready) { doneMs = 1300 + i * 25; break; }
+    await sleep(25);
+  }
+  samples.push({ t: doneMs === null ? '超时' : doneMs, off: await ev(`window.__probe()`) });
   samples.forEach(s => console.log(`  t=+${String(s.t).padStart(4)}ms  未画完总量=${s.off}`));
 
   const peak = samples[0].off;

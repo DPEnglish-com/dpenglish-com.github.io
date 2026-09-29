@@ -1,10 +1,15 @@
 {
   "$comment": [
-    "母站唯一数据源。index.html 里三处产品信息（图版 DATA、产品槽位、<noscript> 清单）",
+    "母站唯一数据源。index.html 里四处产品内容（图版 DATA、产品槽位、<noscript> 清单）",
     "都由 tools/build.mjs 从这里生成，改产品只改这个文件，然后 `node tools/build.mjs`。",
     "",
     "不要手改 index.html 里 @generated 标记之间的内容：下次生成会覆盖，",
     "跑 `node tools/build.mjs --check` 会报不同步（CI 也跑这个）。",
+    "",
+    "media 是每个产品的片子与在线试用，都是本仓库内的同源文件，无外部请求：",
+    "  video / poster —— 用 onetake 拍的使用演示片（21–22 秒，1080p30，无解说，只有现场音）",
+    "  demo           —— 可交互的离线试用页（手机/平板两种布局）",
+    "video 用 preload=none，只有点开弹窗才加载；demo 用 iframe，只有点开才创建。",
     "",
     "事实基线：核对于 2026-09-26，取自各产品自己的线上页面与仓库文档。",
     "不确定的写进 note 明说，不要写看起来漂亮的话。"
@@ -32,7 +37,11 @@
       "links": [
         { "label": "前往站点", "href": "https://dpenglish-com.github.io/wenbian-site/" },
         { "label": "下载 APK", "href": "https://dpenglish-com.github.io/wenbian-site/downloads/wenbian-android-debug.apk" }
-      ]
+      ],
+      "media": {"video": "assets/video/wenbian.mp4",
+        "poster": "assets/video/wenbian-poster.jpg",
+        "demo": "assets/demo/wenbian.html",
+        "demoNote": "范围澄清 → 正方发言 → 你回应 → 切 AI 与 AI"}
     },
     {
       "id": "lang",
@@ -50,7 +59,11 @@
       "links": [
         { "label": "前往站点", "href": "https://dpenglish-com.github.io/paperecho-site/" },
         { "label": "下载 APK", "href": "https://dpenglish-com.github.io/paperecho-site/downloads/PaperEcho.apk" }
-      ]
+      ],
+      "media": {"video": "assets/video/paperecho.mp4",
+        "poster": "assets/video/paperecho-poster.jpg",
+        "demo": "assets/demo/paperecho.html",
+        "demoNote": "听写 → 核对 → 词条 → 长文精读"}
     },
     {
       "id": "body",
@@ -68,7 +81,11 @@
       "links": [
         { "label": "前往站点", "href": "https://dpenglish-com.github.io/workoutloop-site/" },
         { "label": "下载 APK", "href": "https://dpenglish-com.github.io/workoutloop-site/downloads/WorkoutLoop-0.1.0-release.apk" }
-      ]
+      ],
+      "media": {"video": "assets/video/workoutloop.mp4",
+        "poster": "assets/video/workoutloop-poster.jpg",
+        "demo": "assets/demo/workoutloop.html",
+        "demoNote": "环 → 音量键完成本组 → 休息 → 队列推进"}
     }
   ],
 

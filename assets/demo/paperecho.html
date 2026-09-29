@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>纸上回声 PaperEcho · 在线试用</title>
+<!--
+  离线试用版。零外部请求；只有三段朗读用同级 ../audio/ 下产品自己的录音。
+  设计值照 site/DESIGN.md 的 INK Edition 02：纸 #F4F1EA、墨 #0A0A0A、朱红 #C0432A、
+  直角、零阴影、分区只用 1px 细线。正文与小号朱红字用 --accent-text #A8371F（4.5:1）。
+  文案与词条内容逐字取自产品自己的 site/index.html 与 site/main.js 的 WORD_DETAILS。
+-->
+<style>
+:root{
+  --paper:#F4F1EA; --paper-2:#E7E1D4; --paper-3:#DBD4C5;
+  --ink:#0A0A0A; --ink-2:#4A4A48; --ink-3:#68625A;
+  --accent:#C0432A; --accent-text:#A8371F;
+  --hair:rgba(10,10,10,.14); --hair-strong:rgba(10,10,10,.30);
+  --serif:"PaperEcho Serif","Songti SC","Source Han Serif SC",Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB",Inter,system-ui,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,"Geist Mono",monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+  -webkit-font-smoothing:antialiased}
+body{padding:26px 20px 40px}
+.wrap{max-width:1180px;margin:0 auto}
+
+/* ── 顶栏：设备切换 ── */
+.bar{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;
+  padding-bottom:16px;border-bottom:1px solid var(--hair)}
+.bar h1{margin:0;font-family:var(--serif);font-weight:400;font-size:26px;line-height:1.2}
+.bar p{margin:6px 0 0;font-size:13px;color:var(--ink-3)}
+.toggle{display:flex;border:1px solid var(--ink)}
+.toggle button{appearance:none;border:0;background:transparent;color:var(--ink);
+  font-family:var(--sans);font-size:13px;padding:9px 18px;cursor:pointer}
+.toggle button + button{border-left:1px solid var(--ink)}
+.toggle button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.toggle button:focus-visible,.chip:focus-visible,.btn:focus-visible,
+textarea:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hint{margin:14px 0 0;font-size:13px;color:var(--ink-3);min-height:20px}
+
+/* ── 设备框 ── */
+.stage{margin-top:20px;display:flex;justify-content:center}
+.device{border:1px solid var(--ink);background:var(--paper);padding:10px;width:100%}
+.device[data-device="phone"]{max-width:412px}
+.device[data-device="tablet"]{max-width:1000px}
+.screen{padding:16px}
+
+/* ── 手机：单栏 ── */
+.tabs{display:flex;border-bottom:1px solid var(--hair);margin-bottom:18px}
+.tabs button{appearance:none;background:none;border:0;font-family:var(--sans);font-size:13px;
+  color:var(--ink-3);padding:10px 0;margin-right:22px;cursor:pointer;border-bottom:2px solid transparent}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+.pane[hidden]{display:none}
+
+.masthead{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3)}
+.label{font-size:13px;color:var(--ink-3);margin:14px 0 0;line-height:1.7}
+.playrow{display:flex;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap}
+.play{width:46px;height:46px;background:var(--ink);border:1px solid var(--ink);cursor:pointer;
+  display:grid;place-items:center;flex:none}
+.play i{width:0;height:0;border-left:13px solid var(--paper);border-top:8px solid transparent;border-bottom:8px solid transparent;display:block}
+.play.on{background:var(--accent);border-color:var(--accent)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{appearance:none;background:none;border:1px solid var(--hair);color:var(--ink-3);
+  font-family:var(--mono);font-size:11px;padding:6px 10px;cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--ink);color:var(--ink)}
+.chipset{display:flex;gap:8px;align-items:center}
+.chipset b{font-weight:400;font-size:11px;color:var(--ink-3);font-family:var(--mono)}
+
+.write{margin-top:20px}
+textarea{width:100%;min-height:96px;resize:vertical;background:var(--paper);
+  border:1px solid var(--hair-strong);padding:12px;font-family:var(--sans);font-size:16px;
+  line-height:1.8;color:var(--ink)}
+.rule{height:1px;background:var(--hair);margin:18px 0}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{appearance:none;font-family:var(--sans);font-size:13px;padding:11px 18px;cursor:pointer;
+  background:var(--paper);border:1px solid var(--ink);color:var(--ink)}
+.btn.primary{background:var(--ink);color:var(--paper)}
+.btn[disabled]{color:var(--ink-3);border-color:var(--hair);cursor:not-allowed;background:var(--paper)}
+
+.answer{margin-top:18px;padding-top:16px;border-top:1px solid var(--hair)}
+.answer[hidden]{display:none}
+.answer .en{font-family:var(--serif);font-size:22px;line-height:1.5;margin:0}
+.answer .zh{margin:10px 0 0;font-size:14px;color:var(--ink-3)}
+.answer .mark-ok{color:var(--ink)}
+.answer .mark-no{color:var(--accent-text);border-bottom:1px solid var(--accent)}
+.verdict{margin:14px 0 0;font-size:14px;line-height:1.8}
+.verdict b{font-weight:600}
+.rates{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.rate{appearance:none;font-family:var(--sans);font-size:13px;padding:8px 14px;cursor:pointer;
+  border:1px solid var(--hair-strong);background:var(--paper);color:var(--ink-2)}
+.rate[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);background:var(--paper-3)}
+
+.words{margin:22px 0 0}
+.words h3{margin:0;font-family:var(--serif);font-weight:400;font-size:17px}
+.wlist{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.wlist button{appearance:none;border:1px solid var(--hair-strong);background:var(--paper);
+  font-family:var(--serif);font-size:15px;padding:7px 12px;cursor:pointer;color:var(--ink)}
+.wlist button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+/* 词条：手机上是底部一张纸；平板上是第三栏。 */
+.card{border-top:1px solid var(--ink);margin-top:18px;padding-top:14px}
+.card .term{font-family:var(--serif);font-size:34px;line-height:1}
+.card .meta{font-family:var(--mono);font-size:12px;color:var(--accent-text);margin-top:8px}
+.card .listen{appearance:none;border:0;background:none;color:var(--accent-text);
+  font-family:var(--sans);font-size:12px;padding:6px 0;cursor:pointer;text-decoration:underline}
+.card dl{margin:12px 0 0;display:grid;grid-template-columns:auto 1fr;gap:8px 14px}
+.card dt{font-size:12px;color:var(--ink-3);font-weight:400}
+.card dd{margin:0;font-size:14px;line-height:1.7}
+
+/* ── 长文 ── */
+.arthead{font-family:var(--serif);font-size:24px;line-height:1.3;margin:0}
+.cols{display:block;margin-top:16px}
+.toc{border-right:0}
+.toc b{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-3);font-weight:400;margin-bottom:12px}
+.toc button{display:block;appearance:none;background:none;border:0;text-align:left;width:100%;
+  font-family:var(--sans);font-size:14px;color:var(--ink-3);padding:7px 0;cursor:pointer}
+.toc button[aria-current="true"]{color:var(--ink);border-left:2px solid var(--ink);padding-left:10px}
+.body p{margin:0 0 18px;font-size:17px;line-height:1.85}
+.body p .zh{display:none;color:var(--ink-3);font-size:14px;display:block;margin-top:6px}
+.show-zh .body p .zh{display:block}
+.body .w{border-bottom:1px solid var(--accent);color:var(--accent-text);cursor:pointer}
+.switchrow{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink-3)}
+.switchrow input{width:16px;height:16px;accent-color:var(--ink)}
+
+/* 平板上：屏幕本身更宽，一屏之内的栏更多 —— 听写是两栏（任务 + 词条），
+   精读是三栏（目录 + 正文 + 词条）。仍然是"一次一屏"，只是每屏能同时放下更多东西。 */
+.device[data-device="tablet"] .screen{padding:22px}
+.device[data-device="tablet"] .widesplit{display:grid;gap:26px}
+.device[data-device="tablet"] .dict .widesplit{grid-template-columns:1fr 330px}
+.device[data-device="tablet"] .read .widesplit{grid-template-columns:180px 1fr 320px}
+.device[data-device="tablet"] .card{border-top:0;border-left:1px solid var(--hair);
+  margin:0;padding:0 0 0 22px}
+.device[data-device="tablet"] .toc{border-right:1px solid var(--hair);padding-right:18px}
+.device[data-device="tablet"] .mobile-only{display:none}
+.device[data-device="phone"] .desk-only{display:none}
+/* 手机上的词条在句子下面（一句话说完再看词），平板上的词条在右栏（读的时候随时查） */
+
+.note{margin:22px 0 0;padding-top:14px;border-top:1px solid var(--hair);
+  font-size:12px;color:var(--ink-3);line-height:1.8}
+.status{font-family:var(--mono);font-size:11px;color:var(--ink-3);min-height:16px;margin-top:10px}
+@media (max-width: 600px){
+  .bar{flex-direction:column;align-items:stretch;gap:14px}
+  .bar h1{font-size:22px}
+  .toggle{align-self:flex-start}
+  .toggle button{padding:9px 16px;white-space:nowrap}
+  body{padding:18px 14px 32px}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="bar">
+    <div>
+      <h1>纸上回声 PaperEcho</h1>
+      <p>手机负责出题与朗读，答案写在纸上。</p>
+    </div>
+    <div class="toggle" role="group" aria-label="切换设备">
+      <button type="button" data-dev="phone" aria-pressed="true">手机</button>
+      <button type="button" data-dev="tablet" aria-pressed="false">平板</button>
+    </div>
+  </div>
+  <p class="hint" id="hint">手机：一次做一件事，听写与精读分屏；词条从下面滑出来。</p>
+
+  <div class="stage">
+    <div class="device" id="device" data-device="phone">
+      <div class="screen">
+        <div class="tabs" role="tablist">
+          <button type="button" role="tab" data-tab="dict" aria-selected="true">① 句子听写</button>
+          <button type="button" role="tab" data-tab="read" aria-selected="false">② 长文精读</button>
+        </div>
+
+        <!-- ══════ 听写 ══════ -->
+        <section class="pane dict" data-pane="dict">
+          <div class="widesplit">
+            <div>
+              <div class="masthead"><span>句子听写</span><span>第 1 / 8 句</span></div>
+              <p class="label" id="prompt">先听，然后在纸上写这句话</p>
+              <div class="playrow">
+                <button class="play" id="play" type="button" aria-label="播放句子"><i></i></button>
+                <div class="chipset">
+                  <b>口音</b>
+                  <button class="chip" type="button" data-accent="gb" aria-pressed="true">英音</button>
+                  <button class="chip" type="button" data-accent="us" aria-pressed="false">美音</button>
+                </div>
+                <div class="chipset">
+                  <b>速度</b>
+                  <button class="chip" type="button" data-speed="0.75" aria-pressed="false">0.75×</button>
+                  <button class="chip" type="button" data-speed="1" aria-pressed="true">1×</button>
+                  <button class="chip" type="button" data-speed="1.25" aria-pressed="false">1.25×</button>
+                </div>
+              </div>
+              <div class="status" id="audioStatus" role="status"></div>
+
+              <div class="write">
+                <label class="label" for="typed">你听到的：</label>
+                <textarea id="typed" spellcheck="false" placeholder="在这里写下你听到的句子"></textarea>
+              </div>
+
+              <div class="rule"></div>
+              <div class="btnrow">
+                <button class="btn primary" id="reveal" type="button">揭晓原文，核对答案</button>
+                <button class="btn" id="clear" type="button">清空重写</button>
+              </div>
+
+              <div class="answer" id="answer" hidden>
+                <p class="en" id="answerEn"></p>
+                <p class="zh">政府应当投资公共交通，以缓解城市拥堵。</p>
+                <p class="verdict" id="verdict"></p>
+                <div class="rates" role="group" aria-label="自评">
+                  <button class="rate" type="button" data-rate="again" aria-pressed="false">不会</button>
+                  <button class="rate" type="button" data-rate="fuzzy" aria-pressed="false">模糊</button>
+                  <button class="rate" type="button" data-rate="mastered" aria-pressed="false">掌握</button>
+                </div>
+              </div>
+
+              <div class="words">
+                <h3>这句里的词</h3>
+                <div class="wlist" id="wlist"></div>
+              </div>
+            </div>
+
+            <!-- 词条：手机在下面，平板在右栏 -->
+            <aside class="card" id="wordCard" aria-live="polite">
+              <div class="term" id="wTerm">mitigate</div>
+              <div class="meta" id="wMeta">/ˈmɪtɪɡeɪt/ · v.</div>
+              <button class="listen" id="wPlay" type="button">听这个词</button>
+              <dl>
+                <dt>核心义</dt><dd id="wCore">缓解，减轻</dd>
+                <dt>本文语境</dt><dd id="wCtx">减轻城市拥堵</dd>
+                <dt>常用搭配</dt><dd id="wColl">mitigate the impact · mitigate risks</dd>
+                <dt>同义词差异</dt><dd id="wSyn">alleviate 多指减轻痛苦；ease 语气更日常</dd>
+              </dl>
+              <div class="status" id="wordStatus" role="status"></div>
+            </aside>
+          </div>
+        </section>
+
+        <!-- ══════ 长文 ══════ -->
+        <section class="pane read" data-pane="read" hidden>
+          <div class="widesplit">
+            <nav class="toc" aria-label="目录">
+              <b>目录</b>
+              <button type="button" data-sec="0" aria-current="true">一、拥堵的代价</button>
+              <button type="button" data-sec="1" aria-current="false">二、政策的一致性</button>
+              <button type="button" data-sec="2" aria-current="false">三、城市如何回应</button>
+              <div class="switchrow" style="margin-top:18px">
+                <input type="checkbox" id="zhToggle">
+                <label for="zhToggle">显示译文</label>
+              </div>
+            </nav>
+
+            <div class="body" id="artBody">
+              <h2 class="arthead">长文精读 · 城市交通与公共空间</h2>
+              <div id="paras"></div>
+            </div>
+
+            <aside class="card desk-only" id="wordCard2" aria-live="polite"></aside>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <p class="note">
+    离线试用：这是产品流程的模拟，不是真实服务；只有三段朗读用的是产品自己的录音。
+    正式版是 Android 应用，无需注册账户，词库与训练记录只保存在设备上。
+  </p>
+</div>
+
+<audio id="au" preload="none"></audio>
+<script>
+(function () {
+  'use strict';
+  var SENT = 'Governments should invest in public transport to reduce urban congestion.';
+  var WORD_AT = { mitigate: 0, urban: 0 };
+  // 词条内容逐字取自产品 site/main.js 的 WORD_DETAILS
+  var WORDS = {
+    mitigate: { meta: '/ˈmɪtɪɡeɪt/ · v.', core: '缓解，减轻', ctx: '减轻城市拥堵',
+      coll: 'mitigate the impact · mitigate risks', syn: 'alleviate 多指减轻痛苦；ease 语气更日常' },
+    coherent: { meta: '/kəʊˈhɪərənt/ · adj.', core: '连贯的，一致的', ctx: '政策保持一致',
+      coll: 'a coherent strategy · coherent arguments', syn: 'consistent 侧重前后不矛盾；logical 侧重逻辑自洽' },
+    urban: { meta: '/ˈɜːbən/ · adj.', core: '城市的', ctx: '城市规划',
+      coll: 'urban planning · urban areas', syn: 'metropolitan 更正式，多指大都市圈' }
+  };
+  var PARAS = [
+    { en: 'To <u>mitigate</u> <u>urban</u> congestion, governments invest in public transport.',
+      zh: '为缓解城市拥堵，政府投资公共交通。' },
+    { en: 'Policies must remain <u>coherent</u> across departments.',
+      zh: '政策必须在各部门之间保持一致。' },
+    { en: '<u>Urban</u> planning shapes how residents move every day.',
+      zh: '城市规划塑造着居民每天的出行方式。' }
+  ];
+
+  var $ = function (id) { return document.getElementById(id); };
+  var device = $('device'), au = $('au');
+  var accent = 'gb', speed = 1, current = 'mitigate';
+
+  /* ---------- 设备切换：只改一个属性，状态天然保留 ---------- */
+  var HINT = {
+    phone: '手机：一次做一件事，听写与精读分屏；词条在句子下面。',
+    tablet: '平板：同一件事，一屏能放下更多 —— 听写是「任务 + 词条」两栏，精读是「目录 + 正文 + 词条」三栏。'
+  };
+  function setDevice(dev) {
+    device.dataset.device = dev;
+    Array.prototype.forEach.call(document.querySelectorAll('.toggle button'), function (x) {
+      x.setAttribute('aria-pressed', String(x.dataset.dev === dev));
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.pane'), function (p) {
+      p.hidden = (p.dataset.pane !== activeTab());
+    });
+    $('hint').textContent = HINT[dev];
+  }
+  function activeTab() {
+    var b = document.querySelector('.tabs button[aria-selected="true"]');
+    return b ? b.dataset.tab : 'dict';
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.toggle button'), function (b) {
+    b.addEventListener('click', function () { setDevice(b.dataset.dev); });
+  });
+  // 初始设备跟着视口走：宽屏直接给平板（三栏），窄屏给手机。
+  setDevice(window.innerWidth >= 760 ? 'tablet' : 'phone');
+
+  /* ---------- 分页（手机上） ---------- */
+  Array.prototype.forEach.call(document.querySelectorAll('.tabs button'), function (b) {
+    b.addEventListener('click', function () {
+      Array.prototype.forEach.call(document.querySelectorAll('.tabs button'), function (x) {
+        x.setAttribute('aria-selected', String(x === b));
+      });
+      Array.prototype.forEach.call(document.querySelectorAll('.pane'), function (p) {
+        p.hidden = p.dataset.pane !== b.dataset.tab;
+      });
+    });
+  });
+
+  /* ---------- 音频：能播就播，缺文件不抛错 ---------- */
+  var FILES = { gb: '../audio/sentence-gb.mp3', us: '../audio/sentence-us.mp3' };
+  function say(src, rate) {
+    try {
+      au.pause(); au.src = src; au.playbackRate = rate || 1;
+      var p = au.play();
+      if (p && p.catch) p.catch(function () { $('audioStatus').textContent = '这段录音没找到（离线试用时属正常）。'; });
+    } catch (e) { $('audioStatus').textContent = '这段录音没能播放。'; }
+  }
+  $('play').addEventListener('click', function () {
+    say(FILES[accent], speed);
+    $('play').classList.add('on');
+    setTimeout(function () { $('play').classList.remove('on'); }, 260);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-accent]'), function (b) {
+    b.addEventListener('click', function () {
+      accent = b.dataset.accent;
+      Array.prototype.forEach.call(document.querySelectorAll('[data-accent]'), function (x) {
+        x.setAttribute('aria-pressed', String(x === b));
+      });
+      $('prompt').textContent = '再听一遍，核对刚才写下的';
+    });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-speed]'), function (b) {
+    b.addEventListener('click', function () {
+      speed = parseFloat(b.dataset.speed);
+      au.playbackRate = speed;
+      Array.prototype.forEach.call(document.querySelectorAll('[data-speed]'), function (x) {
+        x.setAttribute('aria-pressed', String(x === b));
+      });
+    });
+  });
+
+  /* ---------- 核对：大小写与标点不计，逐词比 ---------- */
+  function norm(s) {
+    return String(s || '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
+  }
+  $('reveal').addEventListener('click', function () {
+    var mine = norm($('typed').value), real = norm(SENT);
+    var hits = 0, marks = real.map(function (w, i) {
+      var ok = mine.indexOf(w) !== -1; if (ok) hits++;
+      return '<span class="' + (ok ? 'mark-ok' : 'mark-no') + '">' + w + '</span>';
+    });
+    $('answerEn').innerHTML = marks.join(' ');
+    var pct = Math.round(hits / real.length * 100);
+    $('verdict').innerHTML = mine.length === 0
+      ? '还没写。先听一遍，把听到的写下来；写多少算多少。'
+      : '对上了 <b>' + hits + ' / ' + real.length + '</b> 个词（' + pct + '%）。写错的那几个已经标出来，再听一遍这几处。';
+    $('answer').hidden = false;
+  });
+  $('clear').addEventListener('click', function () {
+    $('typed').value = ''; $('answer').hidden = true; $('typed').focus();
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.rate'), function (b) {
+    b.addEventListener('click', function () {
+      Array.prototype.forEach.call(document.querySelectorAll('.rate'), function (x) {
+        x.setAttribute('aria-pressed', String(x === b));
+      });
+      $('verdict').innerHTML = '已记下：<b>' + b.textContent + '</b>。这个词会按它自己的节奏再出现一次。';
+    });
+  });
+
+  /* ---------- 词条 ---------- */
+  function showWord(w) {
+    current = w; var d = WORDS[w];
+    var cards = [ $('wordCard'), $('wordCard2') ];
+    cards.forEach(function (c) {
+      if (!c) return;
+      c.innerHTML = '<div class="term">' + w + '</div><div class="meta">' + d.meta + '</div>' +
+        '<button class="listen" type="button" data-say="' + w + '">听这个词</button>' +
+        '<dl><dt>核心义</dt><dd>' + d.core + '</dd><dt>本文语境</dt><dd>' + d.ctx + '</dd>' +
+        '<dt>常用搭配</dt><dd>' + d.coll + '</dd><dt>同义词差异</dt><dd>' + d.syn + '</dd></dl>' +
+        '<div class="status" role="status"></div>';
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.wlist button'), function (x) {
+      x.setAttribute('aria-pressed', String(x.dataset.w === w));
+    });
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest ? e.target.closest('[data-say]') : null;
+    if (!b) return;
+    var w = b.dataset.say, a = b.parentNode.querySelector('.status');
+    try {
+      au.pause(); au.src = '../audio/word-' + w + '.mp3'; au.playbackRate = 1;
+      var p = au.play();
+      if (p && p.catch) p.catch(function () { if (a) a.textContent = '这个词的录音没找到。'; });
+    } catch (err) { if (a) a.textContent = '这个词的录音没能播放。'; }
+  });
+
+  var wl = $('wlist');
+  ['mitigate', 'urban', 'coherent'].forEach(function (w) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.dataset.w = w; b.textContent = w;
+    b.setAttribute('aria-pressed', String(w === 'mitigate'));
+    b.addEventListener('click', function () { showWord(w); });
+    wl.appendChild(b);
+  });
+  $('wordCard2').innerHTML = $('wordCard').innerHTML;
+
+  /* ---------- 长文 ---------- */
+  function renderParas() {
+    $('paras').innerHTML = PARAS.map(function (p) {
+      var en = p.en.replace(/<u>(\w+)<\/u>/g, function (_, w) {
+        return '<span class="w" data-w="' + w.toLowerCase() + '">' + w + '</span>';
+      });
+      return '<p>' + en + '<span class="zh">' + p.zh + '</span></p>';
+    }).join('');
+    Array.prototype.forEach.call(document.querySelectorAll('#paras .w'), function (s) {
+      s.addEventListener('click', function () { showWord(s.dataset.w); });
+    });
+  }
+  renderParas();
+  $('zhToggle').addEventListener('change', function () {
+    $('artBody').classList.toggle('show-zh', $('zhToggle').checked);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.toc button[data-sec]'), function (b) {
+    b.addEventListener('click', function () {
+      Array.prototype.forEach.call(document.querySelectorAll('.toc button[data-sec]'), function (x) {
+        x.setAttribute('aria-current', String(x === b));
+      });
+      var p = document.querySelectorAll('#paras p')[Number(b.dataset.sec)];
+      if (p) p.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    });
+  });
+  showWord('mitigate');
+})();
+</script>
+</body>
+</html>
