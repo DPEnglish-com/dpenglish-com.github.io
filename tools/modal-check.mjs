@@ -12,8 +12,9 @@
 //   4) 键盘与焦点：Esc 关闭；关闭后焦点回到当初那个按钮；Tab 不出窗
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:http';
-import { existsSync, createReadStream, statSync } from 'node:fs';
-import { resolve, dirname, join, extname } from 'node:path';
+import { existsSync, createReadStream, statSync, mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sleep, waitReady } from './wait-ready.mjs';
 import { CHROME } from './chrome.mjs';
@@ -44,11 +45,28 @@ async function serve() {
 }
 const url = REMOTE ? target : await serve();
 
+/* 这道门吃过一次"整段挂住、Node 以 13 退出、只留一句 unsettled top-level await"：
+   挂在哪一行都看不出来。两个根治：
+   ① profile 目录每次用 mkdtemp 新建 —— 固定的 /tmp 目录上若留着一次崩掉的
+      Chrome 实例，新实例起不来，而 CDP 的重试会连上那个旧实例，行为不可预期；
+   ② 整段包一个看门狗 —— 超时就带着"卡在哪一步"退出非零，绝不静默。
+   send() 也带 15s 单发超时：一个不回包的 CDP 调用立刻报错，不攒成悬案。 */
+const WATCHDOG_MS = 180_000;
+let phase = '启动';
+const watchdog = setTimeout(() => {
+  console.error(`✗ 悬浮窗检查超过 ${WATCHDOG_MS / 1000}s 没有跑完，按挂住处理（最后一步：${phase}）`);
+  chrome?.kill('SIGKILL'); if (server) server.close();
+  process.exit(3);
+}, WATCHDOG_MS);
+let cdp = null;
+
+const profile = mkdtempSync(join(tmpdir(), 'chrome-modal-'));
 const chrome = spawn(CHROME, [
-  '--headless=new', `--remote-debugging-port=${PORT}`, `--user-data-dir=/tmp/chrome-modal-${PORT}`,
+  '--headless=new', `--remote-debugging-port=${PORT}`, `--user-data-dir=${profile}`,
   '--no-first-run', '--no-default-browser-check', '--disable-gpu', '--hide-scrollbars',
   '--force-color-profile=srgb', '--window-size=1440,1000', 'about:blank',
 ], { stdio: 'ignore' });
+chrome.on('error', e => { console.error('✗ Chrome 启动失败：' + e.message); process.exit(2); });
 
 class CDP {
   constructor(ws) { this.ws = ws; this.id = 0; this.pending = new Map(); this.onEvent = null; }
@@ -57,11 +75,14 @@ class CDP {
       try { const r = await fetch(`http://127.0.0.1:${p}/json/version`); return new CDP((await r.json()).webSocketDebuggerUrl); }
       catch { await sleep(250); }
     }
-    throw new Error('no chrome');
+    throw new Error(`40 次都没连上 127.0.0.1:${p} 的 CDP —— Chrome 没起来，或端口被别的进程占了`);
   }
   async open() {
     return new Promise((res, rej) => {
-      this.sock = new WebSocket(this.ws); this.sock.onopen = res; this.sock.onerror = rej;
+      this.sock = new WebSocket(this.ws);
+      this.sock.onopen = res;
+      this.sock.onerror = () => rej(new Error('CDP WebSocket 连接失败'));
+      this.sock.onclose = () => { for (const { rej: r } of this.pending.values()) r(new Error('CDP 连接被关闭')); this.pending.clear(); };
       this.sock.onmessage = e => {
         const m = JSON.parse(e.data);
         if (m.id && this.pending.has(m.id)) { const { res, rej } = this.pending.get(m.id); this.pending.delete(m.id); m.error ? rej(new Error(m.error.message)) : res(m.result); }
@@ -69,16 +90,27 @@ class CDP {
       };
     });
   }
-  send(m, p = {}, s) { const id = ++this.id; return new Promise((res, rej) => { this.pending.set(id, { res, rej }); this.sock.send(JSON.stringify({ id, method: m, params: p, sessionId: s })); }); }
+  send(m, p = {}, s) {
+    return new Promise((res, rej) => {
+      const id = ++this.id;
+      const t = setTimeout(() => { this.pending.delete(id); rej(new Error(`CDP ${m} 15s 没有回包`)); }, 15_000);
+      this.pending.set(id, { res: v => { clearTimeout(t); res(v); }, rej: e => { clearTimeout(t); rej(e); } });
+      this.sock.send(JSON.stringify({ id, method: m, params: p, sessionId: s }));
+    });
+  }
+  close() { try { this.sock.close(); } catch {} }
 }
 
 const fails = [];
 const ck = (ok, m) => { console.log(`  ${ok ? 'PASS' : 'FAIL'}  ${m}`); if (!ok) fails.push(m); };
 
 try {
-  const cdp = await CDP.connect(PORT); await cdp.open();
+  phase = '连接 CDP';
+  cdp = await CDP.connect(PORT); await cdp.open();
+  phase = '建会话';
   const { targetId } = await cdp.send('Target.createTarget', { url: 'about:blank' });
   const { sessionId } = await cdp.send('Target.attachToTarget', { targetId, flatten: true });
+  phase = '开 Page/Runtime/Network 域';
   await cdp.send('Page.enable', {}, sessionId);
   await cdp.send('Runtime.enable', {}, sessionId);
   await cdp.send('Network.enable', {}, sessionId);
@@ -204,8 +236,11 @@ try {
 
   console.log(`\n${fails.length ? '✗ ' + fails.length + ' 项未通过' : '✓ 悬浮窗全部通过'}`);
 } finally {
-  chrome.kill();
+  clearTimeout(watchdog);
+  cdp?.close();
+  chrome.kill('SIGKILL');
   if (server) server.close();
+  rmSync(profile, { recursive: true, force: true });
 }
 
 if (fails.length) { fails.forEach(f => console.log('  · ' + f)); process.exit(1); }

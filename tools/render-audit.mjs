@@ -19,8 +19,9 @@
  */
 
 import { spawn } from 'node:child_process';
-import { mkdirSync, writeFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { CHROME } from './chrome.mjs';
 
@@ -249,11 +250,19 @@ class CDP {
 
 // ---------------------------------------------------------------- 主流程
 
+/* profile 每次用 mkdtemp 新建：固定的 /tmp/xichang-cdp 上若留着上一个没退干净的
+   实例，新 Chrome 会因为"profile 已被占用"直接退出，40 次重连全部落空，
+   这道门就报一次莫名其妙的"无法连接 Chrome CDP"（实测约两三回里出一次）。
+   用完即删，顺带不再往 /tmp 里攒目录。 */
+const profile = mkdtempSync(join(tmpdir(), 'xichang-cdp-'));
 const chrome = spawn(CHROME, [
   '--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check',
-  `--remote-debugging-port=${PORT}`, '--user-data-dir=/tmp/xichang-cdp',
+  `--remote-debugging-port=${PORT}`, `--user-data-dir=${profile}`,
   '--allow-file-access-from-files', '--hide-scrollbars', 'about:blank',
 ], { stdio: 'ignore' });
+chrome.on('error', e => { console.error('✗ Chrome 启动失败：' + e.message); process.exit(2); });
+// try 和 catch 是两个块级作用域：清理函数必须声明在它们外面，catch 里才看得见
+const killChrome = () => { try { chrome.kill('SIGKILL'); } catch {} try { rmSync(profile, { recursive: true, force: true }); } catch {} };
 
 let failures = [];
 let cdp;
@@ -361,11 +370,11 @@ try {
 
 } catch (e) {
   console.error('审计失败：', e.message);
-  chrome.kill();
+  killChrome();
   process.exit(2);
 }
 
-chrome.kill();
+killChrome();
 
 console.log('\n' + '─'.repeat(70));
 if (failures.length) {
