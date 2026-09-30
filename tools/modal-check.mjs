@@ -240,7 +240,10 @@ try {
   cdp?.close();
   chrome.kill('SIGKILL');
   if (server) server.close();
-  rmSync(profile, { recursive: true, force: true });
+  // 删 profile 只能尽力而为：SIGKILL 之后 Chrome 的子进程可能还在往里写，
+  // rmSync 走到一半目录又被填回来就抛 ENOTEMPTY —— CI 上真炸过一次（全部 PASS 之后）。
+  // 目录在 /tmp 里，系统会清；这里失败就算了。
+  try { rmSync(profile, { recursive: true, force: true }); } catch {}
 }
 
 if (fails.length) { fails.forEach(f => console.log('  · ' + f)); process.exit(1); }

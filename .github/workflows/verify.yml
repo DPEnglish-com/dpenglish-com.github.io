@@ -54,7 +54,7 @@ jobs:
           echo "CHROME_PATH=/usr/bin/google-chrome-stable" >> "$GITHUB_ENV"
           /usr/bin/google-chrome-stable --version
 
-      - name: 跑八道门
+      - name: 跑九道门
         run: node tools/verify.mjs
 
       - name: 失败时留下截图
