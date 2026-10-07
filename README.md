@@ -8,6 +8,7 @@
 - 单文件静态站：`index.html` 就是全部产物（CSS/JS/词标子集内联）
 - **零依赖、零构建、零外部请求**：没有 CDN、没有字体外链、没有分析脚本
 - `404.html` 与 `index.html` 的四处产品内容都由 `data/products.json` 生成
+- 分享卡片 `assets/og.png` 由 `node tools/make-og.mjs` 生成（字体取自 index.html，同源）
 - 每个产品两个动作：**查看视频**（`assets/video/*.mp4`，21–22 秒的使用演示片）
   与**在线试用**（`assets/demo/*.html`，离线可交互、手机/平板两种布局）。
   两个都开在同一个悬浮窗里；视频 `preload=none`、iframe 开窗才建 —— 不点开就不加载
