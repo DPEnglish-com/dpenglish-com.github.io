@@ -50,15 +50,16 @@
       "accent": "pe",
       "slot": "b",
       "name": "PaperEcho 纸上回声",
-      "short": "Android · 1.2.28",
+      "short": "Android · 1.2.42",
       "platform": "Android 8.0+",
-      "version": "1.2.28",
-      "size": "5.48 MB",
+      "version": "1.2.42",
+      "size": "5.66 MB",
       "desc": "手机负责出题与朗读，答案写在纸上。从单词到听写、精听、长文与写作批改，六个环节共用同一份词库：你今天背的词，就是今天练习的材料。",
-      "note": "无需注册账户；词库、训练历史与复习记录只保存在你的设备上。需要联网。",
+      "note": "无需注册账户；词库、训练历史与复习记录只保存在你的设备上。需要联网。可在 SE English 网站登录账号，把课程里到期的词、句型与阅读生成为今日纸笔训练包，练完的结果回传网站。",
       "links": [
         { "label": "前往站点", "href": "https://dpenglish-com.github.io/paperecho-site/" },
-        { "label": "下载 APK", "href": "https://dpenglish-com.github.io/paperecho-site/downloads/PaperEcho.apk" }
+        { "label": "下载 APK", "href": "https://dpenglish-com.github.io/paperecho-site/downloads/PaperEcho.apk" },
+        { "label": "SE English 网站", "href": "https://www.seandictation.site/" }
       ],
       "media": {"video": "assets/video/paperecho.mp4",
         "poster": "assets/video/paperecho-poster.jpg",

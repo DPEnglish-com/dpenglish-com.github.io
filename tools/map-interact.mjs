@@ -186,6 +186,11 @@ try {
   check(s.cap === '嘴巴', `说明应为「嘴巴」，实为「${s.cap}」`);
   check(s.panel === 'PaperEcho 纸上回声', `应显示 PaperEcho，实为「${s.panel}」`);
   check(s.spines === 1, `换部位后仍应为 1 条层脊，实为 ${s.spines}`);
+  // 嘴巴这条线是两个站点：纸笔端（PaperEcho）与课程中枢（SE English）成对出现，
+  // 所以它是唯一有三个链接的应用。少了这条链接，联动就从页面上消失。
+  console.log(`  链接=${s.panelLinks.join(' , ')}`);
+  check(s.panelLinks.length === 3 && s.panelLinks.some(l => l.includes('SE English')),
+    `嘴巴应带三个链接（含 SE English 网站），实为 ${s.panelLinks.join(' , ')}`);
   // 嘴巴长在脑袋上：选嘴巴时脑袋应留一点，不能和身体一样暗
   const head = s.zones.find(z => z.zone === 'argue');
   const body = s.zones.find(z => z.zone === 'body');

@@ -775,14 +775,15 @@ body.modal-open { overflow: hidden; }
         </div>
         <div class="map-panel">
           <h3>PaperEcho 纸上回声</h3>
-          <p class="p-domain">语言 · 考试 — Android 8.0+ · 1.2.28 · 5.48 MB</p>
+          <p class="p-domain">语言 · 考试 — Android 8.0+ · 1.2.42 · 5.66 MB</p>
           <p>手机负责出题与朗读，答案写在纸上。从单词到听写、精听、长文与写作批改，六个环节共用同一份词库：你今天背的词，就是今天练习的材料。</p>
           <ul>
-            <li>无需注册账户；词库、训练历史与复习记录只保存在你的设备上。需要联网。</li>
+            <li>无需注册账户；词库、训练历史与复习记录只保存在你的设备上。需要联网。可在 SE English 网站登录账号，把课程里到期的词、句型与阅读生成为今日纸笔训练包，练完的结果回传网站。</li>
           </ul>
           <p class="p-actions">
             <a href="https://dpenglish-com.github.io/paperecho-site/">前往站点</a>
             <a href="https://dpenglish-com.github.io/paperecho-site/downloads/PaperEcho.apk">下载 APK</a>
+            <a href="https://www.seandictation.site/">SE English 网站</a>
           </p>
         </div>
         <div class="map-panel">
@@ -863,11 +864,11 @@ body.modal-open { overflow: hidden; }
         </p>
         <dl class="slot-specs">
           <div><dt>平台</dt><dd>Android 8.0+</dd></div>
-          <div><dt>版本</dt><dd>1.2.28</dd></div>
-          <div><dt>体积</dt><dd>5.48 MB</dd></div>
+          <div><dt>版本</dt><dd>1.2.42</dd></div>
+          <div><dt>体积</dt><dd>5.66 MB</dd></div>
         </dl>
         <p class="slot-note">
-          无需注册账户；词库、训练历史与复习记录只保存在你的设备上。需要联网。
+          无需注册账户；词库、训练历史与复习记录只保存在你的设备上。需要联网。可在 SE English 网站登录账号，把课程里到期的词、句型与阅读生成为今日纸笔训练包，练完的结果回传网站。
         </p>
         <div class="slot-acts">
           <button type="button" class="slot-act" data-open="video"
@@ -880,6 +881,7 @@ body.modal-open { overflow: hidden; }
         <div class="slot-links">
           <a href="https://dpenglish-com.github.io/paperecho-site/">前往站点 <span class="arw" aria-hidden="true">→</span></a>
           <a href="https://dpenglish-com.github.io/paperecho-site/downloads/PaperEcho.apk">下载 APK</a>
+          <a href="https://www.seandictation.site/">SE English 网站</a>
         </div>
       </article>
 
@@ -1065,10 +1067,10 @@ body.modal-open { overflow: hidden; }
         "k": "语言 · 考试",
         "accent": "pe",
         "name": "PaperEcho 纸上回声",
-        "short": "Android · 1.2.28",
-        "domain": "语言 · 考试 — Android 8.0+ · 1.2.28 · 5.48 MB",
+        "short": "Android · 1.2.42",
+        "domain": "语言 · 考试 — Android 8.0+ · 1.2.42 · 5.66 MB",
         "desc": "手机负责出题与朗读，答案写在纸上。从单词到听写、精听、长文与写作批改，六个环节共用同一份词库：你今天背的词，就是今天练习的材料。",
-        "note": "无需注册账户；词库、训练历史与复习记录只保存在你的设备上。需要联网。",
+        "note": "无需注册账户；词库、训练历史与复习记录只保存在你的设备上。需要联网。可在 SE English 网站登录账号，把课程里到期的词、句型与阅读生成为今日纸笔训练包，练完的结果回传网站。",
         "links": [
           {
             "label": "前往站点",
@@ -1077,6 +1079,10 @@ body.modal-open { overflow: hidden; }
           {
             "label": "下载 APK",
             "href": "https://dpenglish-com.github.io/paperecho-site/downloads/PaperEcho.apk"
+          },
+          {
+            "label": "SE English 网站",
+            "href": "https://www.seandictation.site/"
           }
         ]
       },
@@ -1200,7 +1206,8 @@ body.modal-open { overflow: hidden; }
       flow.appendChild(L1);
 
       /* 选中哪个部位，就把那个应用摊开在它下面。
-         介绍 + 客观指标 + 两个链接，够了。 */
+         介绍 + 客观指标 + 链接，够了（一般两个；嘴巴那条线多一个
+         SE English 网站 —— 课程中枢与纸笔训练是同一件事的两端）。 */
       if (d) {
         var L2 = el('div', 'layer layer-p');
         L2.appendChild(panel(d));
@@ -1218,7 +1225,7 @@ body.modal-open { overflow: hidden; }
       }
     }
 
-    /* 一个应用的样子：名字、一行客观指标、介绍、需要知道的，然后两个链接。 */
+    /* 一个应用的样子：名字、一行客观指标、介绍、需要知道的，然后它的链接。 */
     function panel(d) {
       var box = el('div', 'map-panel');
 
