@@ -41,10 +41,11 @@ products.forEach((p, i) => {
     if (!l.label || !l.href) problems.push(`${where}.links[${j}] 缺 label 或 href`);
     if (l.href && !/^https:\/\//.test(l.href)) problems.push(`${where}.links[${j}] 必须是 https: ${l.href}`);
   });
-  // media：字段要齐，路径要落在仓库里。写成 https:// 会打破"零外部请求"，
-  // 写成绝对路径会在子路径部署时 404 —— 两者都在生成前拦下。
-  if (!p.media || typeof p.media !== 'object') problems.push(`${where} 缺 media（video / poster / demo / demoNote）`);
-  else {
+  // media：可选。有的必须字段齐全、文件落在仓库里（写成 https:// 会打破
+  // "零外部请求"，写成绝对路径会在子路径部署时 404 —— 两者都在生成前拦下）；
+  // 没有的（还没拍片 / 没有离线试用页）就不生成「查看视频 / 在线试用」两个按钮。
+  if (p.media != null && typeof p.media !== 'object') problems.push(`${where} media 不是对象`);
+  else if (p.media) {
     for (const f of ['video', 'poster', 'demo', 'demoNote']) {
       if (!p.media[f] || typeof p.media[f] !== 'string') problems.push(`${where}.media 缺字段: ${f}`);
     }
@@ -57,6 +58,11 @@ products.forEach((p, i) => {
   }
 });
 
+// 声明了几个产品就得是真几个：site.count 写错时页面上「收录产品」那个读数会是假的
+if (data.site && data.site.count !== products.length) {
+  problems.push(`site.count = ${data.site.count}，但 products 有 ${products.length} 个（页面上「收录产品」直接读它）`);
+}
+
 // id / accent / slot 不能撞：它们分别是人形区域、颜色、栅格位置的键
 for (const key of ['id', 'accent', 'slot']) {
   const seen = new Map();
@@ -65,6 +71,12 @@ for (const key of ['id', 'accent', 'slot']) {
     seen.set(p[key], p.id);
   });
 }
+
+/* 一个部位可以有两个产品（2026-10-07 起：嘴巴 = PaperEcho + SE English）。
+   人形 SVG 里每个部位只有一个区域，所以同部位的产品共用它：
+   zone 取该部位**第一个**产品的 id（也是 data-zone 的名字）。 */
+const zoneOfPart = new Map();
+for (const p of products) if (!zoneOfPart.has(p.part)) zoneOfPart.set(p.part, p.id);
 
 /* 新增产品时最容易漏的一步：用了新的 accent / slot，
    却没有在 index.html 的 CSS 里加对应的令牌与规则。
@@ -101,6 +113,14 @@ for (const p of products) {
       `      请加一条栅格位置（12 列里占几列），参考现有 .slot-a / .slot-b / .slot-c。`
     );
   }
+  // 部位对应的 zone 必须真的画在人形里，否则点这一行时人形不会亮、连线也画不出来
+  const zone = zoneOfPart.get(p.part);
+  if (!new RegExp('data-zone="' + zone + '"').test(fullSource)) {
+    problems.push(
+      `products(${p.id}) 的部位「${p.part}」映射到人形区域 data-zone="${zone}"，\n` +
+      `      但 index.html 的 SVG 里没有这个区域。部位名或产品顺序变了就要同步人形。`
+    );
+  }
 }
 
 if (problems.length) {
@@ -132,14 +152,16 @@ function genSlots() {
     // 「查看视频」「在线试用」不是链接，是打开悬浮窗的按钮：写成 <a href> 的话，
     // 中键或回车会直接跳到一段裸的 mp4 / 一个裸的 demo 页，那是另一条没人维护的路径。
     // 地址与标题都挂在 data-* 上，脚本里不为任何产品写死内容。
-    const acts = `        <div class="slot-acts">
+    // 没有 media 的产品（还没拍片 / 没有离线试用页）不生成这两个按钮。
+    const acts = p.media ? `        <div class="slot-acts">
           <button type="button" class="slot-act" data-open="video"
                   data-src="${esc(p.media.video)}" data-poster="${esc(p.media.poster)}"
                   data-title="${esc(p.name)} · 使用演示">查看视频</button>
           <button type="button" class="slot-act" data-open="demo"
                   data-src="${esc(p.media.demo)}" data-title="${esc(p.name)} · 在线试用"
                   data-note="${esc(p.media.demoNote)}">在线试用</button>
-        </div>`;
+        </div>
+` : '';
     return `      <!-- ${esc(p.name)}：${esc(p.part)} -->
       <article class="slot slot-${esc(p.slot)} reveal" data-accent="${esc(p.accent)}">
         <p class="slot-domain">${esc(p.part)} · ${esc(p.k)}</p>
@@ -153,8 +175,7 @@ ${specs}
         <p class="slot-note">
           ${esc(p.note)}
         </p>
-${acts}
-        <div class="slot-links">
+${acts}        <div class="slot-links">
 ${links}
         </div>
       </article>`;
@@ -162,9 +183,10 @@ ${links}
 }
 
 // 2) 图版数据。形状与 JSON 一致，不再套一层 product，少一层心智负担。
+//    zone = 这条产品管着的人形区域（同部位共用；页面上靠它点亮与连线）。
 function genData() {
   const slim = products.map(p => ({
-    id: p.id, part: p.part, k: p.k, accent: p.accent,
+    id: p.id, part: p.part, k: p.k, accent: p.accent, zone: zoneOfPart.get(p.part),
     name: p.name, short: p.short,
     domain: domainOf(p),
     desc: p.desc, note: p.note, links: p.links,
@@ -203,6 +225,14 @@ function genPlanned() {
     .join('\n');
 }
 
+// 5) 页脚的产品链接。以前是手写的一串 <a>，加产品时最容易漏的就是它
+//    （同 §4.3 的理由：同一件事写在两处，迟早不一致）。
+function genFooter() {
+  return products.map(p =>
+    `        <a href="${esc(p.links[0].href)}">${esc(p.name)}</a>`
+  ).join('\n');
+}
+
 /* ---------------------------------------------------------------- 404.html
 
    整份生成，不是只填一段 —— 免得 404 页的颜色/字体跟主页各走各的。
@@ -224,6 +254,10 @@ function gen404() {
   const links = products.map(p =>
     `        <li><a href="${esc(p.links[0].href)}"><b>${esc(p.part)} · ${esc(p.name)}</b><span>${esc(p.k)}</span></a></li>`
   ).join('\n');
+
+  // 页面上的「几个产品」都用汉字（五个产品），这里跟着来，别写成 "5 个产品"
+  const CN = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+  const cnNum = n => CN[n] != null ? CN[n] : String(n);
 
   return `<!doctype html>
 <html lang="zh-CN">
@@ -307,7 +341,7 @@ li span { font-family: var(--mono); font-size: 12.5px; color: var(--ink-3); }
 <div class="wrap">
   <p class="code">404 · 没有这个页面</p>
   <h1>这里没有东西。</h1>
-  <p class="lead">地址可能打错了，或者那个页面已经搬走。下面是全部四个产品。</p>
+  <p class="lead">地址可能打错了，或者那个页面已经搬走。下面是全部${cnNum(products.length)}个产品。</p>
   <div class="spine" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <ul style="margin-top:44px">
 ${links}
@@ -325,6 +359,7 @@ const REGIONS = [
   { name: 'slots',    open: '<!-- @generated:slots -->',    close: '<!-- @generated:end -->', body: genSlots() },
   { name: 'noscript', open: '<!-- @generated:noscript -->', close: '<!-- @generated:end -->', body: genNoscript() },
   { name: 'planned',  open: '<!-- @generated:planned -->',  close: '<!-- @generated:end -->', body: genPlanned() },
+  { name: 'footer',   open: '<!-- @generated:footer -->',   close: '<!-- @generated:end -->', body: genFooter() },
   { name: 'data',     open: '/* @generated:data */',        close: '/* @generated:end */',    body: genData() },
 ];
 
@@ -363,6 +398,7 @@ const OUTER = {
   slots:    { tag: 'div', cls: 'slots' },
   noscript: { tag: 'div', cls: 'map' },
   planned:  { tag: 'ul',  cls: 'planned' },
+  footer:   { tag: 'div', cls: 'foot-links' },
   data:     null,             // JS 变量声明，没有容器概念
 };
 

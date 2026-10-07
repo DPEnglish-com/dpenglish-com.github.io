@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>从头到脚 · 语言、思辨、身体与穿搭</title>
-<meta name="description" content="从头到脚收录同一作者做的四个产品：嘴上练语言，脑子里练思辨，身上练身体，着装练穿搭。每个产品的平台、版本、体积、账号与数据位置都写在它自己那一层里。">
+<meta name="description" content="从头到脚收录同一作者做的五个产品：嘴上练语言，脑子里练思辨，身上练身体，着装练穿搭。每个产品的平台、版本、体积、账号与数据位置都写在它自己那一层里。">
 <meta name="color-scheme" content="dark light">
 <meta name="theme-color" content="#0C0D0F">
 <link rel="canonical" href="https://dpenglish-com.github.io/">
@@ -16,7 +16,7 @@
 <!-- 社交分享。与四个子站同一套写法，地址与 canonical 保持一致。 -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="从头到脚 · 语言、思辨、身体与穿搭">
-<meta property="og:description" content="嘴上、脑子里、身上、着装。四个产品，各管一处：问辩练思辨，PaperEcho 练语言，WorkoutLoop 练身体，外在练穿搭。">
+<meta property="og:description" content="嘴上、脑子里、身上、着装。五个产品，各管一处：问辩练思辨，PaperEcho 与 SE English 练语言，WorkoutLoop 练身体，外在练穿搭。">
 <meta property="og:url" content="https://dpenglish-com.github.io/">
 <meta property="og:image" content="https://dpenglish-com.github.io/assets/og.png">
 <meta property="og:image:width" content="1200">
@@ -43,7 +43,7 @@
    与 PaperEcho / 问辩 / WorkoutLoop 三站同源：--bg/--ink/--hair 命名、
    hairline 分区、零阴影、等宽只用于真实测量值。
    差异：母站自身不占用任何色相。唯一强调色是中性高光（--signal）；
-   四个产品的颜色只以 1px 细线与 8px 色块出现，面积 <2%。
+   五个产品的颜色只以 1px 细线与 8px 色块出现，面积 <2%。
    对比度由 tools/contrast-audit.py 核算，比值见各令牌后的注释。
    ============================================================ */
 
@@ -66,6 +66,7 @@
   --wb: #C0D5AC;          /* 问辩 苔绿       12.36:1 on --bg */
   --wl: #6FBFAE;          /* WorkoutLoop 松青 9.02:1 on --bg */
   --os: #E8944F;          /* 外在 橙（品牌 #F97316 调暗一档）8.13:1 on --bg */
+  --se: #CC785C;          /* SE English 铜（品牌 --color-primary）5.85:1 on --bg */
 
   /* ---- 字体 ----
      正文走系统 CJK 栈；词标内嵌思源宋体子集（base64 内联，约 2.2 KB），
@@ -119,6 +120,7 @@
   --wb: #44603B;          /* 6.34:1 on --bg */
   --wl: #1B5E54;          /* 6.81:1 on --bg */
   --os: #B45309;          /* 4.52:1 on --bg（品牌 #F97316 在浅底只有 2.52:1） */
+  --se: #A9583E;          /* 4.51:1 on --bg（品牌 --color-primary-active） */
 }
 
 /* 无 JS 时跟随系统浅色偏好。此块必须与上面逐令牌一致，由审计脚本核对。 */
@@ -138,6 +140,7 @@
     --wb: #44603B;
     --wl: #1B5E54;
     --os: #B45309;
+    --se: #A9583E;
   }
 }
 
@@ -275,7 +278,7 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
 .readings .k { color: var(--ink-3); font-size: var(--t-micro); font-family: var(--mono); letter-spacing: .02em; }
 .readings .v { color: var(--ink); font-size: var(--t-small); font-family: var(--mono); font-variant-numeric: tabular-nums; }
 
-/* 唯一的一次「表演」：四个部位各自的色码按序点亮，之后全静止 */
+/* 唯一的一次「表演」：四个部位各自的色码按序点亮（色码按部位，不按产品数），之后全静止 */
 .codebar { display: flex; gap: 2px; margin-top: clamp(30px, 4vw, 46px); height: 3px; max-width: 420px; }
 .codebar i {
   display: block; height: 100%; transform-origin: left center;
@@ -327,14 +330,15 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
   transition: transform var(--dur-ui) var(--ease);
 }
 .slot:hover::before { transform: scaleX(1); }
-/* 四个产品用 7/5 交替起手：第一行 7+5，第二行 5+7，两行交错 ——
+/* 五个产品用 7/5 交替起手：第一行 7+5，第二行 5+7，第三行又是 7 ——
    右侧留白是编辑式偏移，刻意不做三等分卡片墙。（与 DESIGN.md §2.4 一致） */
 .slot-a { grid-column: span 7; }
 .slot-b { grid-column: span 5; }
 .slot-c { grid-column: span 5; }
 .slot-d { grid-column: span 7; }
+.slot-e { grid-column: span 7; }
 
-@media (max-width: 900px) { .slot-a, .slot-b, .slot-c, .slot-d { grid-column: span 12; } }
+@media (max-width: 900px) { .slot-a, .slot-b, .slot-c, .slot-d, .slot-e { grid-column: span 12; } }
 
 .slot-domain { font-family: var(--mono); font-size: var(--t-micro); color: var(--ink-3); letter-spacing: .04em; }
 .slot-name { font-size: clamp(21px, 2.1vw, 27px); margin: 10px 0 12px; }
@@ -362,6 +366,7 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
 .slot[data-accent="wb"] { --accent: var(--wb); }
 .slot[data-accent="wl"] { --accent: var(--wl); }
 .slot[data-accent="os"] { --accent: var(--os); }
+.slot[data-accent="se"] { --accent: var(--se); }
 
 /* ============================================================ 从头到脚：一层层展开
    左边一具 1px 细线画的人形，从上到下是脑袋、嘴巴、身体；
@@ -457,10 +462,13 @@ html:not(.js) #map-root { display: none; }
 /* 嘴巴长在脑袋上：选嘴巴时脑袋留一点，不然嘴巴会浮在空中 */
 .map-figure[data-active="lang"] .fig-zone[data-zone="argue"] { opacity: .58; }
 
-.fig-zone[data-zone="argue"].on path { stroke: var(--wb); stroke-width: 1.4; }
-.fig-zone[data-zone="lang"].on path  { stroke: var(--pe); stroke-width: 1.9; }
-.fig-zone[data-zone="body"].on path  { stroke: var(--wl); stroke-width: 1.4; }
-.fig-zone[data-zone="outer"].on path { stroke: var(--os); stroke-width: 1.4; }
+/* 亮起来的那一段用**被选中那条产品**的颜色（同一个部位可能有两个产品：
+   嘴巴 = PaperEcho + SE English，取谁的颜色取决于点了哪一行）。
+   颜色由脚本写在 --zone-accent 上；粗细仍按部位。 */
+.fig-zone[data-zone="argue"].on path { stroke: var(--zone-accent, var(--wb)); stroke-width: 1.4; }
+.fig-zone[data-zone="lang"].on path  { stroke: var(--zone-accent, var(--pe)); stroke-width: 1.9; }
+.fig-zone[data-zone="body"].on path  { stroke: var(--zone-accent, var(--wl)); stroke-width: 1.4; }
+.fig-zone[data-zone="outer"].on path { stroke: var(--zone-accent, var(--os)); stroke-width: 1.4; }
 
 /* ---- 连线：从被选中的那一处身体，连到它对应的那一行 ----
    这是整个隐喻的落点：点脑袋，线从脑袋长出来接到「脑袋」这一行，
@@ -518,6 +526,10 @@ html:not(.js) #map-root { display: none; }
 .band-s { font-family: var(--mono); font-size: var(--t-micro); color: var(--ink-3); letter-spacing: .04em; }
 .band-m { font-family: var(--mono); font-size: var(--t-micro); color: var(--ink-3); margin-left: auto; }
 
+/* 一个部位可能占两行（嘴巴 = PaperEcho + SE English）：部位名只写在第一行，
+   第二行的部位格留空 —— 固定这一列的宽度，两行后面几列才对得齐。 */
+.layer-d .band-k { flex: 0 0 2.2em; }
+
 /* ---- 选中的那个应用 ----
    不画外框：它已经坐在 .map 的 --surface 上，自己换成 --bg 就分离出来了。
    在外框里再套一个外框是卡片套卡片，角落那个折角也不再需要。 */
@@ -547,9 +559,25 @@ html:not(.js) #map-root { display: none; }
 }
 .map-panel .p-actions a:hover { text-decoration: none; color: var(--ink); border-color: var(--ink-3); }
 
-/* 只有 <noscript> 的清单会同时出现多个面板（JS 在场时永远只有一个），
-   它们并排贴在 --surface 上，需要一条细线分开。 */
+/* 只有 <noscript> 的清单会同时出现多个面板（JS 在场时最多两个：嘴巴那条线），
+   上下排列时用一条细线分开。 */
 .map-panel + .map-panel { margin-top: 14px; border-top: 1px solid var(--hair); }
+
+/* 点一个部位，它管着的产品各占一块面板。两个的时候并排（.multi）：
+   并排不画外框、各换 --bg 已经分得开，中间再补一条 1px 细线。 */
+.layer-p.multi { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(18px, 2.6vw, 34px); }
+.layer-p.multi .map-panel + .map-panel {
+  margin-top: 0; border-top: 0;
+  border-left: 1px solid var(--hair); padding-left: clamp(18px, 2.6vw, 34px);
+}
+/* 窄屏并排放不下（每块只剩两百多像素）：落回上下，细线换成横的 */
+@media (max-width: 1180px) {
+  .layer-p.multi { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .layer-p.multi .map-panel + .map-panel {
+    border-left: 0; padding-left: clamp(18px, 2.4vw, 26px);
+    border-top: 1px solid var(--hair); margin-top: 14px;
+  }
+}
 
 /* 窄屏放不下两栏：人形收起来，部位名由每一行的标题自己承担 */
 @media (max-width: 980px) {
@@ -672,7 +700,7 @@ body.modal-open { overflow: hidden; }
     <a class="top-mark" href="#top">从头到脚</a>
     <nav class="top-nav" aria-label="站内导航">
       <a href="#map">一层层展开</a>
-      <a href="#products">四个产品</a>
+      <a href="#products">五个产品</a>
       <a href="#planned">敬请期待</a>
     </nav>
     <button class="tbtn" id="theme-toggle" type="button" aria-label="切换为浅色主题">深色</button>
@@ -684,11 +712,11 @@ body.modal-open { overflow: hidden; }
   <!-- ============================================ 首屏 -->
   <section class="hero wrap">
     <h1 class="wordmark"><span>从</span><span>头</span><span>到</span><span>脚</span></h1>
-    <p class="hero-lead">嘴上、脑子里、身上、着装。四个产品，各管一处。</p>
+    <p class="hero-lead">嘴上、脑子里、身上、着装。五个产品，各管一处。</p>
 
     <ul class="readings">
       <li><span class="k">部位</span><span class="v">嘴 · 脑 · 身 · 装</span></li>
-      <li><span class="k">收录产品</span><span class="v">04</span></li>
+      <li><span class="k">收录产品</span><span class="v">05</span></li>
       <li><span class="k">核对日期</span><span class="v">2026-10-07</span></li>
     </ul>
 
@@ -696,7 +724,7 @@ body.modal-open { overflow: hidden; }
 
     <div class="cta-row">
       <a class="btn btn-solid" href="#map">从头看一遍 <span aria-hidden="true">↓</span></a>
-      <a class="btn btn-line" href="#products">直接看四个产品</a>
+      <a class="btn btn-line" href="#products">直接看五个产品</a>
     </div>
   </section>
 
@@ -706,7 +734,8 @@ body.modal-open { overflow: hidden; }
       <h2 class="sec-title">一层层展开</h2>
       <p class="sec-note">
         左边是一具人形：脑袋管思辨，嘴巴管语言，身体管训练，最外一层着装管穿搭。
-        点一个部位，右边就是管着它的那个产品。
+        点一个部位，右边就是管着它的产品；嘴巴这条线是两个（纸笔端与课程端），
+        各占一行、各有一块介绍。
       </p>
     </div>
 
@@ -756,10 +785,10 @@ body.modal-open { overflow: hidden; }
       </div>
     </div>
 
-    <!-- 禁用 JS 时的等价内容：四个应用连同介绍直接列出，不缺信息 -->
+    <!-- 禁用 JS 时的等价内容：五个应用连同介绍直接列出，不缺信息 -->
     <noscript>
       <div class="map" style="margin-top:20px">
-        <div class="map-bar"><span class="mono">脚本已禁用，以下是四个应用的完整介绍</span></div>
+        <div class="map-bar"><span class="mono">脚本已禁用，以下是五个应用的完整介绍</span></div>
 <!-- @generated:noscript -->
         <div class="map-panel" style="margin-top:16px">
           <h3>问辩 Wenbian</h3>
@@ -778,12 +807,11 @@ body.modal-open { overflow: hidden; }
           <p class="p-domain">语言 · 考试 — Android 8.0+ · 1.2.42 · 5.66 MB</p>
           <p>手机负责出题与朗读，答案写在纸上。从单词到听写、精听、长文与写作批改，六个环节共用同一份词库：你今天背的词，就是今天练习的材料。</p>
           <ul>
-            <li>无需注册账户；词库、训练历史与复习记录只保存在你的设备上。需要联网。可在 SE English 网站登录账号，把课程里到期的词、句型与阅读生成为今日纸笔训练包，练完的结果回传网站。</li>
+            <li>无需注册账户；词库、训练历史与复习记录只保存在你的设备上。需要联网。</li>
           </ul>
           <p class="p-actions">
             <a href="https://dpenglish-com.github.io/paperecho-site/">前往站点</a>
             <a href="https://dpenglish-com.github.io/paperecho-site/downloads/PaperEcho.apk">下载 APK</a>
-            <a href="https://www.seandictation.site/">SE English 网站</a>
           </p>
         </div>
         <div class="map-panel">
@@ -810,6 +838,18 @@ body.modal-open { overflow: hidden; }
             <a href="https://dpenglish-com.github.io/outerstyle-site/downloads/OuterStyle-0.2.0-debug.apk">下载 APK</a>
           </p>
         </div>
+        <div class="map-panel">
+          <h3>SE English</h3>
+          <p class="p-domain">语言 · 课程 — Web · Android · 1.0.2 · 3.10 MB</p>
+          <p>课程与复习的中枢：该学哪些新词、什么时候复习由它安排；单词、句型、场景、阅读、听力、写作与口语各有练习，作答由服务端批改。</p>
+          <ul>
+            <li>需要账户（邮箱注册，需完成验证）；课程进度、复习记录与统计存在账号上。可以和 PaperEcho 绑定：到期的词与篇章生成为纸笔训练包，练完的结果回传到这里。</li>
+          </ul>
+          <p class="p-actions">
+            <a href="https://www.seandictation.site/">前往站点</a>
+            <a href="https://www.seandictation.site/downloads/SE-English.apk">下载 APK</a>
+          </p>
+        </div>
 <!-- @generated:end -->
       </div>
     </noscript>
@@ -818,7 +858,7 @@ body.modal-open { overflow: hidden; }
   <!-- ============================================ 产品 -->
   <section class="section wrap" id="products">
     <div class="sec-head reveal">
-      <h2 class="sec-title">四个产品</h2>
+      <h2 class="sec-title">五个产品</h2>
       <p class="sec-note">
         每个数字都取自它自己的线上页面，核对于 2026-10-07，不是宣传文案的转述。
       </p>
@@ -868,7 +908,7 @@ body.modal-open { overflow: hidden; }
           <div><dt>体积</dt><dd>5.66 MB</dd></div>
         </dl>
         <p class="slot-note">
-          无需注册账户；词库、训练历史与复习记录只保存在你的设备上。需要联网。可在 SE English 网站登录账号，把课程里到期的词、句型与阅读生成为今日纸笔训练包，练完的结果回传网站。
+          无需注册账户；词库、训练历史与复习记录只保存在你的设备上。需要联网。
         </p>
         <div class="slot-acts">
           <button type="button" class="slot-act" data-open="video"
@@ -881,7 +921,6 @@ body.modal-open { overflow: hidden; }
         <div class="slot-links">
           <a href="https://dpenglish-com.github.io/paperecho-site/">前往站点 <span class="arw" aria-hidden="true">→</span></a>
           <a href="https://dpenglish-com.github.io/paperecho-site/downloads/PaperEcho.apk">下载 APK</a>
-          <a href="https://www.seandictation.site/">SE English 网站</a>
         </div>
       </article>
 
@@ -942,6 +981,27 @@ body.modal-open { overflow: hidden; }
           <a href="https://dpenglish-com.github.io/outerstyle-site/downloads/OuterStyle-0.2.0-debug.apk">下载 APK</a>
         </div>
       </article>
+
+      <!-- SE English：嘴巴 -->
+      <article class="slot slot-e reveal" data-accent="se">
+        <p class="slot-domain">嘴巴 · 语言 · 课程</p>
+        <h3 class="slot-name">SE English</h3>
+        <p class="slot-desc">
+          课程与复习的中枢：该学哪些新词、什么时候复习由它安排；单词、句型、场景、阅读、听力、写作与口语各有练习，作答由服务端批改。
+        </p>
+        <dl class="slot-specs">
+          <div><dt>平台</dt><dd>Web · Android</dd></div>
+          <div><dt>版本</dt><dd>1.0.2</dd></div>
+          <div><dt>体积</dt><dd>3.10 MB</dd></div>
+        </dl>
+        <p class="slot-note">
+          需要账户（邮箱注册，需完成验证）；课程进度、复习记录与统计存在账号上。可以和 PaperEcho 绑定：到期的词与篇章生成为纸笔训练包，练完的结果回传到这里。
+        </p>
+        <div class="slot-links">
+          <a href="https://www.seandictation.site/">前往站点 <span class="arw" aria-hidden="true">→</span></a>
+          <a href="https://www.seandictation.site/downloads/SE-English.apk">下载 APK</a>
+        </div>
+      </article>
 <!-- @generated:end -->
     </div>
   </section>
@@ -973,12 +1033,15 @@ body.modal-open { overflow: hidden; }
       <p>作者 肖恩 · 微信 16659317774</p>
     </div>
     <div>
-      <h2>四个产品</h2>
+      <h2>五个产品</h2>
       <div class="foot-links">
+<!-- @generated:footer -->
         <a href="https://dpenglish-com.github.io/wenbian-site/">问辩 Wenbian</a>
         <a href="https://dpenglish-com.github.io/paperecho-site/">PaperEcho 纸上回声</a>
         <a href="https://dpenglish-com.github.io/workoutloop-site/">WorkoutLoop</a>
         <a href="https://dpenglish-com.github.io/outerstyle-site/">外在 OuterStyle</a>
+        <a href="https://www.seandictation.site/">SE English</a>
+<!-- @generated:end -->
       </div>
     </div>
   </div>
@@ -1033,7 +1096,7 @@ body.modal-open { overflow: hidden; }
     var NS = 'http://www.w3.org/2000/svg';
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    /* 四个部位，各管一个产品。内容全部取自各产品自己的线上页面与仓库文档，没有编的。
+    /* 四个部位；多数一个产品，嘴巴两个。内容全部取自各产品自己的线上页面与仓库文档，没有编的。
        顺序就是人形从上到下的顺序：脑袋 → 嘴巴 → 身体。
 
        这里刻意只有两层：部位 → 应用。一个部位就一个产品，
@@ -1045,6 +1108,7 @@ body.modal-open { overflow: hidden; }
         "part": "脑袋",
         "k": "思辨 · 论证",
         "accent": "wb",
+        "zone": "argue",
         "name": "问辩 Wenbian",
         "short": "Web · Android",
         "domain": "思辨 · 论证 — Web · Android · 内测包 · 13.66 MB",
@@ -1066,11 +1130,12 @@ body.modal-open { overflow: hidden; }
         "part": "嘴巴",
         "k": "语言 · 考试",
         "accent": "pe",
+        "zone": "lang",
         "name": "PaperEcho 纸上回声",
         "short": "Android · 1.2.42",
         "domain": "语言 · 考试 — Android 8.0+ · 1.2.42 · 5.66 MB",
         "desc": "手机负责出题与朗读，答案写在纸上。从单词到听写、精听、长文与写作批改，六个环节共用同一份词库：你今天背的词，就是今天练习的材料。",
-        "note": "无需注册账户；词库、训练历史与复习记录只保存在你的设备上。需要联网。可在 SE English 网站登录账号，把课程里到期的词、句型与阅读生成为今日纸笔训练包，练完的结果回传网站。",
+        "note": "无需注册账户；词库、训练历史与复习记录只保存在你的设备上。需要联网。",
         "links": [
           {
             "label": "前往站点",
@@ -1079,10 +1144,6 @@ body.modal-open { overflow: hidden; }
           {
             "label": "下载 APK",
             "href": "https://dpenglish-com.github.io/paperecho-site/downloads/PaperEcho.apk"
-          },
-          {
-            "label": "SE English 网站",
-            "href": "https://www.seandictation.site/"
           }
         ]
       },
@@ -1091,6 +1152,7 @@ body.modal-open { overflow: hidden; }
         "part": "身体",
         "k": "训练 · 编排",
         "accent": "wl",
+        "zone": "body",
         "name": "WorkoutLoop",
         "short": "Android · 0.1.0",
         "domain": "训练 · 编排 — Android · 0.1.0 · 2.08 MB",
@@ -1112,6 +1174,7 @@ body.modal-open { overflow: hidden; }
         "part": "着装",
         "k": "穿搭 · 审美",
         "accent": "os",
+        "zone": "outer",
         "name": "外在 OuterStyle",
         "short": "Android · 0.2.0",
         "domain": "穿搭 · 审美 — Android 8.0+ · 0.2.0 · 19.1 MB",
@@ -1125,6 +1188,28 @@ body.modal-open { overflow: hidden; }
           {
             "label": "下载 APK",
             "href": "https://dpenglish-com.github.io/outerstyle-site/downloads/OuterStyle-0.2.0-debug.apk"
+          }
+        ]
+      },
+      {
+        "id": "se",
+        "part": "嘴巴",
+        "k": "语言 · 课程",
+        "accent": "se",
+        "zone": "lang",
+        "name": "SE English",
+        "short": "Web · Android · 1.0.2",
+        "domain": "语言 · 课程 — Web · Android · 1.0.2 · 3.10 MB",
+        "desc": "课程与复习的中枢：该学哪些新词、什么时候复习由它安排；单词、句型、场景、阅读、听力、写作与口语各有练习，作答由服务端批改。",
+        "note": "需要账户（邮箱注册，需完成验证）；课程进度、复习记录与统计存在账号上。可以和 PaperEcho 绑定：到期的词与篇章生成为纸笔训练包，练完的结果回传到这里。",
+        "links": [
+          {
+            "label": "前往站点",
+            "href": "https://www.seandictation.site/"
+          },
+          {
+            "label": "下载 APK",
+            "href": "https://www.seandictation.site/downloads/SE-English.apk"
           }
         ]
       }
@@ -1165,11 +1250,20 @@ body.modal-open { overflow: hidden; }
       b.style.setProperty('--accent', 'var(--' + o.accent + ')');
       if (!reduce) b.style.setProperty('--bd', o.delay);
       if (o.on) { b.classList.add('on'); b.setAttribute('aria-expanded', 'true'); }
+      /* 同一部位的第二行不重复写部位名（第一行已经写了），
+         但读屏要听到完整的「部位 · 类别 · 产品」。 */
+      if (o.label) b.setAttribute('aria-label', o.label);
       b.appendChild(el('span', 'band-k', o.k));
       if (o.s) b.appendChild(el('span', 'band-s', o.s));
       if (o.m) b.appendChild(el('span', 'band-m', o.m));
       b.addEventListener('click', o.pick);
       return b;
+    }
+
+    /* 一个部位管着的全部产品。多数部位只有一个；
+       嘴巴是两个（PaperEcho 纸笔端 + SE English 课程端，2026-10-07 分开成两块）。 */
+    function itemsOfPart(part) {
+      return DATA.filter(function (it) { return it.part === part; });
     }
 
     function render() {
@@ -1180,37 +1274,53 @@ body.modal-open { overflow: hidden; }
 
       flow.textContent = '';
 
-      /* 人形跟着选中项亮起来 */
-      fig.setAttribute('data-active', d ? d.id : '');
+      /* 人形跟着选中项亮起来。区域按 zone（同部位共用一个），
+         颜色按被点的那一条产品走。 */
+      fig.setAttribute('data-active', d ? d.zone : '');
       var zone = fig.querySelector('.fig-zone.on');
       if (zone) zone.classList.remove('on');
       if (d) {
-        var hit = fig.querySelector('.fig-zone[data-zone="' + d.id + '"]');
+        var hit = fig.querySelector('.fig-zone[data-zone="' + d.zone + '"]');
         if (hit) hit.classList.add('on');
+        fig.style.setProperty('--zone-accent', 'var(--' + d.accent + ')');
       }
       figCap.textContent = d ? d.part : '全身';
 
-      /* 部位行：四个人形部位，随时可换 */
+      var group = d ? itemsOfPart(d.part) : [];
+
+      /* 部位行：四个人形部位，随时可换。同部位有两个产品时**挨着**各占一行
+         （产品在 data 里的顺序不一定相邻），部位名只写在第一行
+         （CSS 给这一列固定宽度，两行才对得齐）。 */
       var L1 = el('div', 'layer layer-d');
-      DATA.forEach(function (item, i) {
-        L1.appendChild(band({
-          cls: 'band-d', accent: item.accent,
-          k: item.part, s: item.k, m: item.name,
-          on: !!(d && d.id === item.id), delay: i * 55,
-          pick: function () {
-            state.d = (state.d && state.d.id === item.id) ? null : item;
-            render();
-          }
-        }));
+      var order = [];
+      var byPart = {};
+      DATA.forEach(function (item) {
+        if (!byPart[item.part]) { byPart[item.part] = []; order.push(item.part); }
+        byPart[item.part].push(item);
+      });
+      var n = 0;
+      order.forEach(function (part) {
+        byPart[part].forEach(function (item, idx) {
+          L1.appendChild(band({
+            cls: 'band-d', accent: item.accent,
+            k: idx === 0 ? part : '', s: item.k, m: item.name,
+            on: !!(d && d.part === part), delay: n * 55,
+            label: part + ' · ' + item.k + ' · ' + item.name,
+            pick: function () {
+              state.d = (state.d && state.d.part === part) ? null : item;
+              render();
+            }
+          }));
+          n++;
+        });
       });
       flow.appendChild(L1);
 
-      /* 选中哪个部位，就把那个应用摊开在它下面。
-         介绍 + 客观指标 + 链接，够了（一般两个；嘴巴那条线多一个
-         SE English 网站 —— 课程中枢与纸笔训练是同一件事的两端）。 */
+      /* 选中哪个部位，就把它管着的产品摊开在它下面 ——
+         一个产品一块面板；嘴巴是两个，并排（窄屏落回上下）。 */
       if (d) {
-        var L2 = el('div', 'layer layer-p');
-        L2.appendChild(panel(d));
+        var L2 = el('div', 'layer layer-p' + (group.length > 1 ? ' multi' : ''));
+        group.forEach(function (item) { L2.appendChild(panel(item)); });
         flow.appendChild(L2);
       }
 
@@ -1267,7 +1377,9 @@ body.modal-open { overflow: hidden; }
       });
 
       hintEl.textContent = d
-        ? d.part + ' · ' + d.short
+        ? (itemsOfPart(d.part).length > 1
+            ? d.part + ' · ' + itemsOfPart(d.part).length + ' 个产品'
+            : d.part + ' · ' + d.short)
         : '点一个部位';
     }
 
@@ -1280,8 +1392,10 @@ body.modal-open { overflow: hidden; }
       var d = state.d;
       if (!d || window.innerWidth <= 980) return;
 
-      var row = flow.querySelector('.layer-d .band.on');
-      if (!row) return;
+      /* 一个部位可能站出来两行（嘴巴的两条产品），线落在这一组的中间：
+         它要说的是「你点的这些行，管的是身上这一处」。 */
+      var rows = flow.querySelectorAll('.layer-d .band.on');
+      if (!rows.length) return;
 
       var stage = stageEl.getBoundingClientRect();
       if (!stage.width || !stage.height) return;
@@ -1289,21 +1403,21 @@ body.modal-open { overflow: hidden; }
 
       /* 连线的起点取该部位在人形上的锚点（不是外接框中心）：
          脑袋取圆心上沿，嘴巴取嘴线右端，身体取躯干中段。 */
-      var zone = fig.querySelector('.fig-zone[data-zone="' + d.id + '"] path');
+      var zone = fig.querySelector('.fig-zone[data-zone="' + d.zone + '"] path');
       if (!zone) return;
       var zr = zone.getBoundingClientRect();
       var svgFig = fig.querySelector('svg').getBoundingClientRect();
 
       var x1, y1;
-      if (d.id === 'lang') {
+      if (d.zone === 'lang') {
         /* 嘴巴：取右侧嘴角，线从嘴边出去 */
         x1 = svgFig.right - stage.left - 6;
         y1 = zr.top - stage.top + zr.height / 2;
-      } else if (d.id === 'argue') {
+      } else if (d.zone === 'argue') {
         /* 脑袋：取圆的右侧 */
         x1 = svgFig.right - stage.left - (svgFig.width * 0.345);
         y1 = zr.top - stage.top + zr.height / 2;
-      } else if (d.id === 'outer') {
+      } else if (d.zone === 'outer') {
         /* 着装：取整层外缘（第一条路径只是领口的一小段弧，不能代表整层），
            线从外套右侧出去。 */
         var gr = fig.querySelector('.fig-zone[data-zone="outer"]').getBoundingClientRect();
@@ -1315,9 +1429,10 @@ body.modal-open { overflow: hidden; }
         y1 = zr.top - stage.top + zr.height * 0.34;
       }
 
-      var rr = row.getBoundingClientRect();
-      var x2 = rr.left - stage.left;
-      var y2 = rr.top - stage.top + rr.height / 2;
+      var rFirst = rows[0].getBoundingClientRect();
+      var rLast = rows[rows.length - 1].getBoundingClientRect();
+      var x2 = rFirst.left - stage.left;
+      var y2 = (rFirst.top + rLast.bottom) / 2 - stage.top;
 
       /* 先横着出人形，再竖着进那一行：一条折线读起来像"接上去"，
          一条斜线读起来像"飘过去"。 */

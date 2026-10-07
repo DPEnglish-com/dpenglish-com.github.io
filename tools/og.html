@@ -9,7 +9,7 @@
 @font-face{font-family:"Wordmark";src:url(__FONT__) format("woff2");font-weight:500;font-style:normal}
 :root{
   --bg:#0C0D0F; --ink:#E8EAED; --ink-2:#AAACAF; --ink-3:#888A8E;
-  --wb:#C0D5AC; --pe:#E2603F; --wl:#6FBFAE; --os:#E8944F;
+  --wb:#C0D5AC; --pe:#E2603F; --wl:#6FBFAE; --os:#E8944F; --se:#CC785C;
   --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Source Han Sans SC","Noto Sans SC",system-ui,sans-serif;
   --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,monospace;
 }
@@ -22,21 +22,23 @@ h1{margin:0;font-family:"Wordmark","Songti SC","Source Han Serif SC",serif;font-
 .lead{margin:26px 0 0;font-size:27px;color:var(--ink-2);line-height:1.5}
 .codebar{display:flex;gap:2px;height:3px;width:520px;margin-top:38px}
 .codebar i{display:block;height:100%}
-.row{display:flex;align-items:flex-end;gap:48px}
+.row{display:flex;align-items:flex-end;gap:26px}
 .item .k{display:flex;align-items:baseline;gap:9px}
 .dot{display:inline-block;width:8px;height:8px;flex:none;transform:translateY(-2px)}
-.item .n{font-size:21px;font-weight:700;white-space:nowrap}
+/* 五个产品之后这一行变紧：字号 21→18、间距 48→26，右下角的域名才不会被挤出画布 */
+.item .n{font-size:18px;font-weight:700;white-space:nowrap}
 .item .s{font-family:var(--mono);font-size:14px;color:var(--ink-3);margin-top:7px;letter-spacing:.04em;white-space:nowrap}
 .url{margin-left:auto;font-family:var(--mono);font-size:16px;color:var(--ink-3);letter-spacing:.04em;white-space:nowrap}
 </style></head><body>
 <div>
   <h1>从头到脚</h1>
-  <p class="lead">嘴上、脑子里、身上、着装。四个产品，各管一处。</p>
+  <p class="lead">嘴上、脑子里、身上、着装。五个产品，各管一处。</p>
   <div class="codebar"><i style="flex:3;background:var(--wb)"></i><i style="flex:3;background:var(--pe)"></i><i style="flex:2;background:var(--wl)"></i><i style="flex:2;background:var(--os)"></i></div>
 </div>
 <div class="row">
   <div class="item"><div class="k"><span class="dot" style="background:var(--wb)"></span><span class="n">脑袋 · 问辩</span></div><div class="s">思辨 · 论证</div></div>
   <div class="item"><div class="k"><span class="dot" style="background:var(--pe)"></span><span class="n">嘴巴 · PaperEcho</span></div><div class="s">语言 · 考试</div></div>
+  <div class="item"><div class="k"><span class="dot" style="background:var(--se)"></span><span class="n">嘴巴 · SE English</span></div><div class="s">语言 · 课程</div></div>
   <div class="item"><div class="k"><span class="dot" style="background:var(--wl)"></span><span class="n">身体 · WorkoutLoop</span></div><div class="s">训练 · 编排</div></div>
   <div class="item"><div class="k"><span class="dot" style="background:var(--os)"></span><span class="n">着装 · 外在</span></div><div class="s">穿搭 · 审美</div></div>
   <div class="url">dpenglish-com.github.io</div>

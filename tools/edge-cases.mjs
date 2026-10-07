@@ -35,7 +35,7 @@ const mob = await ev(`(function(){
 })()`);
 console.log(`  人形 display=${mob.figDisplay} 宽=${Math.round(mob.figW)}px  初始行=${mob.bands}`);
 ck(mob.figDisplay==='none'||mob.figW===0, '390px 人形应收起');
-ck(mob.bands===4, `390px 初始应有 4 个部位行（实为 ${mob.bands}）`);
+ck(mob.bands===5, `390px 初始应有 5 行（四个部位，嘴巴占两行，实为 ${mob.bands}）`);
 await ev(`document.querySelectorAll('.band-d')[0].click()`); await sleep(800);
 const mob2 = await ev(`(function(){
   return { bands: document.querySelectorAll('.band').length,

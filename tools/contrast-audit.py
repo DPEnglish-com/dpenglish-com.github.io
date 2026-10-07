@@ -97,6 +97,7 @@ CHECKS: list[tuple[str, str, str, float]] = [
     ("产品色 问辩", "wb", "bg", 3.0),
     ("产品色 WorkoutLoop", "wl", "bg", 3.0),
     ("产品色 外在", "os", "bg", 3.0),
+    ("产品色 SE English", "se", "bg", 3.0),
 ]
 
 

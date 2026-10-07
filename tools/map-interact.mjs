@@ -90,6 +90,29 @@ try {
       if(!n) return false; n.click(); return true;})()`);
   };
 
+  /* 按产品名点行，不按下标：嘴巴占两行之后，「第 3 行」是身体还是 SE English
+     取决于数据顺序，按下标点会安静地点错行。 */
+  const clickBand = async (name) => {
+    await evalJs(`(function(){
+      var rows = Array.from(document.querySelectorAll('.band-d'));
+      var hit = rows.filter(function(b){
+        var m = b.querySelector('.band-m');
+        return m && m.textContent.indexOf(${JSON.stringify(name)}) === 0;
+      })[0];
+      if (hit) hit.scrollIntoView({block:'center'});
+      return !!hit;
+    })()`);
+    await sleep(150);
+    return evalJs(`(function(){
+      var rows = Array.from(document.querySelectorAll('.band-d'));
+      var hit = rows.filter(function(b){
+        var m = b.querySelector('.band-m');
+        return m && m.textContent.indexOf(${JSON.stringify(name)}) === 0;
+      })[0];
+      if (!hit) return false; hit.click(); return true;
+    })()`);
+  };
+
   const snap = () => evalJs(`(function(){
     var zones = Array.from(document.querySelectorAll('.fig-zone')).map(function(g){
       var p = g.querySelector('path');
@@ -103,8 +126,14 @@ try {
       bands: Array.from(document.querySelectorAll('.band')).map(function(b){
         var lvl = b.classList.contains('band-d') ? 'band-d'
                 : b.classList.contains('band-p') ? 'band-p' : 'band-c';
-        return lvl + ':' + b.querySelector('.band-k').textContent +
-               (b.classList.contains('on') ? '*' : '');
+        // 部位格可能为空（同一部位的第二行），记成 · 才看得出是"同一部位的第二条"
+        var k = (b.querySelector('.band-k') || {}).textContent || '·';
+        var m = (b.querySelector('.band-m') || {}).textContent || '';
+        return lvl + ':' + k + '/' + m + (b.classList.contains('on') ? '*' : '');
+      }),
+      panels: Array.from(document.querySelectorAll('.map-panel h3')).map(function(h){ return h.textContent; }),
+      panelLinksAll: Array.from(document.querySelectorAll('.map-panel')).map(function(p){
+        return p.querySelectorAll('.p-actions a').length;
       }),
       spines: document.querySelectorAll('.layer:not(.layer-d)').length,
       crumbs: Array.from(document.querySelectorAll('.crumb')).map(function(c){return c.textContent;}),
@@ -125,7 +154,7 @@ try {
   console.log(`  行: ${s.bands.join(' | ')}`);
   console.log(`  人形: ${s.zones.map(z => z.zone + (z.on ? '[亮]' : '')).join(' ')}  说明=${s.cap}  面包屑=${s.crumbs.join('/')}`);
   console.log(`  提示: ${s.hint}   面板: ${s.panel || '（无）'}`);
-  check(s.bands.length === 4, `初始应只有 4 个部位行，实为 ${s.bands.length}`);
+  check(s.bands.length === 5, `初始应有 5 行（四个部位，嘴巴占两行），实为 ${s.bands.length}`);
   check(s.zones.length === 4, `人形应有 4 个部位组，实为 ${s.zones.length}`);
   check(s.cap === '全身', `初始说明应为「全身」，实为「${s.cap}」`);
   check(s.panel === null, '初始不应有应用面板');
@@ -151,7 +180,7 @@ try {
 
   // ---- 点第一层：脑袋 → 直接出应用 ----
   console.log(`\n=== 点「脑袋」：应直接出应用，不再有子分类 ===`);
-  check(await click('.band-d', 0), '点得到「脑袋」这一行');
+  check(await clickBand('问辩 Wenbian'), '点得到「脑袋」这一行');
   await sleep(800);
   s = await snap();
   console.log(`  行: ${s.bands.join(' | ')}`);
@@ -162,6 +191,7 @@ try {
   check(s.active === 'argue', `人形应切到 argue，实为 ${s.active}`);
   check(s.cap === '脑袋', `说明应为「脑袋」，实为「${s.cap}」`);
   check(s.panel === '问辩 Wenbian', `应直接显示应用名，实为「${s.panel}」`);
+  check(s.panels.length === 1, `一个产品的部位只该有一块面板，实为 ${s.panels.length} 块`);
   check(!!s.panelDesc && s.panelDesc.length > 40, '应用应带一段介绍');
   check(s.panelLinks.length === 2, `应用应有两个链接，实为 ${s.panelLinks.length}`);
   check(s.spines === 1, `应长出 1 条层脊，实为 ${s.spines}`);
@@ -177,7 +207,7 @@ try {
 
   // ---- 换嘴巴 ----
   console.log(`\n=== 点「嘴巴」 ===`);
-  check(await click('.band-d', 1), '点得到「嘴巴」');
+  check(await clickBand('PaperEcho 纸上回声'), '点得到「嘴巴」');
   await sleep(800);
   s = await snap();
   console.log(`  人形: ${s.zones.map(z => z.zone + (z.on ? `[亮 ${z.stroke}]` : `(${z.zoneOpacity})`)).join(' ')}  说明=${s.cap}`);
@@ -185,12 +215,17 @@ try {
   check(s.active === 'lang', `人形应切到 lang，实为 ${s.active}`);
   check(s.cap === '嘴巴', `说明应为「嘴巴」，实为「${s.cap}」`);
   check(s.panel === 'PaperEcho 纸上回声', `应显示 PaperEcho，实为「${s.panel}」`);
+  check(s.panels.length === 2, `嘴巴应有 2 块面板，实为 ${s.panels.length} 块：${s.panels.join(' , ')}`);
+  check(s.panels[1] === 'SE English', `第二块应是 SE English，实为「${s.panels[1]}」`);
+  /* 嘴巴的两行必须**挨着**（一个部位一组），第二行的部位格留空 ——
+     产品在 data 里的顺序不相邻，渲染时按部位归过组，这两条断言看的正是那件事。 */
+  check((s.bands[1] || '').indexOf('band-d:嘴巴/PaperEcho 纸上回声*') === 0 &&
+        (s.bands[2] || '').indexOf('band-d:·/SE English*') === 0,
+    `嘴巴两行应挨在一起、第二行部位格留空，实为：${s.bands.join(' | ')}`);
+  check(s.panelLinksAll.length === 2 && s.panelLinksAll.every(n => n === 2),
+    `两块面板各两个链接，实为 ${s.panelLinksAll.join(' , ')}`);
+  check(s.hint === '嘴巴 · 2 个产品', `提示应为「嘴巴 · 2 个产品」，实为「${s.hint}」`);
   check(s.spines === 1, `换部位后仍应为 1 条层脊，实为 ${s.spines}`);
-  // 嘴巴这条线是两个站点：纸笔端（PaperEcho）与课程中枢（SE English）成对出现，
-  // 所以它是唯一有三个链接的应用。少了这条链接，联动就从页面上消失。
-  console.log(`  链接=${s.panelLinks.join(' , ')}`);
-  check(s.panelLinks.length === 3 && s.panelLinks.some(l => l.includes('SE English')),
-    `嘴巴应带三个链接（含 SE English 网站），实为 ${s.panelLinks.join(' , ')}`);
   // 嘴巴长在脑袋上：选嘴巴时脑袋应留一点，不能和身体一样暗
   const head = s.zones.find(z => z.zone === 'argue');
   const body = s.zones.find(z => z.zone === 'body');
@@ -200,7 +235,7 @@ try {
 
   // ---- 换身体 ----
   console.log(`\n=== 点「身体」 ===`);
-  check(await click('.band-d', 2), '点得到「身体」');
+  check(await clickBand('WorkoutLoop'), '点得到「身体」');
   await sleep(800);
   s = await snap();
   console.log(`  人形: ${s.zones.map(z => z.zone + (z.on ? `[亮 ${z.stroke}]` : '')).join(' ')}  说明=${s.cap}`);
@@ -217,7 +252,7 @@ try {
 
   // ---- 换着装：最后新增的一层 ----
   console.log(`\n=== 点「着装」 ===`);
-  check(await click('.band-d', 3), '点得到「着装」');
+  check(await clickBand('外在 OuterStyle'), '点得到「着装」');
   await sleep(800);
   s = await snap();
   console.log(`  人形: ${s.zones.map(z => z.zone + (z.on ? `[亮 ${z.stroke}]` : '')).join(' ')}  说明=${s.cap}`);
@@ -229,22 +264,22 @@ try {
 
   // ---- 再点一次 = 收起 ----
   console.log(`\n=== 再点同一部位应收起 ===`);
-  check(await click('.band-d', 3), '再点「着装」');
+  check(await clickBand('外在 OuterStyle'), '再点「着装」');
   await sleep(600);
   s = await snap();
-  check(s.bands.length === 4 && s.panel === null && s.active === '',
+  check(s.bands.length === 5 && s.panel === null && s.active === '',
     `收起后应回到初始态，实为 bands=${s.bands.length} panel=${s.panel} active=${s.active}`);
 
   // ---- 面包屑退回 ----
   console.log(`\n=== 面包屑退回 ===`);
-  check(await click('.band-d', 0), '先展开脑袋');
+  check(await clickBand('问辩 Wenbian'), '先展开脑袋');
   await sleep(600);
   s = await snap();
   check(s.crumbs.length === 2, `展开后应有 2 段面包屑，实为 ${s.crumbs.length}`);
   check(await click('.crumb', 0), '点「全身」面包屑');
   await sleep(600);
   s = await snap();
-  check(s.bands.length === 4 && s.active === '' && s.panel === null,
+  check(s.bands.length === 5 && s.active === '' && s.panel === null,
     `退回应回到初始态，实为 bands=${s.bands.length} active=${s.active}`);
 
   // ---- 键盘可达性 ----

@@ -17,7 +17,7 @@
 
   "site": {
     "verifiedOn": "2026-10-07",
-    "count": 4
+    "count": 5
   },
 
   "products": [
@@ -55,11 +55,10 @@
       "version": "1.2.42",
       "size": "5.66 MB",
       "desc": "手机负责出题与朗读，答案写在纸上。从单词到听写、精听、长文与写作批改，六个环节共用同一份词库：你今天背的词，就是今天练习的材料。",
-      "note": "无需注册账户；词库、训练历史与复习记录只保存在你的设备上。需要联网。可在 SE English 网站登录账号，把课程里到期的词、句型与阅读生成为今日纸笔训练包，练完的结果回传网站。",
+      "note": "无需注册账户；词库、训练历史与复习记录只保存在你的设备上。需要联网。",
       "links": [
         { "label": "前往站点", "href": "https://dpenglish-com.github.io/paperecho-site/" },
-        { "label": "下载 APK", "href": "https://dpenglish-com.github.io/paperecho-site/downloads/PaperEcho.apk" },
-        { "label": "SE English 网站", "href": "https://www.seandictation.site/" }
+        { "label": "下载 APK", "href": "https://dpenglish-com.github.io/paperecho-site/downloads/PaperEcho.apk" }
       ],
       "media": {"video": "assets/video/paperecho.mp4",
         "poster": "assets/video/paperecho-poster.jpg",
@@ -109,6 +108,24 @@
         "poster": "assets/video/outerstyle-poster.jpg",
         "demo": "assets/demo/outerstyle.html",
         "demoNote": "录入单品 → 生成搭配 → 颜色角色 → 审美训练"}
+    },
+    {
+      "id": "se",
+      "part": "嘴巴",
+      "k": "语言 · 课程",
+      "accent": "se",
+      "slot": "e",
+      "name": "SE English",
+      "short": "Web · Android · 1.0.2",
+      "platform": "Web · Android",
+      "version": "1.0.2",
+      "size": "3.10 MB",
+      "desc": "课程与复习的中枢：该学哪些新词、什么时候复习由它安排；单词、句型、场景、阅读、听力、写作与口语各有练习，作答由服务端批改。",
+      "note": "需要账户（邮箱注册，需完成验证）；课程进度、复习记录与统计存在账号上。可以和 PaperEcho 绑定：到期的词与篇章生成为纸笔训练包，练完的结果回传到这里。",
+      "links": [
+        { "label": "前往站点", "href": "https://www.seandictation.site/" },
+        { "label": "下载 APK", "href": "https://www.seandictation.site/downloads/SE-English.apk" }
+      ]
     }
   ],
 
