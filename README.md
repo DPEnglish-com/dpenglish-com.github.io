@@ -2,8 +2,8 @@
 
 公开访问：**https://dpenglish-com.github.io/**
 
-三个产品站的上层入口。左边一具 1px 细线画的人形——脑袋管思辨，
-嘴巴管语言，身体管训练——点一处，出管着它的那个产品。
+四个产品站的上层入口。左边一具 1px 细线画的人形——脑袋管思辨，
+嘴巴管语言，身体管训练，最外一层着装管穿搭——点一处，出管着它的那个产品。
 
 - 单文件静态站：`index.html` 就是全部产物（CSS/JS/词标子集内联）
 - **零依赖、零构建、零外部请求**：没有 CDN、没有字体外链、没有分析脚本
@@ -15,13 +15,14 @@
 > `package.json` 里的依赖**只给审计工具用**，不进线上产物。
 > 部署的就是仓库里那几个静态文件，没有构建步骤。
 
-## 三个子站
+## 四个子站
 
 | 部位 | 产品 | 站点 |
 |---|---|---|
 | 脑袋 | 问辩 Wenbian | https://dpenglish-com.github.io/wenbian-site/ |
 | 嘴巴 | PaperEcho 纸上回声 | https://dpenglish-com.github.io/paperecho-site/ |
 | 身体 | WorkoutLoop | https://dpenglish-com.github.io/workoutloop-site/ |
+| 着装 | 外在 OuterStyle | https://dpenglish-com.github.io/outerstyle-site/ |
 
 ## 改产品：只改一处
 
@@ -64,7 +65,7 @@ node tools/verify.mjs
 | 5 | 边界路径：390px 移动端 / reduced-motion / 禁用 JS |
 | 6 | 设计规则检测（impeccable 引擎） |
 | 7 | `cramped-padding` 豁免依据复核 |
-| 8 | 悬浮窗与试用页：点开前零加载、窗口里装对了东西、Esc 与焦点归位、三份试用页能开且手机/平板真的换布局 |
+| 8 | 悬浮窗与试用页：点开前零加载、窗口里装对了东西、Esc 与焦点归位、四份试用页能开且手机/平板真的换布局 |
 
 ```bash
 node tools/verify.mjs --no-browser      # 跳过需要 Chrome 的五项，约 1 秒
@@ -83,7 +84,7 @@ CI（Ubuntu）与 macOS 因此共用同一套脚本。**显式设了 `CHROME_PAT
 git add -A && git commit -m "站点更新" && git push
 ```
 
-GitHub Pages 从 `main` 根目录发布（legacy build，与三个子站一致）。
+GitHub Pages 从 `main` 根目录发布（legacy build，与四个子站一致）。
 `.nojekyll` 保留：关掉 Jekyll 处理。
 
 `robots.txt` 与 `sitemap.xml` 里的地址与 `index.html` 的

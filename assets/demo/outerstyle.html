@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>外在 OuterStyle · 在线试用</title>
+<!--
+  离线试用版。零外部请求、零依赖。深色主题 —— 与 App 的深色卡片观感一致。
+  取色照 ui/theme/Color.kt 的设计系统 v2.0：
+    画布 DeepNavy #0F172A · 卡 Graphite #1E293B · 文字 OffWhite #F8FAFC
+    强调 Orange #F97316 · 冷色 Slate400 #94A3B8
+  演示的是产品的核心链路：衣橱里的单品 → 生成一套搭配 → 说清颜色角色 → 每天一课的判断。
+-->
+<style>
+:root{
+  --bg:#0F172A; --card:#1E293B; --card-2:#16203A; --line:#334155;
+  --ink:#F8FAFC; --ink-2:#94A3B8; --ink-3:#7E8FA6;
+  --accent:#F97316; --accent-soft:rgba(249,115,22,.16); --on-accent:#0F172A;
+  --font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Segoe UI",system-ui,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);
+  -webkit-font-smoothing:antialiased;font-size:15px;line-height:1.75}
+body{padding:26px 20px 44px}
+.wrap{max-width:1100px;margin:0 auto}
+[hidden]{display:none !important}
+
+.bar{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;
+  padding-bottom:16px;border-bottom:1px solid var(--line)}
+.bar h1{margin:0;font-size:25px;font-weight:700;letter-spacing:-.2px}
+.bar p{margin:6px 0 0;font-size:13px;color:var(--ink-2)}
+.toggle{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex:none}
+.toggle button{appearance:none;border:0;background:transparent;color:var(--ink-2);
+  font-family:var(--font);font-size:13px;padding:9px 18px;cursor:pointer}
+.toggle button + button{border-left:1px solid var(--line)}
+.toggle button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);font-weight:700}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.hint{margin:14px 0 0;font-size:13px;color:var(--ink-2);min-height:20px}
+
+.stage{margin-top:22px;display:flex;justify-content:center}
+.device{border:1px solid var(--line);border-radius:22px;background:var(--card-2);padding:18px;width:100%}
+.device[data-device="phone"]{max-width:412px}
+.device[data-device="tablet"]{max-width:960px}
+
+.tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.tab{appearance:none;border:1px solid var(--line);background:transparent;color:var(--ink-2);
+  font-family:var(--font);font-size:13px;border-radius:999px;padding:8px 16px;cursor:pointer}
+.tab[aria-selected="true"]{border-color:var(--accent);color:var(--ink);background:var(--accent-soft)}
+
+.screen{display:grid;gap:24px}
+.device[data-device="phone"] .screen{grid-template-columns:1fr}
+.device[data-device="tablet"] .screen{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+
+.card{border:1px solid var(--line);border-radius:16px;background:var(--card);padding:18px}
+.card h2{margin:0 0 4px;font-size:15px;font-weight:700}
+.card .sub{margin:0 0 14px;font-size:12.5px;color:var(--ink-2)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--ink-3);margin:0 0 12px}
+
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.chip{font-size:12px;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:5px 12px}
+.chip[data-on="1"]{color:var(--ink);border-color:var(--ink-3)}
+
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.device[data-device="tablet"] .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg)}
+.item .cat{font-size:11px;color:var(--ink-3);font-family:var(--mono)}
+.item .nm{font-size:13.5px;margin-top:2px}
+.item .sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:7px;
+  vertical-align:-1px;border:1px solid rgba(248,250,252,.25)}
+.item[data-pick="1"]{border-color:var(--accent)}
+
+.outfit{display:grid;gap:10px}
+.device[data-device="tablet"] .outfit{grid-template-columns:repeat(2,minmax(0,1fr))}
+.slot{border:1px solid var(--line);border-radius:12px;padding:11px 13px;background:var(--bg);
+  display:flex;align-items:center;gap:12px}
+.slot .role{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;padding:3px 8px;border-radius:6px;
+  background:var(--accent-soft);color:var(--accent);flex:none;min-width:52px;text-align:center}
+.slot.base .role{background:rgba(148,163,184,.16);color:var(--ink-2)}
+.slot .txt b{display:block;font-size:13.5px;font-weight:600}
+.slot .txt small{color:var(--ink-3);font-size:11.5px}
+
+.btn{margin-top:16px;width:100%;appearance:none;border:0;border-radius:12px;background:var(--accent);
+  color:var(--on-accent);font-family:var(--font);font-size:14px;font-weight:700;padding:14px;cursor:pointer}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink);font-weight:600}
+
+.note{margin-top:14px;border-top:1px solid var(--line);padding-top:12px;font-size:12.5px;color:var(--ink-2)}
+.note b{color:var(--ink);font-weight:600}
+
+.choices{display:grid;gap:12px;margin-top:6px}
+.device[data-device="tablet"] .choices{grid-template-columns:1fr 1fr}
+.choice{appearance:none;text-align:left;border:1px solid var(--line);border-radius:14px;background:var(--bg);
+  padding:16px;cursor:pointer;color:var(--ink);font-family:var(--font)}
+.choice .swatch{display:flex;gap:6px;margin-bottom:12px}
+.choice .swatch i{display:block;height:34px;flex:1;border-radius:8px}
+.choice .lbl{font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:.08em}
+.choice .nm{font-size:14px;margin-top:3px}
+.choice[data-pick="1"]{border-color:var(--accent)}
+.choice[data-right="1"]{border-color:var(--accent)}
+.choice[disabled]{cursor:default}
+
+.verdict{margin-top:14px;font-size:13px;color:var(--ink-2);min-height:20px}
+.verdict b{color:var(--ink)}
+.foot{margin-top:22px;font-size:12px;color:var(--ink-3);line-height:1.9;
+  border-top:1px solid var(--line);padding-top:14px}
+@media (max-width:600px){
+  .bar{flex-direction:column;align-items:stretch;gap:14px}
+  .toggle{align-self:flex-start}
+  body{padding:18px 14px 32px}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="bar">
+    <div>
+      <h1>外在 OuterStyle</h1>
+      <p>从你已经有的衣服里挑一套，并说清为什么这样搭成立。</p>
+    </div>
+    <div class="toggle" role="group" aria-label="切换设备">
+      <button type="button" data-dev="phone" aria-pressed="true">手机</button>
+      <button type="button" data-dev="tablet" aria-pressed="false">平板</button>
+    </div>
+  </div>
+  <p class="hint" id="hint">手机：一次看一屏 —— 衣橱、搭配、训练各占一屏。</p>
+
+  <div class="stage">
+    <div class="device" id="device" data-device="phone">
+
+      <div class="tabs" role="tablist" aria-label="演示步骤">
+        <button class="tab" role="tab" data-view="wardrobe" aria-selected="true" type="button">① 衣橱</button>
+        <button class="tab" role="tab" data-view="outfit" aria-selected="false" type="button">② 搭配</button>
+        <button class="tab" role="tab" data-view="lesson" aria-selected="false" type="button">③ 训练</button>
+      </div>
+
+      <!-- ① 衣橱 -->
+      <section class="screen" id="view-wardrobe">
+        <div class="card">
+          <p class="eyebrow">我的衣橱</p>
+          <h2>先把拥有的东西看清楚，再谈买什么。</h2>
+          <p class="sub">上传后会自动识别品类、颜色和版型；识别结果只是建议，确认后才会入库。</p>
+          <div class="chips" id="cats" role="group" aria-label="按品类筛选">
+            <span class="chip" data-cat="全部" data-on="1">全部</span>
+            <span class="chip" data-cat="上装">上装</span>
+            <span class="chip" data-cat="下装">下装</span>
+            <span class="chip" data-cat="外套">外套</span>
+            <span class="chip" data-cat="鞋履">鞋履</span>
+          </div>
+          <div class="grid" id="wardrobe" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <!-- ② 搭配 -->
+      <section class="screen" id="view-outfit" hidden>
+        <div class="card">
+          <p class="eyebrow">今日搭配 · 通勤</p>
+          <h2 id="score">这一套 78 分</h2>
+          <p class="sub">按品类各挑一件组成搭配，并说清每件在配色里扮演什么角色。</p>
+          <div class="outfit" id="outfit"></div>
+          <button class="btn" id="regen" type="button">重新生成一套</button>
+          <p class="note" id="note"></p>
+        </div>
+      </section>
+
+      <!-- ③ 训练 -->
+      <section class="screen" id="view-lesson" hidden>
+        <div class="card">
+          <p class="eyebrow">审美训练 · 第 01 课 · 点缀色</p>
+          <h2>哪一套更耐看？</h2>
+          <p class="sub">两套都能穿。先不要想品牌和价格，只看颜色面积的关系。</p>
+          <div class="choices" id="choices"></div>
+          <p class="verdict" id="verdict" role="status">先自己选一套，再点开看解释。</p>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <p class="foot" id="foot">
+    离线试用：这是产品判断流程的模拟，不是真实服务 —— 数据是内置的示例衣橱。
+    正式版是 Android 应用，需要手机号登录，搭配由服务端生成；身材数据只保存在本机。
+  </p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var device = $('device');
+
+  /* ---------- 示例衣橱（内置，来自 App 的品类与配色角色模型） ---------- */
+  var ITEMS = [
+    { cat: '外套', nm: '灰西装外套', hex: '#4E504B' },
+    { cat: '上装', nm: '旧白亨利领', hex: '#E9E3D7' },
+    { cat: '下装', nm: '深靛直筒牛仔', hex: '#293C52' },
+    { cat: '鞋履', nm: '棕色乐福鞋', hex: '#855A3D' },
+    { cat: '外套', nm: '藏青夹克', hex: '#1E2A44' },
+    { cat: '上装', nm: '燕麦针织衫', hex: '#D8CDBA' }
+  ];
+
+  /* 三套预置搭配：外套=主色，上装=底色，下装=底色，鞋履自成一格，饰品=点缀。 */
+  var OUTFITS = [
+    { score: 78, slots: [
+        ['主色', '灰西装外套', '大面积，定了整套的调子', 0],
+        ['底色', '旧白亨利领', '离脸最近，提亮气色', 1],
+        ['底色', '深靛直筒牛仔', '压住下盘，和上装差出层次', 2],
+        ['鞋履', '棕色乐福鞋', '暖色收尾，呼应西装的灰', 3]
+      ],
+      note: '<b>注意</b>：三件都偏冷，鞋子的棕要选深一点的，否则整套会散。' },
+    { score: 84, slots: [
+        ['主色', '藏青夹克', '蓝作主色，比黑更耐看', 4],
+        ['底色', '旧白亨利领', '用白隔开蓝与牛仔，避免糊成一片', 1],
+        ['底色', '深靛直筒牛仔', '同色系深浅差，是安全的高级感', 2],
+        ['鞋履', '棕色乐福鞋', '冷暖各占一半，整套才不闷', 3]
+      ],
+      note: '<b>注意</b>：牛仔的靛和夹克的藏青太接近时，靠白色上装拉开距离。' },
+    { score: 71, slots: [
+        ['主色', '灰西装外套', '灰是中性色，谁来都能搭', 0],
+        ['底色', '燕麦针织衫', '针织的暖把西装的硬压下去', 5],
+        ['底色', '深靛直筒牛仔', '休闲感来源，别换成西裤', 2],
+        ['鞋履', '棕色乐福鞋', '棕配燕麦是这一套的暗线', 3]
+      ],
+      note: '<b>注意</b>：燕麦和棕都是暖色，冷色只剩牛仔一件，整套会偏软。' }
+  ];
+
+  var LESSON = {
+    q: '哪一套更耐看？',
+    a: { lbl: 'A', nm: '灰 · 白 · 棕', hexes: ['#8A8D86', '#EDE7DA', '#82634A'],
+         right: false, why: '三件都在中性偏暖的一段里，谁也不抢谁 —— 稳，但也平，看完记不住。' },
+    b: { lbl: 'B', nm: '黑 · 蓝 · 红', hexes: ['#1B1C1A', '#293C52', '#A24136'],
+         right: true, why: '黑与蓝把面积让给底色，红只占很小一块做点缀色。点缀色的规矩是：小、少、位置固定。' }
+  };
+
+  /* ---------- 设备切换：gate 会点「手机」，data-device 必须真的变 ---------- */
+  var HINT = {
+    phone: '手机：一次看一屏 —— 衣橱、搭配、训练各占一屏。',
+    tablet: '平板：一屏两栏 —— 左边看清单，右边看结果，不用来回切。'
+  };
+  function setDevice(dev) {
+    device.dataset.device = dev;
+    Array.prototype.forEach.call(document.querySelectorAll('.toggle button'), function (x) {
+      x.setAttribute('aria-pressed', String(x.dataset.dev === dev));
+    });
+    $('hint').textContent = HINT[dev];
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.toggle button'), function (b) {
+    b.addEventListener('click', function () { setDevice(b.dataset.dev); });
+  });
+  setDevice(window.innerWidth >= 760 ? 'tablet' : 'phone');
+
+  /* ---------- ① 衣橱：按品类筛选 ---------- */
+  var cat = '全部';
+  function renderWardrobe() {
+    $('wardrobe').innerHTML = ITEMS.filter(function (it) {
+      return cat === '全部' || it.cat === cat;
+    }).map(function (it) {
+      return '<div class="item"><span class="cat">' + it.cat + '</span>' +
+        '<div class="nm"><span class="sw" style="background:' + it.hex + '"></span>' + it.nm + '</div></div>';
+    }).join('');
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('#cats .chip'), function (c) {
+    c.addEventListener('click', function () {
+      cat = c.dataset.cat;
+      Array.prototype.forEach.call(document.querySelectorAll('#cats .chip'), function (x) {
+        x.dataset.on = String(x === c);
+      });
+      renderWardrobe();
+    });
+  });
+  renderWardrobe();
+
+  /* ---------- ② 搭配：循环三套预置 ---------- */
+  var oi = 0;
+  function renderOutfit() {
+    var o = OUTFITS[oi];
+    $('score').textContent = '这一套 ' + o.score + ' 分';
+    $('outfit').innerHTML = o.slots.map(function (s) {
+      var it = ITEMS[s[3]];
+      var isBase = s[0] === '底色' || s[0] === '鞋履';
+      return '<div class="slot' + (isBase ? ' base' : '') + '">' +
+        '<span class="role">' + s[0] + '</span>' +
+        '<span class="txt"><b><span class="sw" style="background:' + it.hex + '"></span>' + s[1] + '</b>' +
+        '<small>' + s[2] + '</small></span></div>';
+    }).join('');
+    $('note').innerHTML = o.note;
+  }
+  $('regen').addEventListener('click', function () {
+    oi = (oi + 1) % OUTFITS.length;
+    renderOutfit();
+  });
+  renderOutfit();
+
+  /* ---------- ③ 训练：先选，再看解释 ---------- */
+  function renderChoices() {
+    $('choices').innerHTML = ['a', 'b'].map(function (k) {
+      var o = LESSON[k];
+      return '<button class="choice" type="button" data-k="' + k + '">' +
+        '<span class="swatch">' + o.hexes.map(function (h) {
+          return '<i style="background:' + h + '"></i>';
+        }).join('') + '</span>' +
+        '<span class="lbl">' + o.lbl + '</span>' +
+        '<div class="nm">' + o.nm + '</div></button>';
+    }).join('');
+    Array.prototype.forEach.call($('choices').querySelectorAll('.choice'), function (b) {
+      b.addEventListener('click', function () { pick(b.dataset.k); });
+    });
+  }
+  function pick(k) {
+    if ($('verdict').dataset.answered === '1') return;
+    $('verdict').dataset.answered = '1';
+    var chosen = LESSON[k];
+    Array.prototype.forEach.call($('choices').querySelectorAll('.choice'), function (b) {
+      b.dataset.pick = String(b.dataset.k === k);
+      b.dataset.right = String(LESSON[b.dataset.k].right);
+      b.disabled = true;
+    });
+    var o = LESSON[k];
+    $('verdict').innerHTML = (o.right ? '<b>选对了。</b> ' : '<b>再看一眼。</b> ') + o.why +
+      (o.right ? '' : ' 更耐看的是 B：' + LESSON.b.why);
+  }
+  renderChoices();
+
+  /* ---------- 步骤切换 ---------- */
+  Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (t) {
+    t.addEventListener('click', function () {
+      Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (x) {
+        x.setAttribute('aria-selected', String(x === t));
+      });
+      ['wardrobe', 'outfit', 'lesson'].forEach(function (v) {
+        $('view-' + v).hidden = (v !== t.dataset.view);
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>

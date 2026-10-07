@@ -125,8 +125,8 @@ try {
   console.log(`  行: ${s.bands.join(' | ')}`);
   console.log(`  人形: ${s.zones.map(z => z.zone + (z.on ? '[亮]' : '')).join(' ')}  说明=${s.cap}  面包屑=${s.crumbs.join('/')}`);
   console.log(`  提示: ${s.hint}   面板: ${s.panel || '（无）'}`);
-  check(s.bands.length === 3, `初始应只有 3 个部位行，实为 ${s.bands.length}`);
-  check(s.zones.length === 3, `人形应有 3 个部位组，实为 ${s.zones.length}`);
+  check(s.bands.length === 4, `初始应只有 4 个部位行，实为 ${s.bands.length}`);
+  check(s.zones.length === 4, `人形应有 4 个部位组，实为 ${s.zones.length}`);
   check(s.cap === '全身', `初始说明应为「全身」，实为「${s.cap}」`);
   check(s.panel === null, '初始不应有应用面板');
   check(s.bands.every(b => b.startsWith('band-d:')), '初始三层里只该有部位行');
@@ -143,7 +143,7 @@ try {
     });
     return bad;
   })()`);
-  check(drawn.length === 0, `人形 13 条线应全部画完，未画完: ${drawn.join(' ; ') || '无'}`);
+  check(drawn.length === 0, `人形 17 条线应全部画完，未画完: ${drawn.join(' ; ') || '无'}`);
 
   await sleep(300);
   let shot = await cdp.send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true }, sessionId);
@@ -210,12 +210,24 @@ try {
   const shot2 = await cdp.send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true }, sessionId);
   writeFileSync(`${outDir}/map-2-body-${W}-${THEME}.png`, Buffer.from(shot2.data, 'base64'));
 
+  // ---- 换着装：最后新增的一层 ----
+  console.log(`\n=== 点「着装」 ===`);
+  check(await click('.band-d', 3), '点得到「着装」');
+  await sleep(800);
+  s = await snap();
+  console.log(`  人形: ${s.zones.map(z => z.zone + (z.on ? `[亮 ${z.stroke}]` : '')).join(' ')}  说明=${s.cap}`);
+  check(s.active === 'outer', `人形应切到 outer，实为 ${s.active}`);
+  check(s.cap === '着装', `说明应为「着装」，实为「${s.cap}」`);
+  check(s.panel === '外在 OuterStyle', `应显示 外在 OuterStyle，实为「${s.panel}」`);
+  const outerZone = s.zones.find(z => z.zone === 'outer');
+  check(outerZone.on && outerZone.stroke === 'rgb(232, 148, 79)', `着装应用外在橙 #E8944F，实为 ${outerZone.stroke}`);
+
   // ---- 再点一次 = 收起 ----
   console.log(`\n=== 再点同一部位应收起 ===`);
-  check(await click('.band-d', 2), '再点「身体」');
+  check(await click('.band-d', 3), '再点「着装」');
   await sleep(600);
   s = await snap();
-  check(s.bands.length === 3 && s.panel === null && s.active === '',
+  check(s.bands.length === 4 && s.panel === null && s.active === '',
     `收起后应回到初始态，实为 bands=${s.bands.length} panel=${s.panel} active=${s.active}`);
 
   // ---- 面包屑退回 ----
@@ -227,7 +239,7 @@ try {
   check(await click('.crumb', 0), '点「全身」面包屑');
   await sleep(600);
   s = await snap();
-  check(s.bands.length === 3 && s.active === '' && s.panel === null,
+  check(s.bands.length === 4 && s.active === '' && s.panel === null,
     `退回应回到初始态，实为 bands=${s.bands.length} active=${s.active}`);
 
   // ---- 键盘可达性 ----

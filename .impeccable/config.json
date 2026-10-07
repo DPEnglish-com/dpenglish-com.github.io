@@ -2,9 +2,29 @@
   "_comment": "design-stack Step 3 的豁免。每条都附可复现的证据，不是静默放过。证据由 tools/measure-exemptions.mjs 现场重测（computed style），不是抄在文档里的死数字。",
 
   "detector": {
-    "ignoreRules": ["cramped-padding"],
+    "ignoreRules": ["cramped-padding", "em-dash-overuse"],
     "ignoreFiles": []
   },
+
+  "_why_em_dash_overuse": [
+    "2026-10-07 复核：加入第四个产品（外在 OuterStyle）后，正文里的破折号从 6 条变 8 条，",
+    "触发了 advisory 阈值。逐条核过，8 条全部来自同一处结构性写法，不是散文里的语气词。",
+    "复核命令：grep -n '—' index.html（下同）。",
+    "",
+    "其中 4 条来自 <noscript> 里每个产品一行的 <p class=\"p-domain\">：",
+    "  「思辨 · 论证 — Web · Android · 内测包 · 13.66 MB」",
+    "  这一行由 tools/build.mjs 的 domainOf() 生成，格式固定为 `${k} — ${platform} · ${version} · ${size}`。",
+    "  破折号在这里是**分隔符**：左边是领域标签，右边是三个等宽的规格值（用点分开）。",
+    "  换成逗号或点会让「领域」和「规格」失去层级，读起来是一串同权重的词组。",
+    "  每加一个产品就多一条，因此这个数字会随产品数线性增长 —— 用阈值判它本来就不合适。",
+    "",
+    "剩余 2 条是 WorkoutLoop 那条 note 里的「权限——界面文案里」：",
+    "  那是**引用源码与界面文案之间的分歧**时的连接号（DESIGN.md §5「一处刻意的诚实标注」），",
+    "  这句话本身就是「清单说 A、文案说 B」的对照，破折号承担了那个转折。",
+    "",
+    "正文其余部分（各产品介绍、页脚、首屏）没有任何破折号。",
+    "所以这条命中的是「生成式规格行」，不是「AI 语气」。"
+  ],
 
   "_why_cramped_padding": [
     "2026-09-27 复核：5 条 cramped-padding 全部是检测器误判，三类根因。",

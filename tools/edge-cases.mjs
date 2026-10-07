@@ -35,7 +35,7 @@ const mob = await ev(`(function(){
 })()`);
 console.log(`  人形 display=${mob.figDisplay} 宽=${Math.round(mob.figW)}px  初始行=${mob.bands}`);
 ck(mob.figDisplay==='none'||mob.figW===0, '390px 人形应收起');
-ck(mob.bands===3, `390px 初始应有 3 个部位行（实为 ${mob.bands}）`);
+ck(mob.bands===4, `390px 初始应有 4 个部位行（实为 ${mob.bands}）`);
 await ev(`document.querySelectorAll('.band-d')[0].click()`); await sleep(800);
 const mob2 = await ev(`(function(){
   return { bands: document.querySelectorAll('.band').length,
@@ -108,7 +108,7 @@ const nojs = await ev(`(function(){
 console.log(`  空外壳隐藏=${nojs.mapHidden}   noscript 渲染=${nojs.noscriptRendered}   等价面板=${nojs.panels}   正文=${nojs.text} 字`);
 ck(nojs.mapHidden===true, '禁用 JS 时空的图版外壳应隐藏');
 ck(nojs.noscriptRendered, '禁用 JS 时 <noscript> 应渲染');
-ck(nojs.panels>=3, `禁用 JS 时应列出全部产品（实为 ${nojs.panels}）`);
+ck(nojs.panels>=4, `禁用 JS 时应列出全部产品（实为 ${nojs.panels}）`);
 ck(nojs.text>1200, `禁用 JS 时正文应完整（实为 ${nojs.text} 字）`);
 await cdp.send('Emulation.setScriptExecutionDisabled',{value:false},sessionId);
 

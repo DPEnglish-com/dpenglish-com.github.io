@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>从头到脚 · 语言、思辨与身体</title>
-<meta name="description" content="从头到脚收录同一作者做的三个产品：嘴上练语言，脑子里练思辨，身上练身体。每个产品的平台、版本、体积、账号与数据位置都写在它自己那一层里。">
+<title>从头到脚 · 语言、思辨、身体与穿搭</title>
+<meta name="description" content="从头到脚收录同一作者做的四个产品：嘴上练语言，脑子里练思辨，身上练身体，着装练穿搭。每个产品的平台、版本、体积、账号与数据位置都写在它自己那一层里。">
 <meta name="color-scheme" content="dark light">
 <meta name="theme-color" content="#0C0D0F">
 <link rel="canonical" href="https://dpenglish-com.github.io/">
@@ -13,10 +13,10 @@
      无任何外部请求 —— favicon 也内联在文档里。 -->
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23F3F3F1'/%3E%3Cpath d='M15.4 6.9C14.9 12.6 12.3 19.6 7.7 25.3' fill='none' stroke='%23101214' stroke-width='2.8' stroke-linecap='round'/%3E%3Cpath d='M16.9 7.9C17.8 13.6 20.4 20.2 24.2 25.3' fill='none' stroke='%23101214' stroke-width='2.8' stroke-linecap='round'/%3E%3C/svg%3E">
 
-<!-- 社交分享。与三个子站同一套写法，地址与 canonical 保持一致。 -->
+<!-- 社交分享。与四个子站同一套写法，地址与 canonical 保持一致。 -->
 <meta property="og:type" content="website">
-<meta property="og:title" content="从头到脚 · 语言、思辨与身体">
-<meta property="og:description" content="嘴上、脑子里、身上。三个产品，各管一处：问辩练思辨，PaperEcho 练语言，WorkoutLoop 练身体。">
+<meta property="og:title" content="从头到脚 · 语言、思辨、身体与穿搭">
+<meta property="og:description" content="嘴上、脑子里、身上、着装。四个产品，各管一处：问辩练思辨，PaperEcho 练语言，WorkoutLoop 练身体，外在练穿搭。">
 <meta property="og:url" content="https://dpenglish-com.github.io/">
 <meta property="og:image" content="https://dpenglish-com.github.io/assets/og.png">
 <meta property="og:image:width" content="1200">
@@ -43,7 +43,7 @@
    与 PaperEcho / 问辩 / WorkoutLoop 三站同源：--bg/--ink/--hair 命名、
    hairline 分区、零阴影、等宽只用于真实测量值。
    差异：母站自身不占用任何色相。唯一强调色是中性高光（--signal）；
-   三个产品的颜色只以 1px 细线与 8px 色块出现，面积 <2%。
+   四个产品的颜色只以 1px 细线与 8px 色块出现，面积 <2%。
    对比度由 tools/contrast-audit.py 核算，比值见各令牌后的注释。
    ============================================================ */
 
@@ -65,6 +65,7 @@
   --pe: #E2603F;          /* PaperEcho 朱红   5.54:1 on --bg */
   --wb: #C0D5AC;          /* 问辩 苔绿       12.36:1 on --bg */
   --wl: #6FBFAE;          /* WorkoutLoop 松青 9.02:1 on --bg */
+  --os: #E8944F;          /* 外在 橙（品牌 #F97316 调暗一档）8.13:1 on --bg */
 
   /* ---- 字体 ----
      正文走系统 CJK 栈；词标内嵌思源宋体子集（base64 内联，约 2.2 KB），
@@ -117,6 +118,7 @@
   --pe: #C0432A;          /* 4.64:1 on --bg */
   --wb: #44603B;          /* 6.34:1 on --bg */
   --wl: #1B5E54;          /* 6.81:1 on --bg */
+  --os: #B45309;          /* 4.52:1 on --bg（品牌 #F97316 在浅底只有 2.52:1） */
 }
 
 /* 无 JS 时跟随系统浅色偏好。此块必须与上面逐令牌一致，由审计脚本核对。 */
@@ -135,6 +137,7 @@
     --pe: #C0432A;
     --wb: #44603B;
     --wl: #1B5E54;
+    --os: #B45309;
   }
 }
 
@@ -272,7 +275,7 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
 .readings .k { color: var(--ink-3); font-size: var(--t-micro); font-family: var(--mono); letter-spacing: .02em; }
 .readings .v { color: var(--ink); font-size: var(--t-small); font-family: var(--mono); font-variant-numeric: tabular-nums; }
 
-/* 唯一的一次「表演」：三个部位各自的色码按序点亮，之后全静止 */
+/* 唯一的一次「表演」：四个部位各自的色码按序点亮，之后全静止 */
 .codebar { display: flex; gap: 2px; margin-top: clamp(30px, 4vw, 46px); height: 3px; max-width: 420px; }
 .codebar i {
   display: block; height: 100%; transform-origin: left center;
@@ -281,6 +284,7 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
 .codebar i:nth-child(1) { flex: 3; background: var(--wb); animation-delay: 380ms; }
 .codebar i:nth-child(2) { flex: 3; background: var(--pe); animation-delay: 470ms; }
 .codebar i:nth-child(3) { flex: 2; background: var(--wl); animation-delay: 560ms; }
+.codebar i:nth-child(4) { flex: 2; background: var(--os); animation-delay: 650ms; }
 
 .cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: clamp(34px, 5vw, 52px); }
 .btn {
@@ -323,13 +327,14 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
   transition: transform var(--dur-ui) var(--ease);
 }
 .slot:hover::before { transform: scaleX(1); }
-/* 三个产品用 7/5 起手，第三个回到 7 并左侧对齐 —— 右侧留白是编辑式偏移，
-   刻意不做三等分卡片墙。 */
+/* 四个产品用 7/5 交替起手：第一行 7+5，第二行 5+7，两行交错 ——
+   右侧留白是编辑式偏移，刻意不做三等分卡片墙。（与 DESIGN.md §2.4 一致） */
 .slot-a { grid-column: span 7; }
 .slot-b { grid-column: span 5; }
-.slot-c { grid-column: span 7; }
+.slot-c { grid-column: span 5; }
+.slot-d { grid-column: span 7; }
 
-@media (max-width: 900px) { .slot-a, .slot-b, .slot-c { grid-column: span 12; } }
+@media (max-width: 900px) { .slot-a, .slot-b, .slot-c, .slot-d { grid-column: span 12; } }
 
 .slot-domain { font-family: var(--mono); font-size: var(--t-micro); color: var(--ink-3); letter-spacing: .04em; }
 .slot-name { font-size: clamp(21px, 2.1vw, 27px); margin: 10px 0 12px; }
@@ -356,6 +361,7 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
 .slot[data-accent="pe"] { --accent: var(--pe); }
 .slot[data-accent="wb"] { --accent: var(--wb); }
 .slot[data-accent="wl"] { --accent: var(--wl); }
+.slot[data-accent="os"] { --accent: var(--os); }
 
 /* ============================================================ 从头到脚：一层层展开
    左边一具 1px 细线画的人形，从上到下是脑袋、嘴巴、身体；
@@ -438,7 +444,8 @@ html:not(.js) #map-root { display: none; }
 /* 选中某个部位：只有那一段再画一遍，像是那一处被点亮 */
 .js .map.reveal.shown .map-figure[data-active="argue"] .fig-zone[data-zone="argue"] path,
 .js .map.reveal.shown .map-figure[data-active="lang"]  .fig-zone[data-zone="lang"] path,
-.js .map.reveal.shown .map-figure[data-active="body"]  .fig-zone[data-zone="body"] path {
+.js .map.reveal.shown .map-figure[data-active="body"]  .fig-zone[data-zone="body"] path,
+.js .map.reveal.shown .map-figure[data-active="outer"] .fig-zone[data-zone="outer"] path {
   animation: fig-draw 640ms var(--ease-in-out) both;
   animation-delay: calc(var(--i, 0) * 24ms);
 }
@@ -453,6 +460,7 @@ html:not(.js) #map-root { display: none; }
 .fig-zone[data-zone="argue"].on path { stroke: var(--wb); stroke-width: 1.4; }
 .fig-zone[data-zone="lang"].on path  { stroke: var(--pe); stroke-width: 1.9; }
 .fig-zone[data-zone="body"].on path  { stroke: var(--wl); stroke-width: 1.4; }
+.fig-zone[data-zone="outer"].on path { stroke: var(--os); stroke-width: 1.4; }
 
 /* ---- 连线：从被选中的那一处身体，连到它对应的那一行 ----
    这是整个隐喻的落点：点脑袋，线从脑袋长出来接到「脑袋」这一行，
@@ -664,7 +672,7 @@ body.modal-open { overflow: hidden; }
     <a class="top-mark" href="#top">从头到脚</a>
     <nav class="top-nav" aria-label="站内导航">
       <a href="#map">一层层展开</a>
-      <a href="#products">三个产品</a>
+      <a href="#products">四个产品</a>
       <a href="#planned">敬请期待</a>
     </nav>
     <button class="tbtn" id="theme-toggle" type="button" aria-label="切换为浅色主题">深色</button>
@@ -676,19 +684,19 @@ body.modal-open { overflow: hidden; }
   <!-- ============================================ 首屏 -->
   <section class="hero wrap">
     <h1 class="wordmark"><span>从</span><span>头</span><span>到</span><span>脚</span></h1>
-    <p class="hero-lead">嘴上、脑子里、身上。三个产品，各管一处。</p>
+    <p class="hero-lead">嘴上、脑子里、身上、着装。四个产品，各管一处。</p>
 
     <ul class="readings">
-      <li><span class="k">部位</span><span class="v">嘴 · 脑 · 身</span></li>
-      <li><span class="k">收录产品</span><span class="v">03</span></li>
-      <li><span class="k">核对日期</span><span class="v">2026-09-26</span></li>
+      <li><span class="k">部位</span><span class="v">嘴 · 脑 · 身 · 装</span></li>
+      <li><span class="k">收录产品</span><span class="v">04</span></li>
+      <li><span class="k">核对日期</span><span class="v">2026-10-07</span></li>
     </ul>
 
-    <div class="codebar" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="codebar" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 
     <div class="cta-row">
       <a class="btn btn-solid" href="#map">从头看一遍 <span aria-hidden="true">↓</span></a>
-      <a class="btn btn-line" href="#products">直接看三个产品</a>
+      <a class="btn btn-line" href="#products">直接看四个产品</a>
     </div>
   </section>
 
@@ -697,7 +705,7 @@ body.modal-open { overflow: hidden; }
     <div class="sec-head reveal">
       <h2 class="sec-title">一层层展开</h2>
       <p class="sec-note">
-        左边是一具人形：脑袋管思辨，嘴巴管语言，身体管训练。
+        左边是一具人形：脑袋管思辨，嘴巴管语言，身体管训练，最外一层着装管穿搭。
         点一个部位，右边就是管着它的那个产品。
       </p>
     </div>
@@ -732,6 +740,14 @@ body.modal-open { overflow: hidden; }
               <path pathLength="1" style="--i:11;--d:440ms" d="M72,492 L58,504"/>
               <path pathLength="1" style="--i:12;--d:440ms" d="M128,492 L142,504"/>
             </g>
+            <!-- 着装：覆在身体最外面的一层，所以最后画。领口留出 28px 空隙不碰脖子，
+                 两侧贴着双臂外侧下去，下摆敞开不挡腿。 -->
+            <g class="fig-zone" data-zone="outer">
+              <path pathLength="1" style="--i:13;--d:620ms" d="M86,110 C74,102 58,108 44,124"/>
+              <path pathLength="1" style="--i:14;--d:860ms" d="M44,124 C26,146 18,196 20,250 C24,288 32,318 38,338"/>
+              <path pathLength="1" style="--i:15;--d:620ms" d="M114,110 C126,102 142,108 156,124"/>
+              <path pathLength="1" style="--i:16;--d:860ms" d="M156,124 C174,146 182,196 180,250 C176,288 168,318 162,338"/>
+            </g>
           </svg>
           <p class="mono fig-cap" id="fig-cap" aria-live="polite">全身</p>
         </div>
@@ -740,10 +756,10 @@ body.modal-open { overflow: hidden; }
       </div>
     </div>
 
-    <!-- 禁用 JS 时的等价内容：三个应用连同介绍直接列出，不缺信息 -->
+    <!-- 禁用 JS 时的等价内容：四个应用连同介绍直接列出，不缺信息 -->
     <noscript>
       <div class="map" style="margin-top:20px">
-        <div class="map-bar"><span class="mono">脚本已禁用，以下是三个应用的完整介绍</span></div>
+        <div class="map-bar"><span class="mono">脚本已禁用，以下是四个应用的完整介绍</span></div>
 <!-- @generated:noscript -->
         <div class="map-panel" style="margin-top:16px">
           <h3>问辩 Wenbian</h3>
@@ -781,6 +797,18 @@ body.modal-open { overflow: hidden; }
             <a href="https://dpenglish-com.github.io/workoutloop-site/downloads/WorkoutLoop-0.1.0-release.apk">下载 APK</a>
           </p>
         </div>
+        <div class="map-panel">
+          <h3>外在 OuterStyle</h3>
+          <p class="p-domain">穿搭 · 审美 — Android 8.0+ · 0.2.0 · 19.1 MB</p>
+          <p>把衣橱里已确认的单品按品类挑成一套，并说清每件在配色里扮演什么角色、这一套要注意什么。单品拍一张照片即可录入，识别结果由你确认后才保存。它不替你试穿，只让你自己看懂一件件衣服为什么这样搭。</p>
+          <ul>
+            <li>需要账户（手机号验证码登录，开发期不发送真实短信）；搭配由服务端生成，需要联网。身材数据只保存在本机，不随搭配请求上传；登录凭证用 Android Keystore 加密，不参与备份。</li>
+          </ul>
+          <p class="p-actions">
+            <a href="https://dpenglish-com.github.io/outerstyle-site/">前往站点</a>
+            <a href="https://dpenglish-com.github.io/outerstyle-site/downloads/OuterStyle-0.2.0-debug.apk">下载 APK</a>
+          </p>
+        </div>
 <!-- @generated:end -->
       </div>
     </noscript>
@@ -789,9 +817,9 @@ body.modal-open { overflow: hidden; }
   <!-- ============================================ 产品 -->
   <section class="section wrap" id="products">
     <div class="sec-head reveal">
-      <h2 class="sec-title">三个产品</h2>
+      <h2 class="sec-title">四个产品</h2>
       <p class="sec-note">
-        每个数字都取自它自己的线上页面，核对于 2026-09-26，不是宣传文案的转述。
+        每个数字都取自它自己的线上页面，核对于 2026-10-07，不是宣传文案的转述。
       </p>
     </div>
 
@@ -883,6 +911,35 @@ body.modal-open { overflow: hidden; }
           <a href="https://dpenglish-com.github.io/workoutloop-site/downloads/WorkoutLoop-0.1.0-release.apk">下载 APK</a>
         </div>
       </article>
+
+      <!-- 外在 OuterStyle：着装 -->
+      <article class="slot slot-d reveal" data-accent="os">
+        <p class="slot-domain">着装 · 穿搭 · 审美</p>
+        <h3 class="slot-name">外在 OuterStyle</h3>
+        <p class="slot-desc">
+          把衣橱里已确认的单品按品类挑成一套，并说清每件在配色里扮演什么角色、这一套要注意什么。单品拍一张照片即可录入，识别结果由你确认后才保存。它不替你试穿，只让你自己看懂一件件衣服为什么这样搭。
+        </p>
+        <dl class="slot-specs">
+          <div><dt>平台</dt><dd>Android 8.0+</dd></div>
+          <div><dt>版本</dt><dd>0.2.0</dd></div>
+          <div><dt>体积</dt><dd>19.1 MB</dd></div>
+        </dl>
+        <p class="slot-note">
+          需要账户（手机号验证码登录，开发期不发送真实短信）；搭配由服务端生成，需要联网。身材数据只保存在本机，不随搭配请求上传；登录凭证用 Android Keystore 加密，不参与备份。
+        </p>
+        <div class="slot-acts">
+          <button type="button" class="slot-act" data-open="video"
+                  data-src="assets/video/outerstyle.mp4" data-poster="assets/video/outerstyle-poster.jpg"
+                  data-title="外在 OuterStyle · 使用演示">查看视频</button>
+          <button type="button" class="slot-act" data-open="demo"
+                  data-src="assets/demo/outerstyle.html" data-title="外在 OuterStyle · 在线试用"
+                  data-note="录入单品 → 生成搭配 → 颜色角色 → 审美训练">在线试用</button>
+        </div>
+        <div class="slot-links">
+          <a href="https://dpenglish-com.github.io/outerstyle-site/">前往站点 <span class="arw" aria-hidden="true">→</span></a>
+          <a href="https://dpenglish-com.github.io/outerstyle-site/downloads/OuterStyle-0.2.0-debug.apk">下载 APK</a>
+        </div>
+      </article>
 <!-- @generated:end -->
     </div>
   </section>
@@ -914,16 +971,17 @@ body.modal-open { overflow: hidden; }
       <p>作者 肖恩 · 微信 16659317774</p>
     </div>
     <div>
-      <h2>三个产品</h2>
+      <h2>四个产品</h2>
       <div class="foot-links">
         <a href="https://dpenglish-com.github.io/wenbian-site/">问辩 Wenbian</a>
         <a href="https://dpenglish-com.github.io/paperecho-site/">PaperEcho 纸上回声</a>
         <a href="https://dpenglish-com.github.io/workoutloop-site/">WorkoutLoop</a>
+        <a href="https://dpenglish-com.github.io/outerstyle-site/">外在 OuterStyle</a>
       </div>
     </div>
   </div>
   <div class="foot-base">
-    <span class="mono">数据核对 2026-09-26 · 如与各站不一致，以各站为准</span>
+    <span class="mono">数据核对 2026-10-07 · 如与各站不一致，以各站为准</span>
     <a class="mono foot-top" href="#top">返回顶部 ↑</a>
   </div>
 </footer>
@@ -973,7 +1031,7 @@ body.modal-open { overflow: hidden; }
     var NS = 'http://www.w3.org/2000/svg';
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    /* 三个部位，各管一个产品。内容全部取自各产品自己的线上页面与仓库文档，没有编的。
+    /* 四个部位，各管一个产品。内容全部取自各产品自己的线上页面与仓库文档，没有编的。
        顺序就是人形从上到下的顺序：脑袋 → 嘴巴 → 身体。
 
        这里刻意只有两层：部位 → 应用。一个部位就一个产品，
@@ -1042,6 +1100,27 @@ body.modal-open { overflow: hidden; }
             "href": "https://dpenglish-com.github.io/workoutloop-site/downloads/WorkoutLoop-0.1.0-release.apk"
           }
         ]
+      },
+      {
+        "id": "outer",
+        "part": "着装",
+        "k": "穿搭 · 审美",
+        "accent": "os",
+        "name": "外在 OuterStyle",
+        "short": "Android · 0.2.0",
+        "domain": "穿搭 · 审美 — Android 8.0+ · 0.2.0 · 19.1 MB",
+        "desc": "把衣橱里已确认的单品按品类挑成一套，并说清每件在配色里扮演什么角色、这一套要注意什么。单品拍一张照片即可录入，识别结果由你确认后才保存。它不替你试穿，只让你自己看懂一件件衣服为什么这样搭。",
+        "note": "需要账户（手机号验证码登录，开发期不发送真实短信）；搭配由服务端生成，需要联网。身材数据只保存在本机，不随搭配请求上传；登录凭证用 Android Keystore 加密，不参与备份。",
+        "links": [
+          {
+            "label": "前往站点",
+            "href": "https://dpenglish-com.github.io/outerstyle-site/"
+          },
+          {
+            "label": "下载 APK",
+            "href": "https://dpenglish-com.github.io/outerstyle-site/downloads/OuterStyle-0.2.0-debug.apk"
+          }
+        ]
       }
     ];
 /* @generated:end */
@@ -1105,7 +1184,7 @@ body.modal-open { overflow: hidden; }
       }
       figCap.textContent = d ? d.part : '全身';
 
-      /* 部位行：三个人形部位，随时可换 */
+      /* 部位行：四个人形部位，随时可换 */
       var L1 = el('div', 'layer layer-d');
       DATA.forEach(function (item, i) {
         L1.appendChild(band({
@@ -1217,6 +1296,12 @@ body.modal-open { overflow: hidden; }
         /* 脑袋：取圆的右侧 */
         x1 = svgFig.right - stage.left - (svgFig.width * 0.345);
         y1 = zr.top - stage.top + zr.height / 2;
+      } else if (d.id === 'outer') {
+        /* 着装：取整层外缘（第一条路径只是领口的一小段弧，不能代表整层），
+           线从外套右侧出去。 */
+        var gr = fig.querySelector('.fig-zone[data-zone="outer"]').getBoundingClientRect();
+        x1 = svgFig.right - stage.left - (svgFig.width * 0.10);
+        y1 = gr.top - stage.top + gr.height * 0.55;
       } else {
         /* 身体：取躯干右侧 */
         x1 = svgFig.right - stage.left - (svgFig.width * 0.26);
@@ -1307,7 +1392,7 @@ body.modal-open { overflow: hidden; }
 <script>
 /* 悬浮窗。两条硬规则：
    1) 不点开不加载：视频的 src 在打开时才写上，demo 的 iframe 在打开时才创建。
-      三个片子加起来 6.3 MB，挂在首屏上就是让所有人替想看的人付流量。
+      四个片子加起来约 7.7 MB，挂在首屏上就是让所有人替想看的人付流量。
    2) 键盘可用、焦点不逃逸：Esc 关闭，Tab 在窗内循环，关掉之后焦点回到刚才那个按钮。 */
 (function () {
   var modal = document.getElementById('modal');

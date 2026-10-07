@@ -16,8 +16,8 @@
   ],
 
   "site": {
-    "verifiedOn": "2026-09-26",
-    "count": 3
+    "verifiedOn": "2026-10-07",
+    "count": 4
   },
 
   "products": [
@@ -86,6 +86,28 @@
         "poster": "assets/video/workoutloop-poster.jpg",
         "demo": "assets/demo/workoutloop.html",
         "demoNote": "环 → 音量键完成本组 → 休息 → 队列推进"}
+    },
+    {
+      "id": "outer",
+      "part": "着装",
+      "k": "穿搭 · 审美",
+      "accent": "os",
+      "slot": "d",
+      "name": "外在 OuterStyle",
+      "short": "Android · 0.2.0",
+      "platform": "Android 8.0+",
+      "version": "0.2.0",
+      "size": "19.1 MB",
+      "desc": "把衣橱里已确认的单品按品类挑成一套，并说清每件在配色里扮演什么角色、这一套要注意什么。单品拍一张照片即可录入，识别结果由你确认后才保存。它不替你试穿，只让你自己看懂一件件衣服为什么这样搭。",
+      "note": "需要账户（手机号验证码登录，开发期不发送真实短信）；搭配由服务端生成，需要联网。身材数据只保存在本机，不随搭配请求上传；登录凭证用 Android Keystore 加密，不参与备份。",
+      "links": [
+        { "label": "前往站点", "href": "https://dpenglish-com.github.io/outerstyle-site/" },
+        { "label": "下载 APK", "href": "https://dpenglish-com.github.io/outerstyle-site/downloads/OuterStyle-0.2.0-debug.apk" }
+      ],
+      "media": {"video": "assets/video/outerstyle.mp4",
+        "poster": "assets/video/outerstyle-poster.jpg",
+        "demo": "assets/demo/outerstyle.html",
+        "demoNote": "录入单品 → 生成搭配 → 颜色角色 → 审美训练"}
     }
   ],
 

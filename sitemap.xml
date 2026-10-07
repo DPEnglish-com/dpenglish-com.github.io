@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 组织根站：https://dpenglish-com.github.io/（与 index.html 的 canonical/og:url 保持一致）。
-     三个子站在它下面，各自的 sitemap 独立，这里只声明根站自己。 -->
+     四个子站在它下面，各自的 sitemap 独立，这里只声明根站自己。 -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://dpenglish-com.github.io/</loc>

@@ -68,7 +68,7 @@ try {
   await waitReady(ev);
   await ev(`document.documentElement.setAttribute('data-theme','${THEME}')`);
 
-  // 采样器：每次读全部 13 条线的 dashoffset，累计"还没画完"的量
+  // 采样器：每次读全部 17 条线的 dashoffset，累计"还没画完"的量
   const PROBE = `window.__probe = function(){
     var tot = 0;
     document.querySelectorAll('.fig-zone path').forEach(function(p){

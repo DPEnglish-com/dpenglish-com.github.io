@@ -130,7 +130,7 @@ try {
              acts: document.querySelectorAll('.slot-act').length,
              slots: document.querySelectorAll('.slot').length };
   })()`);
-  ck(before.acts >= 6, `三个产品各有视频与试用两个按钮（实为 ${before.acts} 个）`);
+  ck(before.acts >= 8, `四个产品各有视频与试用两个按钮（实为 ${before.acts} 个）`);
   ck(before.videos === 0 && before.iframes === 0, '打开前页面上没有 video / iframe');
   const reqBefore = await ev(`performance.getEntriesByType('resource').filter(r=>/\\.mp4$/.test(r.name)).length`);
   ck(reqBefore === 0, `打开前没有请求过任何 mp4（实为 ${reqBefore} 次）`);
@@ -207,8 +207,8 @@ try {
   })`);
   ck(rendered.ok, rendered.ok ? `试用页渲染出内容（${rendered.chars} 字，标题「${rendered.title}」）` : `试用页没有渲染出内容（${rendered.why}）`);
 
-  // 三份 demo 都能开、都能切设备
-  console.log('\n=== D) 三份试用页与设备切换 ===');
+  // 四份 demo 都能开、都能切设备
+  console.log('\n=== D) 四份试用页与设备切换 ===');
   const srcs = await ev(`Array.prototype.map.call(document.querySelectorAll('.slot-act[data-open="demo"]'), function(b){return b.getAttribute('data-src');})`);
   for (const s of srcs) {
     const ok = await ev(`new Promise(function(res){
