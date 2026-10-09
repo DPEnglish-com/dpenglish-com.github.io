@@ -154,8 +154,8 @@ try {
   console.log(`  行: ${s.bands.join(' | ')}`);
   console.log(`  人形: ${s.zones.map(z => z.zone + (z.on ? '[亮]' : '')).join(' ')}  说明=${s.cap}  面包屑=${s.crumbs.join('/')}`);
   console.log(`  提示: ${s.hint}   面板: ${s.panel || '（无）'}`);
-  check(s.bands.length === 5, `初始应有 5 行（四个部位，嘴巴占两行），实为 ${s.bands.length}`);
-  check(s.zones.length === 4, `人形应有 4 个部位组，实为 ${s.zones.length}`);
+  check(s.bands.length === 6, `初始应有 6 行（五个部位，嘴巴占两行），实为 ${s.bands.length}`);
+  check(s.zones.length === 5, `人形应有 5 个部位组，实为 ${s.zones.length}`);
   check(s.cap === '全身', `初始说明应为「全身」，实为「${s.cap}」`);
   check(s.panel === null, '初始不应有应用面板');
   check(s.bands.every(b => b.startsWith('band-d:')), '初始三层里只该有部位行');
@@ -267,7 +267,7 @@ try {
   check(await clickBand('外在 OuterStyle'), '再点「着装」');
   await sleep(600);
   s = await snap();
-  check(s.bands.length === 5 && s.panel === null && s.active === '',
+  check(s.bands.length === 6 && s.panel === null && s.active === '',
     `收起后应回到初始态，实为 bands=${s.bands.length} panel=${s.panel} active=${s.active}`);
 
   // ---- 面包屑退回 ----
@@ -279,7 +279,7 @@ try {
   check(await click('.crumb', 0), '点「全身」面包屑');
   await sleep(600);
   s = await snap();
-  check(s.bands.length === 5 && s.active === '' && s.panel === null,
+  check(s.bands.length === 6 && s.active === '' && s.panel === null,
     `退回应回到初始态，实为 bands=${s.bands.length} active=${s.active}`);
 
   // ---- 键盘可达性 ----

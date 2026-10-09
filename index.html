@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>从头到脚 · 语言、思辨、身体与穿搭</title>
-<meta name="description" content="从头到脚收录同一作者做的五个产品：嘴上练语言，脑子里练思辨，身上练身体，着装练穿搭。每个产品的平台、版本、体积、账号与数据位置都写在它自己那一层里。">
+<meta name="description" content="从头到脚收录同一作者做的六个产品：嘴上练语言，脑子里练思辨，身上练身体，着装练穿搭，眼睛听网课。每个产品的平台、版本、体积、账号与数据位置都写在它自己那一层里。">
 <meta name="color-scheme" content="dark light">
 <meta name="theme-color" content="#0C0D0F">
 <link rel="canonical" href="https://dpenglish-com.github.io/">
@@ -16,7 +16,7 @@
 <!-- 社交分享。与四个子站同一套写法，地址与 canonical 保持一致。 -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="从头到脚 · 语言、思辨、身体与穿搭">
-<meta property="og:description" content="嘴上、脑子里、身上、着装。五个产品，各管一处：问辩练思辨，PaperEcho 与 SE English 练语言，WorkoutLoop 练身体，外在练穿搭。">
+<meta property="og:description" content="嘴上、脑子里、身上、着装、眼睛。六个产品，各管一处：问辩练思辨，PaperEcho 与 SE English 练语言，WorkoutLoop 练身体，外在练穿搭，课蒸馏把网课听成讲义。">
 <meta property="og:url" content="https://dpenglish-com.github.io/">
 <meta property="og:image" content="https://dpenglish-com.github.io/assets/og.png">
 <meta property="og:image:width" content="1200">
@@ -43,7 +43,7 @@
    与 PaperEcho / 问辩 / WorkoutLoop 三站同源：--bg/--ink/--hair 命名、
    hairline 分区、零阴影、等宽只用于真实测量值。
    差异：母站自身不占用任何色相。唯一强调色是中性高光（--signal）；
-   五个产品的颜色只以 1px 细线与 8px 色块出现，面积 <2%。
+   六个产品的颜色只以 1px 细线与 8px 色块出现，面积 <2%。
    对比度由 tools/contrast-audit.py 核算，比值见各令牌后的注释。
    ============================================================ */
 
@@ -67,6 +67,7 @@
   --wl: #6FBFAE;          /* WorkoutLoop 松青 9.02:1 on --bg */
   --os: #E8944F;          /* 外在 橙（品牌 #F97316 调暗一档）8.13:1 on --bg */
   --se: #CC785C;          /* SE English 铜（品牌 --color-primary）5.85:1 on --bg */
+  --eye: #8AA0C8;         /* 课蒸馏 黛蓝（六色里唯一的冷色，与朱红/苔绿/松青/橙/铜都不撞）7.35:1 on --bg */
 
   /* ---- 字体 ----
      正文走系统 CJK 栈；词标内嵌思源宋体子集（base64 内联，约 2.2 KB），
@@ -121,6 +122,7 @@
   --wl: #1B5E54;          /* 6.81:1 on --bg */
   --os: #B45309;          /* 4.52:1 on --bg（品牌 #F97316 在浅底只有 2.52:1） */
   --se: #A9583E;          /* 4.51:1 on --bg（品牌 --color-primary-active） */
+  --eye: #3F5C8A;         /* 6.08:1 on --bg */
 }
 
 /* 无 JS 时跟随系统浅色偏好。此块必须与上面逐令牌一致，由审计脚本核对。 */
@@ -141,6 +143,7 @@
     --wl: #1B5E54;
     --os: #B45309;
     --se: #A9583E;
+    --eye: #3F5C8A;
   }
 }
 
@@ -278,7 +281,7 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
 .readings .k { color: var(--ink-3); font-size: var(--t-micro); font-family: var(--mono); letter-spacing: .02em; }
 .readings .v { color: var(--ink); font-size: var(--t-small); font-family: var(--mono); font-variant-numeric: tabular-nums; }
 
-/* 唯一的一次「表演」：四个部位各自的色码按序点亮（色码按部位，不按产品数），之后全静止 */
+/* 唯一的一次「表演」：五个部位各自的色码按序点亮（色码按部位，不按产品数），之后全静止 */
 .codebar { display: flex; gap: 2px; margin-top: clamp(30px, 4vw, 46px); height: 3px; max-width: 420px; }
 .codebar i {
   display: block; height: 100%; transform-origin: left center;
@@ -288,6 +291,7 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
 .codebar i:nth-child(2) { flex: 3; background: var(--pe); animation-delay: 470ms; }
 .codebar i:nth-child(3) { flex: 2; background: var(--wl); animation-delay: 560ms; }
 .codebar i:nth-child(4) { flex: 2; background: var(--os); animation-delay: 650ms; }
+.codebar i:nth-child(5) { flex: 2; background: var(--eye); animation-delay: 740ms; }
 
 .cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: clamp(34px, 5vw, 52px); }
 .btn {
@@ -330,15 +334,16 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
   transition: transform var(--dur-ui) var(--ease);
 }
 .slot:hover::before { transform: scaleX(1); }
-/* 五个产品用 7/5 交替起手：第一行 7+5，第二行 5+7，第三行又是 7 ——
+/* 六个产品用 7/5 交替起手：第一行 7+5，第二行 5+7，第三行又是 7+5 ——
    右侧留白是编辑式偏移，刻意不做三等分卡片墙。（与 DESIGN.md §2.4 一致） */
 .slot-a { grid-column: span 7; }
 .slot-b { grid-column: span 5; }
 .slot-c { grid-column: span 5; }
 .slot-d { grid-column: span 7; }
 .slot-e { grid-column: span 7; }
+.slot-f { grid-column: span 5; }
 
-@media (max-width: 900px) { .slot-a, .slot-b, .slot-c, .slot-d, .slot-e { grid-column: span 12; } }
+@media (max-width: 900px) { .slot-a, .slot-b, .slot-c, .slot-d, .slot-e, .slot-f { grid-column: span 12; } }
 
 .slot-domain { font-family: var(--mono); font-size: var(--t-micro); color: var(--ink-3); letter-spacing: .04em; }
 .slot-name { font-size: clamp(21px, 2.1vw, 27px); margin: 10px 0 12px; }
@@ -450,7 +455,8 @@ html:not(.js) #map-root { display: none; }
 .js .map.reveal.shown .map-figure[data-active="argue"] .fig-zone[data-zone="argue"] path,
 .js .map.reveal.shown .map-figure[data-active="lang"]  .fig-zone[data-zone="lang"] path,
 .js .map.reveal.shown .map-figure[data-active="body"]  .fig-zone[data-zone="body"] path,
-.js .map.reveal.shown .map-figure[data-active="outer"] .fig-zone[data-zone="outer"] path {
+.js .map.reveal.shown .map-figure[data-active="outer"] .fig-zone[data-zone="outer"] path,
+.js .map.reveal.shown .map-figure[data-active="eye"]   .fig-zone[data-zone="eye"] path {
   animation: fig-draw 640ms var(--ease-in-out) both;
   animation-delay: calc(var(--i, 0) * 24ms);
 }
@@ -700,7 +706,7 @@ body.modal-open { overflow: hidden; }
     <a class="top-mark" href="#top">从头到脚</a>
     <nav class="top-nav" aria-label="站内导航">
       <a href="#map">一层层展开</a>
-      <a href="#products">五个产品</a>
+      <a href="#products">六个产品</a>
       <a href="#planned">敬请期待</a>
     </nav>
     <button class="tbtn" id="theme-toggle" type="button" aria-label="切换为浅色主题">深色</button>
@@ -712,19 +718,19 @@ body.modal-open { overflow: hidden; }
   <!-- ============================================ 首屏 -->
   <section class="hero wrap">
     <h1 class="wordmark"><span>从</span><span>头</span><span>到</span><span>脚</span></h1>
-    <p class="hero-lead">嘴上、脑子里、身上、着装。五个产品，各管一处。</p>
+    <p class="hero-lead">嘴上、脑子里、身上、着装、眼睛。六个产品，各管一处。</p>
 
     <ul class="readings">
-      <li><span class="k">部位</span><span class="v">嘴 · 脑 · 身 · 装</span></li>
-      <li><span class="k">收录产品</span><span class="v">05</span></li>
-      <li><span class="k">核对日期</span><span class="v">2026-10-07</span></li>
+      <li><span class="k">部位</span><span class="v">嘴 · 脑 · 身 · 装 · 眼</span></li>
+      <li><span class="k">收录产品</span><span class="v">06</span></li>
+      <li><span class="k">核对日期</span><span class="v">2026-10-09</span></li>
     </ul>
 
-    <div class="codebar" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <div class="codebar" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
 
     <div class="cta-row">
       <a class="btn btn-solid" href="#map">从头看一遍 <span aria-hidden="true">↓</span></a>
-      <a class="btn btn-line" href="#products">直接看五个产品</a>
+      <a class="btn btn-line" href="#products">直接看六个产品</a>
     </div>
   </section>
 
@@ -733,7 +739,7 @@ body.modal-open { overflow: hidden; }
     <div class="sec-head reveal">
       <h2 class="sec-title">一层层展开</h2>
       <p class="sec-note">
-        左边是一具人形：脑袋管思辨，嘴巴管语言，身体管训练，最外一层着装管穿搭。
+        左边是一具人形：脑袋管思辨，嘴巴管语言，身体管训练，最外一层着装管穿搭，眼睛管听课。
         点一个部位，右边就是管着它的产品；嘴巴这条线是两个（纸笔端与课程端），
         各占一行、各有一块介绍。
       </p>
@@ -777,6 +783,13 @@ body.modal-open { overflow: hidden; }
               <path pathLength="1" style="--i:15;--d:620ms" d="M114,110 C126,102 142,108 156,124"/>
               <path pathLength="1" style="--i:16;--d:860ms" d="M156,124 C174,146 182,196 180,250 C176,288 168,318 162,338"/>
             </g>
+            <!-- 眼睛：左右各一枚短横，落在脸的中上部，嘴巴（y=72）之上。
+                 放在末尾是为了不去重排前面 16 条线的 --i 序号——序号只决定
+                 入场那不到一秒里的先后（每条差 45ms），肉眼分不出来。 -->
+            <g class="fig-zone" data-zone="eye">
+              <path pathLength="1" style="--i:17;--d:440ms" d="M80,57 L92,57"/>
+              <path pathLength="1" style="--i:18;--d:440ms" d="M108,57 L120,57"/>
+            </g>
           </svg>
           <p class="mono fig-cap" id="fig-cap" aria-live="polite">全身</p>
         </div>
@@ -785,10 +798,10 @@ body.modal-open { overflow: hidden; }
       </div>
     </div>
 
-    <!-- 禁用 JS 时的等价内容：五个应用连同介绍直接列出，不缺信息 -->
+    <!-- 禁用 JS 时的等价内容：六个应用连同介绍直接列出，不缺信息 -->
     <noscript>
       <div class="map" style="margin-top:20px">
-        <div class="map-bar"><span class="mono">脚本已禁用，以下是五个应用的完整介绍</span></div>
+        <div class="map-bar"><span class="mono">脚本已禁用，以下是六个应用的完整介绍</span></div>
 <!-- @generated:noscript -->
         <div class="map-panel" style="margin-top:16px">
           <h3>问辩 Wenbian</h3>
@@ -850,6 +863,18 @@ body.modal-open { overflow: hidden; }
             <a href="https://www.seandictation.site/downloads/SE-English.apk">下载 APK</a>
           </p>
         </div>
+        <div class="map-panel">
+          <h3>课蒸馏</h3>
+          <p class="p-domain">听课 · 蒸馏 — Android 8.0+ · 0.1.0 · 15.5 MB</p>
+          <p>贴一个课程链接，它把一门网课摊成可检索的讲义、词条与师承。每一讲按概念、公式、推导、例题、易混与坑、考点分栏，每条带一个能点回视频的时间锚点；术语收成词条，全课连成大纲。</p>
+          <ul>
+            <li>需要联网，蒸馏在后端完成，没有账号体系。当前是 debug 内测包，后端地址编译期内置了一个线上地址，可在 App 的「设置」里改。只做个人学习用途的文字化：不下载、不重分发视频与音频。</li>
+          </ul>
+          <p class="p-actions">
+            <a href="https://dpenglish-com.github.io/keliuzheng-site/">前往站点</a>
+            <a href="https://dpenglish-com.github.io/keliuzheng-site/downloads/Keliuzheng-0.1.0-debug.apk">下载 APK</a>
+          </p>
+        </div>
 <!-- @generated:end -->
       </div>
     </noscript>
@@ -858,7 +883,7 @@ body.modal-open { overflow: hidden; }
   <!-- ============================================ 产品 -->
   <section class="section wrap" id="products">
     <div class="sec-head reveal">
-      <h2 class="sec-title">五个产品</h2>
+      <h2 class="sec-title">六个产品</h2>
       <p class="sec-note">
         每个数字都取自它自己的线上页面，核对于 2026-10-07，不是宣传文案的转述。
       </p>
@@ -1002,6 +1027,27 @@ body.modal-open { overflow: hidden; }
           <a href="https://www.seandictation.site/downloads/SE-English.apk">下载 APK</a>
         </div>
       </article>
+
+      <!-- 课蒸馏：眼睛 -->
+      <article class="slot slot-f reveal" data-accent="eye">
+        <p class="slot-domain">眼睛 · 听课 · 蒸馏</p>
+        <h3 class="slot-name">课蒸馏</h3>
+        <p class="slot-desc">
+          贴一个课程链接，它把一门网课摊成可检索的讲义、词条与师承。每一讲按概念、公式、推导、例题、易混与坑、考点分栏，每条带一个能点回视频的时间锚点；术语收成词条，全课连成大纲。
+        </p>
+        <dl class="slot-specs">
+          <div><dt>平台</dt><dd>Android 8.0+</dd></div>
+          <div><dt>版本</dt><dd>0.1.0</dd></div>
+          <div><dt>体积</dt><dd>15.5 MB</dd></div>
+        </dl>
+        <p class="slot-note">
+          需要联网，蒸馏在后端完成，没有账号体系。当前是 debug 内测包，后端地址编译期内置了一个线上地址，可在 App 的「设置」里改。只做个人学习用途的文字化：不下载、不重分发视频与音频。
+        </p>
+        <div class="slot-links">
+          <a href="https://dpenglish-com.github.io/keliuzheng-site/">前往站点 <span class="arw" aria-hidden="true">→</span></a>
+          <a href="https://dpenglish-com.github.io/keliuzheng-site/downloads/Keliuzheng-0.1.0-debug.apk">下载 APK</a>
+        </div>
+      </article>
 <!-- @generated:end -->
     </div>
   </section>
@@ -1033,7 +1079,7 @@ body.modal-open { overflow: hidden; }
       <p>作者 肖恩 · 微信 16659317774</p>
     </div>
     <div>
-      <h2>五个产品</h2>
+      <h2>六个产品</h2>
       <div class="foot-links">
 <!-- @generated:footer -->
         <a href="https://dpenglish-com.github.io/wenbian-site/">问辩 Wenbian</a>
@@ -1041,6 +1087,7 @@ body.modal-open { overflow: hidden; }
         <a href="https://dpenglish-com.github.io/workoutloop-site/">WorkoutLoop</a>
         <a href="https://dpenglish-com.github.io/outerstyle-site/">外在 OuterStyle</a>
         <a href="https://www.seandictation.site/">SE English</a>
+        <a href="https://dpenglish-com.github.io/keliuzheng-site/">课蒸馏</a>
 <!-- @generated:end -->
       </div>
     </div>
@@ -1096,7 +1143,7 @@ body.modal-open { overflow: hidden; }
     var NS = 'http://www.w3.org/2000/svg';
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    /* 四个部位；多数一个产品，嘴巴两个。内容全部取自各产品自己的线上页面与仓库文档，没有编的。
+    /* 五个部位；多数一个产品，嘴巴两个。内容全部取自各产品自己的线上页面与仓库文档，没有编的。
        顺序就是人形从上到下的顺序：脑袋 → 嘴巴 → 身体。
 
        这里刻意只有两层：部位 → 应用。一个部位就一个产品，
@@ -1210,6 +1257,28 @@ body.modal-open { overflow: hidden; }
           {
             "label": "下载 APK",
             "href": "https://www.seandictation.site/downloads/SE-English.apk"
+          }
+        ]
+      },
+      {
+        "id": "eye",
+        "part": "眼睛",
+        "k": "听课 · 蒸馏",
+        "accent": "eye",
+        "zone": "eye",
+        "name": "课蒸馏",
+        "short": "Android · 0.1.0",
+        "domain": "听课 · 蒸馏 — Android 8.0+ · 0.1.0 · 15.5 MB",
+        "desc": "贴一个课程链接，它把一门网课摊成可检索的讲义、词条与师承。每一讲按概念、公式、推导、例题、易混与坑、考点分栏，每条带一个能点回视频的时间锚点；术语收成词条，全课连成大纲。",
+        "note": "需要联网，蒸馏在后端完成，没有账号体系。当前是 debug 内测包，后端地址编译期内置了一个线上地址，可在 App 的「设置」里改。只做个人学习用途的文字化：不下载、不重分发视频与音频。",
+        "links": [
+          {
+            "label": "前往站点",
+            "href": "https://dpenglish-com.github.io/keliuzheng-site/"
+          },
+          {
+            "label": "下载 APK",
+            "href": "https://dpenglish-com.github.io/keliuzheng-site/downloads/Keliuzheng-0.1.0-debug.apk"
           }
         ]
       }
