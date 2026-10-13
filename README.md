@@ -2,32 +2,36 @@
 
 公开访问：**https://dpenglish-com.github.io/**
 
-五个产品站的上层入口。左边一具 1px 细线画的人形——脑袋管思辨，
+六个产品站的上层入口。左边一具 1px 细线画的人形——脑袋管思辨，
 嘴巴管语言，身体管训练，最外一层着装管穿搭，眼睛管听课——点一处，出管着它的那个产品。
 
 - 单文件静态站：`index.html` 就是全部产物（CSS/JS/词标子集内联）
 - **零依赖、零构建、零外部请求**：没有 CDN、没有字体外链、没有分析脚本
 - `404.html` 与 `index.html` 的四处产品内容都由 `data/products.json` 生成
 - 分享卡片 `assets/og.png` 由 `node tools/make-og.mjs` 生成（字体取自 index.html，同源）
-- 每个产品两个动作：**查看视频**（`assets/video/*.mp4`，21–22 秒的使用演示片）
+- 每个产品两个动作：**查看视频**（`assets/video/*.mp4`，20 秒的使用演示片）
   与**在线试用**（`assets/demo/*.html`，离线可交互、手机/平板两种布局）。
   两个都开在同一个悬浮窗里；视频 `preload=none`、iframe 开窗才建 —— 不点开就不加载
 
 > `package.json` 里的依赖**只给审计工具用**，不进线上产物。
 > 部署的就是仓库里那几个静态文件，没有构建步骤。
 
-## 五个子站
+## 六个产品
+
+一个人形五个部位，六个产品：嘴巴那条线是两个（纸笔端与课程端），各占一行。
 
 | 部位 | 产品 | 站点 |
 |---|---|---|
 | 脑袋 | 问辩 Wenbian | https://dpenglish-com.github.io/wenbian-site/ |
 | 嘴巴 | PaperEcho 纸上回声 | https://dpenglish-com.github.io/paperecho-site/ |
+| 嘴巴 | SE English | https://www.seandictation.site/ |
 | 身体 | WorkoutLoop | https://dpenglish-com.github.io/workoutloop-site/ |
 | 着装 | 外在 OuterStyle | https://dpenglish-com.github.io/outerstyle-site/ |
 | 眼睛 | 课蒸馏 | https://dpenglish-com.github.io/keliuzheng-site/ |
 
-> 另有一个不在本组织 Pages 下的产品：SE English（嘴巴，<https://www.seandictation.site/>）。
-> 它和 PaperEcho 共用一个部位，所以人形上是同一处。
+> SE English 不在本组织 Pages 下，其余五个在本仓库组织下自成子站。
+> SE English 与 PaperEcho 共用「嘴巴」，所以人形上是同一处。
+> SE English 与课蒸馏都没有宣传片与离线试用页，槽位里只有两个链接。
 
 ## 改产品：只改一处
 
@@ -89,7 +93,7 @@ CI（Ubuntu）与 macOS 因此共用同一套脚本。**显式设了 `CHROME_PAT
 git add -A && git commit -m "站点更新" && git push
 ```
 
-GitHub Pages 从 `main` 根目录发布（legacy build，与五个子站一致）。
+GitHub Pages 从 `main` 根目录发布（legacy build，与几个子站一致）。
 `.nojekyll` 保留：关掉 Jekyll 处理。
 
 `robots.txt` 与 `sitemap.xml` 里的地址与 `index.html` 的

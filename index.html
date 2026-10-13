@@ -1144,7 +1144,7 @@ body.modal-open { overflow: hidden; }
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     /* 五个部位；多数一个产品，嘴巴两个。内容全部取自各产品自己的线上页面与仓库文档，没有编的。
-       顺序就是人形从上到下的顺序：脑袋 → 嘴巴 → 身体。
+       顺序就是人形从上到下的顺序：脑袋 → 嘴巴 → 身体 → 着装 → 眼睛。
 
        这里刻意只有两层：部位 → 应用。一个部位就一个产品，
        再往下拆子分类只是让人多点了两下，看到的还是同一件事。 */
@@ -1357,7 +1357,7 @@ body.modal-open { overflow: hidden; }
 
       var group = d ? itemsOfPart(d.part) : [];
 
-      /* 部位行：四个人形部位，随时可换。同部位有两个产品时**挨着**各占一行
+      /* 部位行：五个人形部位，随时可换。同部位有两个产品时**挨着**各占一行
          （产品在 data 里的顺序不一定相邻），部位名只写在第一行
          （CSS 给这一列固定宽度，两行才对得齐）。 */
       var L1 = el('div', 'layer layer-d');
@@ -1583,7 +1583,7 @@ body.modal-open { overflow: hidden; }
 <script>
 /* 悬浮窗。两条硬规则：
    1) 不点开不加载：视频的 src 在打开时才写上，demo 的 iframe 在打开时才创建。
-      四个片子加起来约 7.7 MB，挂在首屏上就是让所有人替想看的人付流量。
+      四个片子加起来约 4.6 MB，挂在首屏上就是让所有人替想看的人付流量。
    2) 键盘可用、焦点不逃逸：Esc 关闭，Tab 在窗内循环，关掉之后焦点回到刚才那个按钮。 */
 (function () {
   var modal = document.getElementById('modal');

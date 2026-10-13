@@ -292,6 +292,7 @@ function gen404() {
   --bg: ${tok('bg')}; --ink: ${tok('ink')}; --ink-2: ${tok('ink-2')}; --ink-3: ${tok('ink-3')};
   --hair: ${hair};
   --wb: ${tok('wb')}; --pe: ${tok('pe')}; --wl: ${tok('wl')}; --os: ${tok('os')};
+  --se: ${tok('se')}; --eye: ${tok('eye')};
   --sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB",
           "Source Han Sans SC", "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif;
   --serif: "CongtoudaojiaoWordmark", "Songti SC", "Source Han Serif SC", "Noto Serif SC", serif;
@@ -301,6 +302,7 @@ function gen404() {
   --bg: #F3F3F1; --ink: #101214; --ink-2: #4A4F54; --ink-3: #62686C;
   --hair: rgba(16, 18, 20, .12);
   --wb: #44603B; --pe: #C0432A; --wl: #1B5E54; --os: #B45309;
+  --se: #A9583E; --eye: #3F5C8A;
 }
 *, *::before, *::after { box-sizing: border-box; }
 body {
@@ -326,6 +328,7 @@ h1 { font-size: clamp(26px, 3.2vw, 40px); font-weight: 700; line-height: 1.34; m
 .spine i:nth-child(2) { flex: 3; background: var(--pe); }
 .spine i:nth-child(3) { flex: 2; background: var(--wl); }
 .spine i:nth-child(4) { flex: 2; background: var(--os); }
+.spine i:nth-child(5) { flex: 2; background: var(--eye); }
 ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--hair); }
 li { border-bottom: 1px solid var(--hair); }
 li a { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; padding: 15px 2px; min-height: 56px; }
@@ -342,7 +345,7 @@ li span { font-family: var(--mono); font-size: 12.5px; color: var(--ink-3); }
   <p class="code">404 · 没有这个页面</p>
   <h1>这里没有东西。</h1>
   <p class="lead">地址可能打错了，或者那个页面已经搬走。下面是全部${cnNum(products.length)}个产品。</p>
-  <div class="spine" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <div class="spine" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
   <ul style="margin-top:44px">
 ${links}
   </ul>
