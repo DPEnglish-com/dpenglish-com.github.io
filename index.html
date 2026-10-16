@@ -13,7 +13,7 @@
      无任何外部请求 —— favicon 也内联在文档里。 -->
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23F3F3F1'/%3E%3Cpath d='M15.4 6.9C14.9 12.6 12.3 19.6 7.7 25.3' fill='none' stroke='%23101214' stroke-width='2.8' stroke-linecap='round'/%3E%3Cpath d='M16.9 7.9C17.8 13.6 20.4 20.2 24.2 25.3' fill='none' stroke='%23101214' stroke-width='2.8' stroke-linecap='round'/%3E%3C/svg%3E">
 
-<!-- 社交分享。与四个子站同一套写法，地址与 canonical 保持一致。 -->
+<!-- 社交分享。与子站同一套写法，地址与 canonical 保持一致。 -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="从头到脚 · 语言、思辨、身体与穿搭">
 <meta property="og:description" content="嘴上、脑子里、身上、着装、眼睛。六个产品，各管一处：问辩练思辨，PaperEcho 与 SE English 练语言，WorkoutLoop 练身体，外在练穿搭，课蒸馏把网课听成讲义。">
@@ -603,12 +603,16 @@ html:not(.js) #map-root { display: none; }
 /* ============================================================ 页脚 */
 
 .foot { padding: var(--step) 0 56px; border-top: 1px solid var(--hair); }
-.foot-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 40px; }
+.foot-grid { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 5fr) minmax(0, 5fr); gap: 40px; }
 .foot h2 { font-size: var(--t-body); margin-bottom: 12px; }
 .foot p { color: var(--ink-2); font-size: var(--t-small); max-width: 34em; }
 .foot-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 24px; }
 .foot-links a { font-size: var(--t-small); color: var(--ink-2); display: inline-flex; align-items: center; min-height: 44px; }
 .foot-links a:hover { color: var(--ink); }
+.foot-credits { display: grid; gap: 10px; }
+.foot-credits li { font-size: var(--t-small); color: var(--ink-2); }
+.foot-credits a { color: var(--ink-2); text-decoration: underline; text-underline-offset: .18em; text-decoration-thickness: 1px; }
+.foot-credits a:hover { color: var(--ink); }
 .foot-base {
   display: flex; flex-wrap: wrap; gap: 12px 26px; align-items: baseline;
   margin-top: 44px; padding-top: 22px; border-top: 1px solid var(--hair);
@@ -616,6 +620,7 @@ html:not(.js) #map-root { display: none; }
 .foot-base .mono { flex: 1 1 auto; }
 .foot-base .foot-top { flex: none; display: inline-flex; align-items: center; min-height: 44px; }
 
+@media (max-width: 1080px) { .foot-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; } }
 @media (max-width: 720px) { .foot-grid { grid-template-columns: 1fr; gap: 28px; } }
 
 /* ============================================================ 动效降级 */
@@ -1090,6 +1095,14 @@ body.modal-open { overflow: hidden; }
         <a href="https://dpenglish-com.github.io/keliuzheng-site/">课蒸馏</a>
 <!-- @generated:end -->
       </div>
+    </div>
+    <div>
+      <h2>影片配乐</h2>
+      <ul class="foot-credits">
+        <li>问辩 <span class="mono">Growing Up</span> — Scott Buckley，<a href="https://www.scottbuckley.com.au/library/growing-up/">CC BY 4.0</a></li>
+        <li>PaperEcho <span class="mono">Childhood</span> — Scott Buckley，<a href="https://www.scottbuckley.com.au/library/childhood/">CC BY 4.0</a></li>
+        <li>WorkoutLoop <span class="mono">Funkorama</span> — Kevin MacLeod，<a href="https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100474">CC BY 4.0</a></li>
+      </ul>
     </div>
   </div>
   <div class="foot-base">

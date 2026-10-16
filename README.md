@@ -7,11 +7,12 @@
 
 - 单文件静态站：`index.html` 就是全部产物（CSS/JS/词标子集内联）
 - **零依赖、零构建、零外部请求**：没有 CDN、没有字体外链、没有分析脚本
-- `404.html` 与 `index.html` 的四处产品内容都由 `data/products.json` 生成
+- `404.html` 与 `index.html` 的五处产品内容都由 `data/products.json` 生成
 - 分享卡片 `assets/og.png` 由 `node tools/make-og.mjs` 生成（字体取自 index.html，同源）
 - 每个产品两个动作：**查看视频**（`assets/video/*.mp4`，20 秒的使用演示片）
   与**在线试用**（`assets/demo/*.html`，离线可交互、手机/平板两种布局）。
   两个都开在同一个悬浮窗里；视频 `preload=none`、iframe 开窗才建 —— 不点开就不加载
+- 三支配乐是 CC BY 4.0 的曲目，署名写在页脚「影片配乐」一栏（见 `DESIGN.md` §4.1c）
 
 > `package.json` 里的依赖**只给审计工具用**，不进线上产物。
 > 部署的就是仓库里那几个静态文件，没有构建步骤。
@@ -38,7 +39,7 @@
 `data/products.json` 是唯一数据源。改完重新生成：
 
 ```bash
-node tools/build.mjs          # 写入 index.html（四处）+ 404.html
+node tools/build.mjs          # 写入 index.html（五处）+ 404.html
 node tools/build.mjs --check  # 只检查是否同步（CI 用）
 ```
 
@@ -62,13 +63,13 @@ npm ci            # 只为审计工具装依赖（impeccable）
 node tools/verify.mjs
 ```
 
-九道门一次跑完，约 4 分钟（五项要开 Chrome）；本机和 CI 是同一条命令。
+九道门一次跑完，约 4 分钟（六项要开 Chrome）；本机和 CI 是同一条命令。
 
 | 门 | 查什么 |
 |---|---|
 | 0 | 生成物与 `data/products.json` 同步 |
 | 1 | 静态令牌对比度 |
-| 2 | 真实渲染：8 视口 × 明暗 = 12 组合（对比度/溢出/重叠/sticky/触控目标/禁用 JS） |
+| 2 | 真实渲染：6 视口 × 明暗 = 12 组合（对比度/溢出/重叠/sticky/触控目标/禁用 JS） |
 | 3 | 图版交互：点部位出应用、人形跟随、面包屑退回 |
 | 4 | 动画时序：人形逐条绘制（不是一帧到位）、取消选中不重播 |
 | 5 | 边界路径：390px 移动端 / reduced-motion / 禁用 JS |
