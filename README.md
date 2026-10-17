@@ -7,7 +7,7 @@
 
 - 单文件静态站：`index.html` 就是全部产物（CSS/JS/词标子集内联）
 - **零依赖、零构建、零外部请求**：没有 CDN、没有字体外链、没有分析脚本
-- `404.html` 与 `index.html` 的五处产品内容都由 `data/products.json` 生成
+- `404.html` 与 `index.html` 的四处产品内容都由 `data/products.json` 生成
 - 分享卡片 `assets/og.png` 由 `node tools/make-og.mjs` 生成（字体取自 index.html，同源）
 - 每个产品两个动作：**查看视频**（`assets/video/*.mp4`，20 秒的使用演示片）
   与**在线试用**（`assets/demo/*.html`，离线可交互、手机/平板两种布局）。
@@ -39,7 +39,7 @@
 `data/products.json` 是唯一数据源。改完重新生成：
 
 ```bash
-node tools/build.mjs          # 写入 index.html（五处）+ 404.html
+node tools/build.mjs          # 写入 index.html（四处产品内容 + 敬请期待）+ 404.html
 node tools/build.mjs --check  # 只检查是否同步（CI 用）
 ```
 
