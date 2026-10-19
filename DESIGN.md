@@ -528,7 +528,7 @@ SE English 入口，SE English 官网落地页加了 PaperEcho 入口。
 | WorkoutLoop | Android | 0.1.0 | 2.08 MB | 无 | 设备本机 | 源码清单无该权限 |
 | 外在 OuterStyle | Android 8.0+ | 0.2.0 | 19.1 MB | 需要（手机号） | 搭配服务端，身材数据本机 | 需要 |
 | SE English | Web · Android | 1.0.2 | 3.10 MB | 需要（邮箱注册 + 验证） | 账户归属 | 需要 |
-| 课蒸馏 | Android 8.0+ | 0.1.0 | 15.5 MB | 无账号 | 后端（地址可在「设置」里改） | 需要 |
+| 课蒸馏 | Android 8.0+ | 0.1.0 | 15.8 MB | 无账号 | 后端（地址可在「设置」里改） | 需要 |
 
 SE English 的两个数取自它自己的站：版本号是线上 `/app` 下载页写着的
 `1.0.2`，体积按站上 `downloads/SE-English.apk` 的 `content-length` 3,248,050
@@ -607,6 +607,27 @@ node tools/verify.mjs   # 九道门一次跑完，约 4 分钟（含 Chrome 的�
 | 6 | 设计规则检测（`tools/design-lint.mjs`，impeccable 引擎） |
 | 7 | `cramped-padding` 豁免依据复核（`tools/measure-exemptions.mjs`） |
 | 8 | 悬浮窗与试用页（`tools/modal-check.mjs`）：点开前零加载、窗口里装对了东西、Esc 与焦点归位、四份试用页能开且手机/平板真的换布局 |
+
+### 6.1 接线规则（第 0 道门查）
+
+产品色要真的出现在页面上，需要**三条**同时成立。2026-10-17 发现第六个产品
+只做到第一条就上线了：
+
+| # | 规则 | 漏了会怎样 |
+|---|---|---|
+| 1 | `:root` 里有 `--<accent>` 令牌（深/浅各一） | `var()` 解析失败 |
+| 2 | `.slot[data-accent="<accent>"] { --accent: var(--<accent>); }` | 槽位顶部 1px 细线**透明**，悬停也不变色 |
+| 3 | `.fig-zone[data-zone="<zone>"].on path { stroke: … }` | 点这一行，人形那一段**不亮**（停在默认墨色） |
+
+第 2、3 条是**静默**的：页面不报错，只是少一块颜色。`build.mjs` 早先只查第 1 条
+（`hasToken`），而课蒸馏的令牌确实存在 —— 所以这道检查放过了它，一直没人发现。
+现在三条都查（`hasAccentRule` / `hasZoneRule`）。
+
+**为什么容易漏**：`--eye` 与 `.slot-f` 都写了，看起来"已经接完"；
+但把令牌接到具体选择器上是另外两步，且没有编译器会提醒。
+
+**查法**：`node tools/build.mjs --check` 会逐条报出来（含修复指引）。
+
 
 ```bash
 node tools/verify.mjs --no-browser      # 跳过需要 Chrome 的四项，约 1 秒

@@ -98,6 +98,12 @@ const cssSource = styleMatch[1];
 
 const hasToken = name => new RegExp('--' + name + ':\\s*[^;]+;').test(cssSource);
 const hasSlotClass = slot => new RegExp('\\.slot-' + slot + '\\s*(,|\\{)').test(cssSource);
+/* 令牌存在还不够：槽位与「点亮」都要真的把令牌接上。
+   2026-10-17 发现 --eye 定义了、.slot-f 也有，却漏了这两条接线规则 ——
+   令牌在，但没人用它：课蒸馏的槽位顶线透明、点「眼睛」人形不变色。
+   hasToken 查不出这种漏，因为令牌确实存在。 */
+const hasAccentRule = accent => new RegExp('\\.slot\\[data-accent="' + accent + '"\\]\\s*\\{\\s*--accent:').test(cssSource);
+const hasZoneRule = zone => new RegExp('\\.fig-zone\\[data-zone="' + zone + '"\\]\\.on\\s+path\\s*\\{').test(cssSource);
 
 for (const p of products) {
   if (!hasToken(p.accent)) {
@@ -105,6 +111,13 @@ for (const p of products) {
       `products(${p.id}) 用了 accent="${p.accent}"，但 CSS 里没有 --${p.accent} 令牌。\n` +
       `      请在 :root 与 :root[data-theme="light"] 各加一个（深色/浅色两个值），\n` +
       `      并在 tools/contrast-audit.py 的令牌清单里登记，否则对比度不受检。`
+    );
+  }
+  if (!hasAccentRule(p.accent)) {
+    problems.push(
+      `products(${p.id}) 用了 accent="${p.accent}"，但 CSS 里没有\n` +
+      `      .slot[data-accent="${p.accent}"] { --accent: var(--${p.accent}); } 这一条。\n` +
+      `      令牌在但没接上：槽位顶部那条 1px 细线会解析成空值（透明），悬停也不变色。`
     );
   }
   if (!hasSlotClass(p.slot)) {
@@ -119,6 +132,13 @@ for (const p of products) {
     problems.push(
       `products(${p.id}) 的部位「${p.part}」映射到人形区域 data-zone="${zone}"，\n` +
       `      但 index.html 的 SVG 里没有这个区域。部位名或产品顺序变了就要同步人形。`
+    );
+  }
+  if (!hasZoneRule(zone)) {
+    problems.push(
+      `products(${p.id}) 的部位「${p.part}」映射到 data-zone="${zone}"，但 CSS 里没有\n` +
+      `      .fig-zone[data-zone="${zone}"].on path { stroke: ... } 这一条。\n` +
+      `      点这一行时人形那一段不会亮起（描边停在默认墨色），连线也少一头。`
     );
   }
 }

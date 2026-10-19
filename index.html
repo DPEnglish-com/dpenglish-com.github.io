@@ -372,6 +372,7 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
 .slot[data-accent="wl"] { --accent: var(--wl); }
 .slot[data-accent="os"] { --accent: var(--os); }
 .slot[data-accent="se"] { --accent: var(--se); }
+.slot[data-accent="eye"] { --accent: var(--eye); }
 
 /* ============================================================ 从头到脚：一层层展开
    左边一具 1px 细线画的人形，从上到下是脑袋、嘴巴、身体；
@@ -475,6 +476,7 @@ html:not(.js) #map-root { display: none; }
 .fig-zone[data-zone="lang"].on path  { stroke: var(--zone-accent, var(--pe)); stroke-width: 1.9; }
 .fig-zone[data-zone="body"].on path  { stroke: var(--zone-accent, var(--wl)); stroke-width: 1.4; }
 .fig-zone[data-zone="outer"].on path { stroke: var(--zone-accent, var(--os)); stroke-width: 1.4; }
+.fig-zone[data-zone="eye"].on path   { stroke: var(--zone-accent, var(--eye)); stroke-width: 1.4; }
 
 /* ---- 连线：从被选中的那一处身体，连到它对应的那一行 ----
    这是整个隐喻的落点：点脑袋，线从脑袋长出来接到「脑袋」这一行，
@@ -870,7 +872,7 @@ body.modal-open { overflow: hidden; }
         </div>
         <div class="map-panel">
           <h3>课蒸馏</h3>
-          <p class="p-domain">听课 · 蒸馏 — Android 8.0+ · 0.1.0 · 15.5 MB</p>
+          <p class="p-domain">听课 · 蒸馏 — Android 8.0+ · 0.1.0 · 15.8 MB</p>
           <p>贴一个课程链接，它把一门网课摊成可检索的讲义、词条与师承。每一讲按概念、公式、推导、例题、易混与坑、考点分栏，每条带一个能点回视频的时间锚点；术语收成词条，全课连成大纲。</p>
           <ul>
             <li>需要联网，蒸馏在后端完成，没有账号体系。当前是 debug 内测包，后端地址编译期内置了一个线上地址，可在 App 的「设置」里改。只做个人学习用途的文字化：不下载、不重分发视频与音频。</li>
@@ -1043,7 +1045,7 @@ body.modal-open { overflow: hidden; }
         <dl class="slot-specs">
           <div><dt>平台</dt><dd>Android 8.0+</dd></div>
           <div><dt>版本</dt><dd>0.1.0</dd></div>
-          <div><dt>体积</dt><dd>15.5 MB</dd></div>
+          <div><dt>体积</dt><dd>15.8 MB</dd></div>
         </dl>
         <p class="slot-note">
           需要联网，蒸馏在后端完成，没有账号体系。当前是 debug 内测包，后端地址编译期内置了一个线上地址，可在 App 的「设置」里改。只做个人学习用途的文字化：不下载、不重分发视频与音频。
@@ -1281,7 +1283,7 @@ body.modal-open { overflow: hidden; }
         "zone": "eye",
         "name": "课蒸馏",
         "short": "Android · 0.1.0",
-        "domain": "听课 · 蒸馏 — Android 8.0+ · 0.1.0 · 15.5 MB",
+        "domain": "听课 · 蒸馏 — Android 8.0+ · 0.1.0 · 15.8 MB",
         "desc": "贴一个课程链接，它把一门网课摊成可检索的讲义、词条与师承。每一讲按概念、公式、推导、例题、易混与坑、考点分栏，每条带一个能点回视频的时间锚点；术语收成词条，全课连成大纲。",
         "note": "需要联网，蒸馏在后端完成，没有账号体系。当前是 debug 内测包，后端地址编译期内置了一个线上地址，可在 App 的「设置」里改。只做个人学习用途的文字化：不下载、不重分发视频与音频。",
         "links": [
