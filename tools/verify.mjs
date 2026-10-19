@@ -28,6 +28,11 @@ const GATES = [
   ['5) 边界路径', ['node', ['tools/edge-cases.mjs', TARGET]], true, true],
   ['6) 设计规则检测', ['node', ['tools/design-lint.mjs', 'index.html']], false, false],
   ['7) 豁免依据复核', ['node', ['tools/measure-exemptions.mjs']], true, false],
+  // 母站声明了子站的版本/体积/包名，但那些数字的真正来源是子站仓库，
+  // 母站这边没有东西会跟着更新。子站换包后母站会继续显示旧体积，
+  // 页面照常渲染、照常通过其余门禁 —— 只有人去点开子站才发现对不上。
+  // 子站仓库不在本机时本项自行跳过（CI 里没有兄弟仓库）。
+  ['7b) 子站声明一致', ['node', ['tools/check-subsites.mjs']], false, false],
   // 视频与在线试用是唯一"点开才加载"的东西，也唯一带焦点管理；
   // 别的门都看不到它们（渲染门扫的是首屏，图版门只点人形）。
   ['8) 悬浮窗与试用页', ['node', ['tools/modal-check.mjs', TARGET]], true, true],

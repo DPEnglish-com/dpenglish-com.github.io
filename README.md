@@ -63,7 +63,7 @@ npm ci            # 只为审计工具装依赖（impeccable）
 node tools/verify.mjs
 ```
 
-九道门一次跑完，约 4 分钟（六项要开 Chrome）；本机和 CI 是同一条命令。
+十道门一次跑完，约 4 分钟（六项要开 Chrome）；本机和 CI 是同一条命令。
 
 | 门 | 查什么 |
 |---|---|

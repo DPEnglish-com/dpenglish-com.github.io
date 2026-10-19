@@ -590,7 +590,7 @@ MVP 默认逐条接续。改后说的是同一件事，只是用产品自己的�
 
 ```bash
 npm ci                  # 只为审计工具装依赖（impeccable），不进线上产物
-node tools/verify.mjs   # 九道门一次跑完，约 4 分钟（含 Chrome 的六项占绝大部分）
+node tools/verify.mjs   # 十道门一次跑完，约 4 分钟（含 Chrome 的六项占绝大部分）
 ```
 
 本机和 CI 是**同一条命令**（`.github/workflows/verify.yml`）。
@@ -697,7 +697,7 @@ node tools/verify.mjs --target URL      # 对线上跑（渲染/交互/动画/�
 
 1. **`data/products.json` 单一数据源**（见 §4.3）—— 加产品只改一处
 2. **`404.html`** —— 整份由生成器产出，色值与词标字体从 `index.html` 现场读
-3. **CI 门禁** —— `.github/workflows/verify.yml`，push/PR 都跑九道门
+3. **CI 门禁** —— `.github/workflows/verify.yml`，push/PR 都跑十道门
 
 ### 7.1 CI 头两次运行暴露的问题
 
