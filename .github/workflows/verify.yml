@@ -1,6 +1,6 @@
 name: 验收
 
-# 每次改动都跑一遍九道门。设计约定见 DESIGN.md §6。
+# 每次改动都跑一遍十道门。设计约定见 DESIGN.md §6。
 #
 # 为什么要有这个：这些门原本靠人手动跑，漏跑一次就可能把对比度不达标、
 # 元素重叠、或者生成物不同步的东西推上线。第 0 道（生成物同步）尤其重要：
@@ -54,7 +54,7 @@ jobs:
           echo "CHROME_PATH=/usr/bin/google-chrome-stable" >> "$GITHUB_ENV"
           /usr/bin/google-chrome-stable --version
 
-      - name: 跑九道门
+      - name: 跑十道门
         run: node tools/verify.mjs
 
       - name: 失败时留下截图
