@@ -134,15 +134,15 @@
       "accent": "eye",
       "slot": "f",
       "name": "课蒸馏",
-      "short": "Android · 0.2.0",
+      "short": "Android · 0.3.0",
       "platform": "Android 8.0+",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "size": "13.2 MB",
       "desc": "贴一个课程链接，它把一门网课摊成可检索的讲义、词条与师承。每一讲按概念、公式、推导、例题、易混与坑、考点分栏，每条带一个能点回视频的时间锚点；术语收成词条，全课连成大纲。",
       "note": "需要联网，蒸馏在后端完成。账号可选：登录后书架跟着账号走，不登录也能用；免费档书架最多 3 门、单次最多 10 讲，会员用兑换码开通。当前为 release 签名包（从 0.1.0 debug 升级需先卸载旧版），后端地址编译期内置，可在 App 的「设置」里改。只做个人学习用途的文字化：不下载、不重分发视频与音频。",
       "links": [
         { "label": "前往站点", "href": "https://dpenglish-com.github.io/keliuzheng-site/" },
-        { "label": "下载 APK", "href": "https://dpenglish-com.github.io/keliuzheng-site/downloads/Keliuzheng-0.2.0-release.apk" }
+        { "label": "下载 APK", "href": "https://dpenglish-com.github.io/keliuzheng-site/downloads/Keliuzheng-0.3.0-release.apk" }
       ]
     }
   ],
