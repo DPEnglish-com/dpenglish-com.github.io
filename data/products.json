@@ -3,8 +3,6 @@
     "母站唯一数据源。index.html 里这些产品内容（接触印样、目录、脊柱锚点、六章、页脚、JS DATA、404）",
     "都由 tools/build.mjs 从这里生成；章序 = 数组顺序，promise = 目录与章首的一句话。",
     "不要手改 index.html 里 @generated 标记之间的内容：下次生成会覆盖，",
-    "跑 node tools/build.mjs --check 会报不同步（CI 也跑这个）。",
-    "跑 `node tools/build.mjs --check` 会报不同步（CI 也跑这个）。",
     "",
     "media 是每个产品的片子与在线试用，都是本仓库内的同源文件，无外部请求：",
     "  video / poster —— 产品片与封面：前四支是 20 秒使用演示（1080p30，无解说）；",
@@ -18,7 +16,7 @@
     "不确定的写进 note 明说，不要写看起来漂亮的话。"
   ],
   "site": {
-    "verifiedOn": "2026-10-20",
+    "verifiedOn": "2026-10-17",
     "count": 6,
     "redesignedOn": "2026-10-24"
   },
