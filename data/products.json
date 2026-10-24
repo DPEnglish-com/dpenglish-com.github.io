@@ -8,7 +8,8 @@
     "",
     "media 是每个产品的片子与在线试用，都是本仓库内的同源文件，无外部请求：",
     "  video / poster —— 产品片与封面：前四支是 onetake 拍的使用演示（21–22 秒，1080p30，无解说）；",
-    "                    课蒸馏是 56 秒宣传片（1080p，无旁白，原创配乐）",
+    "                    课蒸馏是 56 秒宣传片（1080p，无旁白，原创配乐）；",
+    "                    SE English 是 20 秒宣传片（纸面重绘学习流程示意，原创配乐）",
     "  videoTitle / videoMeta / videoNote —— 可选：弹窗标题、副标题（时长/规格）、脚注；不写就用演示片的默认文案",
     "  demo / demoNote —— 可交互的离线试用页（手机/平板两种布局）与一句说明；没有试用页的产品可省略",
     "video 用 preload=none，只有点开弹窗才加载；demo 用 iframe，只有点开才创建。",
@@ -124,6 +125,14 @@
       "size": "3.10 MB",
       "desc": "课程与复习的中枢：该学哪些新词、什么时候复习由它安排；单词、句型、场景、阅读、听力、写作与口语各有练习，作答由服务端批改。",
       "note": "需要账户（邮箱注册，需完成验证）；课程进度、复习记录与统计存在账号上。可以和 PaperEcho 绑定：到期的词与篇章生成为纸笔训练包，练完的结果回传到这里。",
+      "media": {
+        "video": "assets/video/se-english.mp4",
+        "poster": "assets/video/se-english-poster.jpg",
+        "videoTitle": "SE English · 产品宣传片",
+        "videoMeta": "20 秒 · 1080P · 无旁白",
+        "videoNote": "学习流程示意 · 依据产品界面重绘 · 原创配乐",
+        "demo": "assets/demo/se-english.html",
+        "demoNote": "今日计划 → 词义回想 → 语境填空 → 掌握度"},
       "links": [
         { "label": "前往站点", "href": "https://www.seandictation.site/" },
         { "label": "下载 APK", "href": "https://www.seandictation.site/downloads/SE-English.apk" }

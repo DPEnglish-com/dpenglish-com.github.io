@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>SE English · 在线试用</title>
+<!--
+  离线试用版。零外部请求、零依赖，整页只有一个文件。
+  设计值取自 SE English 自己的品牌与学习界面：纸 #f4efe7 / 卡片 #fbf8f2 /
+  墨 #24231f / 二级 #6f6a62 / 铜 #cc785c / 深铜 #a9583e；中文标题用宋体，
+  正文系统无衬线，小标签等宽；只留 1px 细线，不用阴影，铜色只做细线、
+  小圆点与重点字。
+  文案取自产品自己的落地页与学习页（「背单词，真正记住。」「先回想，
+  再看答案。」「你对这个词的掌握程度？」）；quiet 的音标、释义与用法
+  注释取自 prisma/seed-expand.ts。今日计划的六项计数是演示用的示例数字，
+  不是账号里的真实进度；页面不联网，也不写入任何账号。
+-->
+<style>
+:root{
+  --paper:#f4efe7;
+  --card:#fbf8f2;
+  --ink:#24231f;
+  --muted:#6f6a62;
+  --copper:#cc785c;
+  --copper-deep:#a9583e;
+  --hair:rgba(36,35,31,.14);
+  --rule:rgba(36,35,31,.30);
+  --field:#8c8983;
+  --serif:"Songti SC","STSong","Noto Serif SC","Source Han Serif SC","SimSun",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,"SF Mono",monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--sans);font-size:14px;line-height:1.7;-webkit-font-smoothing:antialiased}
+body{padding:24px 20px 40px}
+.wrap{max-width:1120px;margin:0 auto}
+[hidden]{display:none !important}
+h1,h2,h3{font-family:var(--serif);font-weight:400;color:var(--ink);margin:0;line-height:1.35}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* ── 页头与设备开关（与家族其余四份一致） ── */
+.bar{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;
+  padding-bottom:16px;border-bottom:1px solid var(--hair)}
+.bar h1{font-size:26px}
+.bar p{margin:6px 0 0;font-size:12.5px;color:var(--muted)}
+.toggle{display:flex;border:1px solid var(--rule);border-radius:3px;overflow:hidden;flex:none}
+.toggle button{appearance:none;border:0;background:transparent;color:var(--muted);
+  font:inherit;font-size:12.5px;padding:0 18px;min-height:44px;cursor:pointer}
+.toggle button + button{border-left:1px solid var(--rule)}
+.toggle button:hover:not([aria-pressed="true"]){color:var(--ink)}
+.toggle button[aria-pressed="true"]{background:var(--ink);color:var(--card)}
+.hint{margin:12px 0 0;font-size:12px;color:var(--muted);min-height:20px}
+button:focus-visible,input:focus-visible{outline:2px solid var(--copper-deep);outline-offset:2px}
+input:focus-visible{border-color:var(--copper-deep)}
+
+/* ── 设备壳 ── */
+.stage{margin-top:18px;display:flex;justify-content:center}
+.device{width:100%;display:flex;justify-content:center}
+.device[data-device="phone"] .shell{max-width:412px}
+.device[data-device="tablet"] .shell{max-width:1000px}
+.shell{width:100%;background:var(--card);border:1px solid var(--rule);
+  border-radius:3px;overflow:hidden}
+
+/* ── 壳内标题栏 ── */
+.appbar{display:flex;align-items:center;justify-content:space-between;gap:16px;
+  min-height:44px;padding:0 20px;border-bottom:1px solid var(--hair)}
+.mark{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;color:var(--ink)}
+.appbar-meta{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--muted)}
+.screen{padding:22px 18px 26px}
+
+/* ── 今日学习 ── */
+.eyebrow{margin:0 0 10px;font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.16em;color:var(--copper-deep)}
+.hero h2{font-size:28px;line-height:1.4}
+.lede{margin:10px 0 0;font-size:12.5px;line-height:1.8;color:var(--muted);max-width:44em}
+
+/* 今日计划：六项计数排成一条数据带，只用 1px 细线分区 */
+.plan{margin-top:24px;border-top:1px solid var(--ink);border-bottom:1px solid var(--hair);
+  padding:13px 0 15px}
+.plan-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.plan-head h3{font-size:15px}
+.plan-count{font-size:10px;letter-spacing:.08em;color:var(--muted)}
+.rail{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:12px 0 0;padding:0}
+.cell{padding:9px 10px 9px 0;border-top:1px solid var(--hair)}
+.cell:nth-child(3n+2),.cell:nth-child(3n){border-left:1px solid var(--hair);padding-left:12px}
+.rail dt{font-size:11px;line-height:1.4;color:var(--muted);letter-spacing:.03em}
+.rail dd{display:flex;align-items:baseline;gap:4px;margin:3px 0 0}
+.rail dd b{font-family:var(--serif);font-weight:400;font-size:22px;line-height:1.1}
+.rail .u{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.plan-note{margin:13px 0 0;font-size:12px;line-height:1.8;color:var(--muted)}
+.plan-note strong{font-weight:600;color:var(--ink)}
+.plan-extra{display:block}
+
+/* ── 两道练习 ── */
+.spread{margin-top:26px}
+.task{min-width:0}
+.task + .task{margin-top:24px;padding-top:24px;border-top:1px solid var(--hair)}
+.task-meta{display:flex;align-items:baseline;gap:10px}
+.task-meta .no{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--copper-deep)}
+.task-meta .kind{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--muted)}
+.task-meta .state{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--muted)}
+.wordline{display:flex;align-items:baseline;flex-wrap:wrap;gap:9px;margin:12px 0 0}
+.word{font-family:var(--serif);font-size:38px;line-height:1;color:var(--ink)}
+.phon{font-family:var(--mono);font-size:11.5px;color:var(--copper-deep)}
+.ask{margin:12px 0 0;font-size:20px;line-height:1.45}
+.task-hint{margin:8px 0 0;font-size:12px;line-height:1.7;color:var(--muted)}
+.sentence{margin:16px 0 0;font-family:var(--serif);font-size:22px;line-height:1.5;color:var(--ink)}
+.blank{color:var(--copper-deep);letter-spacing:.12em}
+.field{margin-top:16px}
+.lbl{display:block;margin-bottom:6px;font-family:var(--mono);font-size:10px;
+  letter-spacing:.12em;color:var(--muted)}
+.field input{width:100%;height:46px;padding:0 12px;border:1px solid var(--field);
+  border-radius:3px;background:var(--paper);color:var(--ink);
+  font-family:var(--sans);font-size:15px;line-height:1}
+.field input::placeholder{color:var(--muted);opacity:1}
+.actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:12px}
+.btn{appearance:none;font:inherit;font-size:12.5px;min-height:44px;padding:0 18px;
+  border:1px solid var(--rule);border-radius:3px;background:transparent;
+  color:var(--ink);cursor:pointer;transition:background-color .15s,border-color .15s,color .15s}
+.btn:hover{border-color:var(--ink)}
+.btn-primary{background:var(--ink);border-color:var(--ink);color:var(--card)}
+.btn-primary:hover{background:#3a3833;border-color:#3a3833}
+.btn-text{border-color:transparent;color:var(--muted);padding:0 6px;
+  text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--hair)}
+.btn-text:hover{color:var(--ink);border-color:transparent}
+
+/* 核对后的反馈：只多一条细线与一个铜点 */
+.feedback{margin:0;font-size:12.5px;line-height:1.8}
+.feedback:not(:empty){margin-top:14px;padding-top:12px;border-top:1px solid var(--hair)}
+.feedback p{margin:0}
+.feedback .verdict{font-size:13px;font-weight:600;color:var(--ink)}
+.feedback .verdict::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;
+  background:var(--copper);margin-right:8px;vertical-align:2px}
+.feedback .answerline{margin-top:3px;color:var(--ink)}
+.feedback .fb-note{margin-top:6px;font-size:11.5px;color:var(--muted)}
+.feedback .full{margin-top:8px;font-family:var(--serif);font-size:18px;line-height:1.5;color:var(--ink)}
+.feedback .full b{font-weight:400;border-bottom:1px solid var(--copper)}
+.feedback .zh{font-size:11.5px;color:var(--muted)}
+
+/* ── 掌握程度 ── */
+.mastery{margin-top:30px;border-top:1px solid var(--ink);padding-top:18px}
+.mastery h3{font-size:20px}
+.levels{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.level{appearance:none;text-align:left;font:inherit;min-height:64px;padding:10px 12px;
+  border:1px solid var(--rule);border-radius:3px;background:transparent;color:var(--ink);
+  cursor:pointer;transition:background-color .15s,border-color .15s}
+.level:hover{border-color:var(--ink)}
+.level[aria-pressed="true"]{border-color:var(--ink);background:var(--paper)}
+.level b{display:block;font-size:14px;font-weight:500;line-height:1.4}
+.level[aria-pressed="true"] b::after{content:"";display:inline-block;width:4px;height:4px;
+  border-radius:50%;background:var(--copper);margin-left:7px;vertical-align:2px}
+.level span{display:block;margin-top:2px;font-size:11px;line-height:1.5;color:var(--muted)}
+.mastery-fb{margin:0;font-size:12.5px;color:var(--ink)}
+.mastery-fb:not(:empty){margin-top:14px;padding-top:12px;border-top:1px solid var(--hair)}
+.mastery-fb .dot{display:inline-block;width:5px;height:5px;border-radius:50%;
+  background:var(--copper);margin-right:8px;vertical-align:2px}
+.mastery-fb .quiet{color:var(--muted);font-size:11.5px}
+
+/* ── 页脚 ── */
+.foot{max-width:52em;margin:18px auto 0;font-size:11.5px;line-height:1.9;
+  color:var(--muted);text-align:center}
+
+/* ── 平板：同一屏放下两栏 ── */
+@media (min-width:760px){
+  .device[data-device="tablet"] .screen{padding:32px 38px 36px}
+  .device[data-device="tablet"] .hero h2{font-size:34px}
+  .device[data-device="tablet"] .rail{grid-template-columns:repeat(6,minmax(0,1fr))}
+  .device[data-device="tablet"] .cell{border-top:0;border-left:1px solid var(--hair);
+    padding:2px 0 2px 18px}
+  .device[data-device="tablet"] .cell:first-child{border-left:0;padding-left:0}
+  .device[data-device="tablet"] .spread{display:grid;grid-template-columns:1fr 1fr}
+  .device[data-device="tablet"] .task,
+  .device[data-device="tablet"] .task + .task{margin:0;padding:0;border-top:0}
+  .device[data-device="tablet"] .task:first-child{padding-right:34px}
+  .device[data-device="tablet"] .task + .task{border-left:1px solid var(--hair);padding-left:34px}
+  .device[data-device="tablet"] .levels{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .device[data-device="tablet"] .plan-extra{display:inline}
+  .device[data-device="tablet"] .word{font-size:44px}
+}
+
+/* ── 窄屏：页头换行 ── */
+@media (max-width:560px){
+  body{padding:16px 12px 32px}
+  .bar{flex-direction:column;align-items:stretch;gap:12px}
+  .bar h1{font-size:22px}
+  .toggle{align-self:flex-start}
+  .foot{text-align:left}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="bar">
+    <div class="bar-copy">
+      <h1>SE English · 在线试用</h1>
+      <p>离线演示 · 内容只在本页</p>
+    </div>
+    <div class="toggle" role="group" aria-label="设备预览">
+      <button type="button" data-dev="phone" aria-pressed="true">手机</button>
+      <button type="button" data-dev="tablet" aria-pressed="false">平板</button>
+    </div>
+  </header>
+  <p class="hint" id="hint">手机：一屏一件事 —— 计划、两道练习、掌握程度依次往下。</p>
+
+  <main class="stage">
+    <div class="device" id="device" data-device="phone">
+      <div class="shell">
+        <div class="appbar">
+          <span class="mark">SE English</span>
+          <span class="appbar-meta">英语训练 · 今日学习</span>
+        </div>
+
+        <div class="screen">
+          <header class="hero">
+            <p class="eyebrow">今日学习</p>
+            <h2>背单词，真正记住。</h2>
+            <p class="lede">按记忆曲线安排复习，单词、句型、阅读、听力、写作与口语都在同一套课程里。</p>
+          </header>
+
+          <section class="plan" aria-labelledby="plan-title">
+            <div class="plan-head">
+              <h3 id="plan-title">今日计划</h3>
+              <span class="mono plan-count">示例 · 6 项</span>
+            </div>
+            <dl class="rail">
+              <div class="cell"><dt>单词</dt><dd><b>8</b><span class="u">词</span></dd></div>
+              <div class="cell"><dt>句型</dt><dd><b>3</b><span class="u">句</span></dd></div>
+              <div class="cell"><dt>阅读</dt><dd><b>1</b><span class="u">篇</span></dd></div>
+              <div class="cell"><dt>听力</dt><dd><b>1</b><span class="u">篇</span></dd></div>
+              <div class="cell"><dt>写作</dt><dd><b>1</b><span class="u">项</span></dd></div>
+              <div class="cell"><dt>口语</dt><dd><b>1</b><span class="u">项</span></dd></div>
+            </dl>
+            <p class="plan-note"><strong>由课程安排，不是你自己挑。</strong><span class="plan-extra">题海是额外练习，不计入今日计划。</span></p>
+          </section>
+
+          <div class="spread">
+            <section class="task" aria-labelledby="q1-title">
+              <div class="task-meta">
+                <span class="no">01</span>
+                <span class="kind">词义回想</span>
+                <span class="state" id="q1-state">未作答</span>
+              </div>
+              <p class="wordline" lang="en"><span class="word">quiet</span><span class="phon">/ˈkwaɪət/</span></p>
+              <h3 class="ask" id="q1-title">quiet 是什么意思？</h3>
+              <p class="task-hint">先回想，再看答案。</p>
+              <div class="field">
+                <label class="lbl" for="q1">你的答案</label>
+                <input id="q1" type="text" autocomplete="off" spellcheck="false"
+                  enterkeyhint="done" placeholder="写下它的中文意思">
+              </div>
+              <div class="actions">
+                <button class="btn btn-primary" id="q1-check" type="button">核对</button>
+                <button class="btn btn-text" id="q1-reset" type="button">重填</button>
+              </div>
+              <div class="feedback" id="q1-fb" role="status" aria-live="polite"></div>
+            </section>
+
+            <section class="task" aria-labelledby="q2-title">
+              <div class="task-meta">
+                <span class="no">02</span>
+                <span class="kind">语境填空</span>
+                <span class="state" id="q2-state">未作答</span>
+              </div>
+              <h3 class="ask" id="q2-title">在上下文中填入正确的单词形式</h3>
+              <p class="sentence" lang="en">It is <span class="blank">______</span> here.</p>
+              <p class="task-hint">这里很安静。</p>
+              <div class="field">
+                <label class="lbl" for="q2">填入的词</label>
+                <input id="q2" type="text" autocomplete="off" spellcheck="false"
+                  enterkeyhint="done" placeholder="输入单词">
+              </div>
+              <div class="actions">
+                <button class="btn btn-primary" id="q2-check" type="button">核对</button>
+                <button class="btn btn-text" id="q2-reset" type="button">重填</button>
+              </div>
+              <div class="feedback" id="q2-fb" role="status" aria-live="polite"></div>
+            </section>
+          </div>
+
+          <section class="mastery" id="mastery" hidden aria-labelledby="mastery-title">
+            <p class="eyebrow">掌握程度</p>
+            <h3 id="mastery-title">你对 quiet 的掌握程度？</h3>
+            <p class="task-hint">自评决定它下次什么时候再出现。这里只在本页记下。</p>
+            <div class="levels" role="group" aria-label="quiet 的掌握程度">
+              <button class="level" type="button" data-level="1" aria-pressed="false">
+                <b>模糊</b><span>完全没想起来</span>
+              </button>
+              <button class="level" type="button" data-level="2" aria-pressed="false">
+                <b>勉强</b><span>想起来了但不确信</span>
+              </button>
+              <button class="level" type="button" data-level="3" aria-pressed="false">
+                <b>答对</b><span>需要想一下</span>
+              </button>
+              <button class="level" type="button" data-level="4" aria-pressed="false">
+                <b>秒答</b><span>几乎不用想</span>
+              </button>
+            </div>
+            <p class="mastery-fb" id="mastery-fb" role="status" aria-live="polite"></p>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <p class="foot">这是离线试用：内容与作答只在本页，不写入账号；真实进度以 SE English 账号为准。</p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var $ = function (id) { return document.getElementById(id); };
+  var device = $('device');
+
+  /* ---------- 设备切换：只改一个属性，作答状态天然保留 ---------- */
+  var HINT = {
+    phone: '手机：一屏一件事 —— 计划、两道练习、掌握程度依次往下。',
+    tablet: '平板：一屏两栏 —— 今日计划横排，两道练习并排，作答与反馈同屏。',
+    narrow: '平板：两栏布局需要 760px 以上的窗口；窗口太窄时仍按手机排。'
+  };
+  function setDevice(dev) {
+    device.dataset.device = dev;
+    Array.prototype.forEach.call(document.querySelectorAll('.toggle button'), function (b) {
+      b.setAttribute('aria-pressed', String(b.dataset.dev === dev));
+    });
+    $('hint').textContent = dev === 'tablet' && window.innerWidth < 760 ? HINT.narrow : HINT[dev];
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.toggle button'), function (b) {
+    b.addEventListener('click', function () { setDevice(b.dataset.dev); });
+  });
+  setDevice(window.innerWidth >= 760 ? 'tablet' : 'phone');
+
+  /* ---------- 练习状态：至少答完一题，才放出掌握程度 ---------- */
+  var answered = { 1: false, 2: false };
+
+  function revealMastery() {
+    if (answered[1] || answered[2]) $('mastery').hidden = false;
+  }
+  function setState(no, text) { $('q' + no + '-state').textContent = text; }
+  function renderFeedback(no, html) { $('q' + no + '-fb').innerHTML = html; }
+
+  function checkQ1() {
+    var raw = $('q1').value;
+    var flat = String(raw).replace(/[\s\u3000]/g, '')
+      .replace(/[，。,.、；;：:！!？?'"“”‘’（）()]/g, '');
+    if (!flat) { renderFeedback(1, '<p class="verdict">先写一个答案，再核对。</p>'); return; }
+    var ok = /安静|宁静|寂静/.test(flat) && !/不安静/.test(flat);
+    answered[1] = true;
+    revealMastery();
+    setState(1, ok ? '答对' : '继续巩固');
+    renderFeedback(1,
+      '<p class="verdict">' + (ok ? '正确！' : '这次没对上。') + '</p>' +
+      '<p class="answerline">正确答案：安静的</p>' +
+      '<p class="fb-note">释义：声音少——不嘈杂；也可以指性格，不爱闹腾。</p>' +
+      '<p class="fb-note">quiet 和 silent 不一样：quiet 是音量低、环境不吵；silent 是完全没声音。</p>');
+  }
+
+  function checkQ2() {
+    var flat = String($('q2').value).trim().toLowerCase();
+    if (!flat) { renderFeedback(2, '<p class="verdict">先填一个词，再核对。</p>'); return; }
+    var ok = flat === 'quiet';
+    answered[2] = true;
+    revealMastery();
+    setState(2, ok ? '答对' : '继续巩固');
+    renderFeedback(2,
+      '<p class="verdict">' + (ok ? '正确！' : '这次没对上。') + '</p>' +
+      (ok ? '' : '<p class="answerline">正确答案：quiet</p>') +
+      '<p class="full">It is <b>quiet</b> here.</p>' +
+      '<p class="zh">这里很安静。</p>' +
+      '<p class="fb-note">be + 形容词：S + be + Adj · 例：Be quiet.</p>');
+  }
+
+  function resetQ(no) {
+    $('q' + no).value = '';
+    renderFeedback(no, '');
+    setState(no, '未作答');
+    $('q' + no).focus();
+  }
+
+  $('q1-check').addEventListener('click', checkQ1);
+  $('q2-check').addEventListener('click', checkQ2);
+  $('q1-reset').addEventListener('click', function () { resetQ(1); });
+  $('q2-reset').addEventListener('click', function () { resetQ(2); });
+  [['q1', checkQ1], ['q2', checkQ2]].forEach(function (pair) {
+    $(pair[0]).addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); pair[1](); }
+    });
+  });
+
+  /* ---------- 掌握程度：自评决定下一次复习间隔 ---------- */
+  var NEXT_REVIEW = {
+    1: '已记录：下次复习 · 明天',
+    2: '已记录：下次复习 · 1 天后',
+    3: '已记录：下次复习 · 3 天后',
+    4: '已记录：下次复习 · 7 天后'
+  };
+  Array.prototype.forEach.call(document.querySelectorAll('.level'), function (b) {
+    b.addEventListener('click', function () {
+      Array.prototype.forEach.call(document.querySelectorAll('.level'), function (x) {
+        x.setAttribute('aria-pressed', String(x === b));
+      });
+      $('mastery-fb').innerHTML = '<span class="dot" aria-hidden="true"></span>' +
+        NEXT_REVIEW[b.dataset.level] +
+        '<span class="quiet">（本页演示，不写入账号）</span>';
+    });
+  });
+})();
+</script>
+</body>
+</html>
