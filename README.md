@@ -3,7 +3,7 @@
 公开访问：**https://dpenglish-com.github.io/**
 
 一本「身体目录」：首屏是一具 1px 人形 + 六帧片花，往下是从头到脚的目录，再往下是六章产品——
-脑袋（问辩）、眼睛（课蒸馏）、嘴巴（PaperEcho / SE English）、身体（WorkoutLoop）、着装（外在）。
+脑袋（问辩 Wenbian）、眼睛（CourseDistill 课蒸馏）、嘴巴（PaperEcho 纸上回声 / SE English 英语训练）、身体（WorkoutLoop 训练环）、着装（外在 OuterStyle）。
 读到哪一章，左侧脊柱上的人形就亮到哪一层。
 
 - 单文件静态站：`index.html` 是全部产物（CSS / JS / display 字体子集全部内联）
@@ -17,17 +17,17 @@
 | 章 | 部位 | 产品 | 站点 |
 |---|---|---|---|
 | 01 | 脑袋 | 问辩 Wenbian | https://dpenglish-com.github.io/wenbian-site/ |
-| 02 | 眼睛 | 课蒸馏 | https://dpenglish-com.github.io/keliuzheng-site/ |
+| 02 | 眼睛 | CourseDistill 课蒸馏 | https://dpenglish-com.github.io/keliuzheng-site/ |
 | 03 | 嘴巴 | PaperEcho 纸上回声 | https://dpenglish-com.github.io/paperecho-site/ |
-| 04 | 嘴巴 | SE English | https://www.seandictation.site/ |
-| 05 | 身体 | WorkoutLoop | https://dpenglish-com.github.io/workoutloop-site/ |
+| 04 | 嘴巴 | SE English 英语训练 | https://www.seandictation.site/ |
+| 05 | 身体 | WorkoutLoop 训练环 | https://dpenglish-com.github.io/workoutloop-site/ |
 | 06 | 着装 | 外在 OuterStyle | https://dpenglish-com.github.io/outerstyle-site/ |
 
 ## 数据与生成
 
 `data/products.json` 是唯一数据源，数组顺序就是章节顺序。每个产品必填：
 
-- `part` / `k` / `accent` / `name` / `short` / `platform` / `version` / `size`
+- `part` / `k` / `accent` / `name`（中英双语，build 会校验）/ `short` / `platform` / `version` / `size`
 - `desc`（两行正文）、`note`（收进「边界与前提」）、`promise`（目录与章首的一句话，≤40 字）
 - `links`（https，第一条是主站，第二条通常是 APK）
 - `media`（可选）：`video` + `poster` 必填；`demo` + `demoNote` 可选；
@@ -62,7 +62,7 @@ node tools/verify.mjs
 | 5 | 边界路径：390px 移动端 / reduced-motion / 禁用 JS 六章完整 |
 | 6 | 设计规则检测（impeccable 引擎） |
 | 7 | 间距依据复核（`.toc` / `.chapter-flow` / `.contact-grid` 的内缩） |
-| 7b | 母站对课蒸馏的版本/体积/包名/哈希与子站仓库一致 |
+| 7b | 母站对 CourseDistill 课蒸馏的版本/体积/包名/哈希与子站仓库一致 |
 | 8 | 悬浮窗与试用页：点开前零加载、Esc/焦点归位、每个视频入口能读、每份试用页能开且切设备 |
 
 ```bash

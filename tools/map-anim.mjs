@@ -48,21 +48,19 @@ try {
   await cdp.send('Page.enable', {}, sessionId);
   await cdp.send('Runtime.enable', {}, sessionId);
   await cdp.send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false }, sessionId);
+  // 在文档创建前挂一个采样器：绘制可能在 waitReady 之前就结束，不能只在加载后采样。
+  await cdp.send('Page.addScriptToEvaluateOnNewDocument', { source: 'window.__animPeak=0;(function(){function p(){try{var a=document.querySelectorAll(".body-figure .zone path");if(a.length){var t=0;for(var i=0;i<a.length;i++)t+=parseFloat(getComputedStyle(a[i]).strokeDashoffset)||0;if(t>window.__animPeak)window.__animPeak=t;}}catch(e){}if(!window.__animStop)requestAnimationFrame(p);}p();})();' }, sessionId);
   await cdp.send('Page.navigate', { url }, sessionId);
   const ev = async expr => (await cdp.send('Runtime.evaluate', { expression: expr, returnByValue: true, awaitPromise: true }, sessionId)).result.value;
   await waitReady(ev);
   await ev("document.documentElement.setAttribute('data-theme'," + JSON.stringify(THEME) + ")");
 
   console.log('\n=== A) 首屏绘制：整具人形是画出来的 ===');
-  const samples = [];
-  for (let i = 0; i < 26; i++) {
-    samples.push(await ev(probe));
-    await sleep(50);
-  }
-  const max = Math.max.apply(null, samples);
-  const final = samples[samples.length - 1];
-  console.log('  采样：' + samples.join(' → '));
-  check(max > 5, '绘制过程中有未完成的线（峰值 ' + max + '）');
+  const peak = await ev('window.__animPeak');
+  await sleep(1300);
+  const final = await ev(probe);
+  console.log('  绘制峰值：' + peak + '，1.3 秒后：' + final);
+  check(peak > 5, '绘制过程中有未完成的线（峰值 ' + peak + '）');
   check(final < 0.5, '1.3 秒后全部画完（最后 ' + final + '）');
   const paths = await ev("document.querySelectorAll('.body-figure .zone path').length");
   check(paths === 38, '首屏 + 脊柱两具人形共 38 条线（实为 ' + paths + '）');

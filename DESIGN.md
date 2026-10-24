@@ -99,7 +99,7 @@
 | 顶栏 | 词标 + 目录/产品/关于 + 主题切换；滚动后浮出 hairline；≤640px 只留目录/产品，关于在页面底部（刻意取舍） |
 | 首屏 | 词标 + 一句定位 + 人形 + 六帧接触印样 + 「从头看起」 |
 | 目录 | 六行，章号 / 部位 / 产品 / promise / 片与试用标记 |
-| 六章 | 01 脑袋（问辩）→ 02 眼睛（课蒸馏）→ 03 嘴巴（PaperEcho）→ 04 嘴巴（SE English）→ 05 身体（WorkoutLoop）→ 06 着装（外在） |
+| 六章 | 01 脑袋（问辩 Wenbian）→ 02 眼睛（CourseDistill 课蒸馏）→ 03 嘴巴（PaperEcho 纸上回声）→ 04 嘴巴（SE English 英语训练）→ 05 身体（WorkoutLoop 训练环）→ 06 着装（外在 OuterStyle） |
 | 关于 | 一个作者、六件东西、数据核对日期；一行「还没开始」 |
 | 页脚 | 联系 / 六个产品 / 影片配乐 / 没有账号系统、没有追踪 |
 | 悬浮窗 | 看片与在线试用共用；点开前零加载 |
@@ -138,6 +138,7 @@
 
 - 数组顺序 = 章节顺序；`site.count` 必须等于产品数。
 - 必填：`id` / `part` / `k` / `accent` / `name` / `short` / `platform` / `version` / `size` / `desc` / `note` / `promise` / `links`。
+  其中 `name` 必须中英双语（同时含汉字与拉丁字母），生成器会拦下缺一半的名字。
 - `media` 可选：`video` + `poster` 必填，`demo` + `demoNote` 可选；
   可选文案 `videoTitle` / `videoMeta` / `videoNote`。
 - 不再有 `slot`：新布局没有 7/5 卡片栅格，章节顺序由数组决定。
@@ -180,6 +181,7 @@
 
 ## 9. 变更记录
 
+- **2026-10-24 产品名统一中英双语**：CourseDistill 课蒸馏、SE English 英语训练、WorkoutLoop 训练环；build 增加双语校验，避免子站改名后母站漏跟。
 - **2026-10-24 身体目录（v2）**：全站重做。纸墨 + 思源宋体 display；首屏人形 + 六帧片花；
   目录 + 六章（脑→眼→口→口→身→衣）；scroll-driven 人形逐层点亮；删除 7/5 卡片墙与旧图版；
   字体子集、OG、404 同步。回滚点 `site-v1`。

@@ -37,6 +37,8 @@ products.forEach((p, i) => {
   }
   if (p.id && !ID_RE.test(p.id)) problems.push(where + ' id 只能是小写字母/数字/连字符: ' + p.id);
   if (p.promise && p.promise.length > 40) problems.push(where + ' promise 太长（≤40 字）: ' + p.promise);
+  // 2026-10-24 起，六个产品的对外名字统一为中英双语；只写一种语言会在母站上缺一半。
+  if (p.name && (!/[\u3400-\u9FFF]/.test(p.name) || !/[A-Za-z]/.test(p.name))) problems.push(where + ' name 必须中英双语: ' + p.name);
   if (!PART_ZONE[p.part]) problems.push(where + ' 未知部位: ' + p.part + '（可用：' + Object.keys(PART_ZONE).join(' / ') + '）');
   if (!Array.isArray(p.links) || p.links.length === 0) problems.push(where + ' links 不能为空');
   (p.links || []).forEach((l, j) => {
