@@ -1,15 +1,12 @@
-// 从 data/products.json 生成 index.html 里四处产品内容。
+// 从 data/products.json 生成 index.html 的目录、六章、接触印样、页脚与 404。
 //
 //   node tools/build.mjs           写入
-//   node tools/build.mjs --check   只检查是否同步（CI 用，不同步则退出码 1）
-//
-// 为什么要有这个：加一个产品原本要改三处（图版 DATA、产品槽位、<noscript> 清单），
-// 三处各写一遍同样的数字，迟早会不一致。现在只有一处。
+//   node tools/build.mjs --check   只检查是否同步（CI 用）
 //
 // 生成区由 index.html 里的标记界定：
 //   <!-- @generated:名字 -->  …  <!-- @generated:end -->
 //   /* @generated:名字 */      …  /* @generated:end */
-// 标记之外的内容一律不碰。
+// 标记之外一律不碰。
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -24,26 +21,28 @@ const CHECK = process.argv.includes('--check');
 const data = JSON.parse(readFileSync(DATA_PATH, 'utf8'));
 const products = data.products;
 
-/* ---------------------------------------------------------------- 校验
-   数据本身先过一遍。生成器不该把坏数据安静地写进页面。 */
+/* 部位 → 人形 SVG 的 zone。五个部位必须都有人。 */
+const PART_ZONE = { 脑袋: 'argue', 眼睛: 'eye', 嘴巴: 'lang', 身体: 'body', 着装: 'outer' };
+const PART_ORDER = ['脑袋', '眼睛', '嘴巴', '身体', '着装'];
+
+/* ---------------------------------------------------------------- 校验 */
 
 const problems = [];
 const ID_RE = /^[a-z][a-z0-9-]*$/;
 
 products.forEach((p, i) => {
-  const where = `products[${i}]${p.id ? ' (' + p.id + ')' : ''}`;
-  for (const f of ['id', 'part', 'k', 'accent', 'slot', 'name', 'short', 'platform', 'version', 'size', 'desc', 'note']) {
-    if (!p[f] || typeof p[f] !== 'string') problems.push(`${where} 缺字段或不是字符串: ${f}`);
+  const where = 'products[' + i + ']' + (p.id ? ' (' + p.id + ')' : '');
+  for (const f of ['id', 'part', 'k', 'accent', 'name', 'short', 'platform', 'version', 'size', 'desc', 'note', 'promise']) {
+    if (!p[f] || typeof p[f] !== 'string') problems.push(where + ' 缺字段或不是字符串: ' + f);
   }
-  if (p.id && !ID_RE.test(p.id)) problems.push(`${where} id 只能是小写字母/数字/连字符: ${p.id}`);
-  if (!Array.isArray(p.links) || p.links.length === 0) problems.push(`${where} links 不能为空`);
+  if (p.id && !ID_RE.test(p.id)) problems.push(where + ' id 只能是小写字母/数字/连字符: ' + p.id);
+  if (p.promise && p.promise.length > 40) problems.push(where + ' promise 太长（≤40 字）: ' + p.promise);
+  if (!PART_ZONE[p.part]) problems.push(where + ' 未知部位: ' + p.part + '（可用：' + Object.keys(PART_ZONE).join(' / ') + '）');
+  if (!Array.isArray(p.links) || p.links.length === 0) problems.push(where + ' links 不能为空');
   (p.links || []).forEach((l, j) => {
-    if (!l.label || !l.href) problems.push(`${where}.links[${j}] 缺 label 或 href`);
-    if (l.href && !/^https:\/\//.test(l.href)) problems.push(`${where}.links[${j}] 必须是 https: ${l.href}`);
+    if (!l.label || !l.href) problems.push(where + '.links[' + j + '] 缺 label 或 href');
+    if (l.href && !/^https:\/\//.test(l.href)) problems.push(where + '.links[' + j + '] 必须是 https: ' + l.href);
   });
-  // media：可选。video + poster 必须有；demo + demoNote 可选（没有试用页的
-  // 产品只生成「查看视频」）；videoTitle / videoMeta / videoNote 覆盖弹窗标题、
-  // 副标题与脚注。文件必须是仓库内的相对路径，且真的存在。
   if (p.media != null && typeof p.media !== 'object') problems.push(where + ' media 不是对象');
   else if (p.media) {
     for (const f of ['video', 'poster']) {
@@ -64,92 +63,35 @@ products.forEach((p, i) => {
       else if (!existsSync(join(ROOT, v))) problems.push(where + '.media.' + f + ' 指向的文件不存在: ' + v);
     }
   }
-
 });
 
-// 声明了几个产品就得是真几个：site.count 写错时页面上「收录产品」那个读数会是假的
 if (data.site && data.site.count !== products.length) {
-  problems.push(`site.count = ${data.site.count}，但 products 有 ${products.length} 个（页面上「收录产品」直接读它）`);
+  problems.push('site.count = ' + data.site.count + '，但 products 有 ' + products.length + ' 个');
 }
-
-// id / accent / slot 不能撞：它们分别是人形区域、颜色、栅格位置的键
-for (const key of ['id', 'accent', 'slot']) {
+for (const key of ['id', 'accent']) {
   const seen = new Map();
   products.forEach(p => {
-    if (seen.has(p[key])) problems.push(`${key} 重复: ${p[key]}（${seen.get(p[key])} 与 ${p.id}）`);
+    if (seen.has(p[key])) problems.push(key + ' 重复: ' + p[key] + '（' + seen.get(p[key]) + ' 与 ' + p.id + '）');
     seen.set(p[key], p.id);
   });
 }
-
-/* 一个部位可以有两个产品（2026-10-07 起：嘴巴 = PaperEcho + SE English）。
-   人形 SVG 里每个部位只有一个区域，所以同部位的产品共用它：
-   zone 取该部位**第一个**产品的 id（也是 data-zone 的名字）。 */
-const zoneOfPart = new Map();
-for (const p of products) if (!zoneOfPart.has(p.part)) zoneOfPart.set(p.part, p.id);
-
-/* 新增产品时最容易漏的一步：用了新的 accent / slot，
-   却没有在 index.html 的 CSS 里加对应的令牌与规则。
-   那样生成出来的 HTML 引用不存在的颜色和栅格位置 ——
-   页面不会报错，只会安静地少一块颜色、错一个位置。
-   所以在生成前就对一遍 CSS。
-
-   注意：只搜 <style> 块。index.html 里同时有 CSS 和生成出来的 HTML，
-   整文件搜索会被自己刚生成的内容满足（slot-d 出现在 HTML 里就算"找到了"），
-   检查就永远通过、等于没查。 */
+const partsUsed = new Set(products.map(p => p.part));
+for (const part of PART_ORDER) {
+  if (!partsUsed.has(part)) problems.push('缺少部位「' + part + '」的产品，人形会少一块');
+}
 
 const fullSource = readFileSync(HTML_PATH, 'utf8');
 const styleMatch = fullSource.match(/<style>([\s\S]*?)<\/style>/);
 if (!styleMatch) {
-  console.error('✗ index.html 里找不到 <style> 块，无法核对 accent / slot 是否有样式');
+  console.error('✗ index.html 里找不到 <style> 块，无法核对 accent 令牌');
   process.exit(2);
 }
 const cssSource = styleMatch[1];
-
 const hasToken = name => new RegExp('--' + name + ':\\s*[^;]+;').test(cssSource);
-const hasSlotClass = slot => new RegExp('\\.slot-' + slot + '\\s*(,|\\{)').test(cssSource);
-/* 令牌存在还不够：槽位与「点亮」都要真的把令牌接上。
-   2026-10-17 发现 --eye 定义了、.slot-f 也有，却漏了这两条接线规则 ——
-   令牌在，但没人用它：课蒸馏的槽位顶线透明、点「眼睛」人形不变色。
-   hasToken 查不出这种漏，因为令牌确实存在。 */
-const hasAccentRule = accent => new RegExp('\\.slot\\[data-accent="' + accent + '"\\]\\s*\\{\\s*--accent:').test(cssSource);
-const hasZoneRule = zone => new RegExp('\\.fig-zone\\[data-zone="' + zone + '"\\]\\.on\\s+path\\s*\\{').test(cssSource);
-
+const hasChapterAccent = accent => new RegExp('\\.chapter\\[data-accent="' + accent + '"\\]').test(cssSource);
 for (const p of products) {
-  if (!hasToken(p.accent)) {
-    problems.push(
-      `products(${p.id}) 用了 accent="${p.accent}"，但 CSS 里没有 --${p.accent} 令牌。\n` +
-      `      请在 :root 与 :root[data-theme="light"] 各加一个（深色/浅色两个值），\n` +
-      `      并在 tools/contrast-audit.py 的令牌清单里登记，否则对比度不受检。`
-    );
-  }
-  if (!hasAccentRule(p.accent)) {
-    problems.push(
-      `products(${p.id}) 用了 accent="${p.accent}"，但 CSS 里没有\n` +
-      `      .slot[data-accent="${p.accent}"] { --accent: var(--${p.accent}); } 这一条。\n` +
-      `      令牌在但没接上：槽位顶部那条 1px 细线会解析成空值（透明），悬停也不变色。`
-    );
-  }
-  if (!hasSlotClass(p.slot)) {
-    problems.push(
-      `products(${p.id}) 用了 slot="${p.slot}"，但 CSS 里没有 .slot-${p.slot} 规则。\n` +
-      `      请加一条栅格位置（12 列里占几列），参考现有 .slot-a / .slot-b / .slot-c。`
-    );
-  }
-  // 部位对应的 zone 必须真的画在人形里，否则点这一行时人形不会亮、连线也画不出来
-  const zone = zoneOfPart.get(p.part);
-  if (!new RegExp('data-zone="' + zone + '"').test(fullSource)) {
-    problems.push(
-      `products(${p.id}) 的部位「${p.part}」映射到人形区域 data-zone="${zone}"，\n` +
-      `      但 index.html 的 SVG 里没有这个区域。部位名或产品顺序变了就要同步人形。`
-    );
-  }
-  if (!hasZoneRule(zone)) {
-    problems.push(
-      `products(${p.id}) 的部位「${p.part}」映射到 data-zone="${zone}"，但 CSS 里没有\n` +
-      `      .fig-zone[data-zone="${zone}"].on path { stroke: ... } 这一条。\n` +
-      `      点这一行时人形那一段不会亮起（描边停在默认墨色），连线也少一头。`
-    );
-  }
+  if (!hasToken(p.accent)) problems.push('products(' + p.id + ') 用了 accent="' + p.accent + '"，CSS 里没有 --' + p.accent + ' 令牌');
+  if (!hasChapterAccent(p.accent)) problems.push('products(' + p.id + ') 用了 accent="' + p.accent + '"，CSS 里没有 .chapter[data-accent="' + p.accent + '"] 规则');
 }
 
 if (problems.length) {
@@ -158,123 +100,194 @@ if (problems.length) {
   process.exit(2);
 }
 
-/* ---------------------------------------------------------------- 派生值 */
-
-// 「一行客观指标」由字段拼出，不在 JSON 里再写一遍
-const domainOf = p => `${p.k} — ${p.platform} · ${p.version} · ${p.size}`;
+/* ---------------------------------------------------------------- 派生 */
 
 const esc = s => String(s)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   .replace(/"/g, '&quot;');
 
-/* ---------------------------------------------------------------- 四段生成 */
+const zoneOf = p => PART_ZONE[p.part];
+const noOf = p => String(products.indexOf(p) + 1).padStart(2, '0');
+const metaOf = p => (p.media && p.media.videoMeta) || '20 秒 · 1080p · 无旁白';
 
-// 1) 产品槽位。7/5 不对称：a=7 b=5 c=5 d=7，两行交错，刻意不做三等分卡片墙。
-function genSlots() {
+const frameDur = p => {
+  const m = metaOf(p).match(/(\d+)\s*秒/);
+  return m ? m[1] + ' 秒' : '';
+};
+const tagDur = p => {
+  const m = metaOf(p).match(/(\d+)\s*秒/);
+  return m ? m[1] + '″' : '片';
+};
+
+/* ---------------------------------------------------------------- 人形 */
+
+const FIG = {
+  argue: ['M100,30 C82.8,30 69,43.8 69,61 C69,78.2 82.8,92 100,92 C117.2,92 131,78.2 131,61 C131,43.8 117.2,30 100,30 Z'],
+  eye: ['M80,57 L92,57', 'M108,57 L120,57'],
+  lang: ['M89,72 L111,72'],
+  body: [
+    'M100,92 L100,112',
+    'M52,128 C72,114 128,114 148,128',
+    'M52,128 C43,172 45,220 54,262',
+    'M148,128 C157,172 155,220 146,262',
+    'M54,262 C64,290 78,302 100,302 C122,302 136,290 146,262',
+    'M52,132 C32,162 24,204 28,252',
+    'M148,132 C168,162 176,204 172,252',
+    'M82,302 C78,364 74,424 72,492',
+    'M118,302 C122,364 126,424 128,492',
+    'M72,492 L58,504',
+    'M128,492 L142,504',
+  ],
+  outer: [
+    'M86,110 C74,102 58,108 44,124',
+    'M44,124 C26,146 18,196 20,250 C24,288 32,318 38,338',
+    'M114,110 C126,102 142,108 156,124',
+    'M156,124 C174,146 182,196 180,250 C176,288 168,318 162,338',
+  ],
+};
+const ZONE_ORDER = ['argue', 'eye', 'lang', 'body', 'outer'];
+
+function genFigure(label) {
+  const groups = ZONE_ORDER.map(z => {
+    const paths = FIG[z].map(d => '          <path pathLength="1" d="' + d + '"/>').join('\n');
+    return '        <g class="zone" data-zone="' + z + '">\n' + paths + '\n        </g>';
+  }).join('\n');
+  return '      <svg class="body-figure" viewBox="0 0 200 540" role="img" aria-label="' + label + '">\n' + groups + '\n      </svg>';
+}
+
+/* ---------------------------------------------------------------- 生成 */
+
+function genContact() {
   return products.map(p => {
-    const specs = [['平台', p.platform], ['版本', p.version], ['体积', p.size]]
-      .map(([k, v]) => `          <div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('\n');
-    const links = p.links.map((l, i) => {
-      const arrow = i === 0 ? ' <span class="arw" aria-hidden="true">→</span>' : '';
-      return `          <a href="${esc(l.href)}">${esc(l.label)}${arrow}</a>`;
-    }).join('\n');
-    // 「查看视频」「在线试用」不是链接，是打开悬浮窗的按钮：写成 <a href> 的话，
-    // 中键或回车会直接跳到一段裸的 mp4 / 一个裸的 demo 页，那是另一条没人维护的路径。
-    // 地址、标题、副标题、脚注都挂在 data-* 上，脚本里不为任何产品写死内容。
-    // 有 video 才生成「查看视频」，有 demo 才生成「在线试用」。
-    var videoAct = '';
-    if (p.media && p.media.video) {
-      videoAct = '          <button type="button" class="slot-act" data-open="video"\n'
-        + '                  data-src="' + esc(p.media.video) + '" data-poster="' + esc(p.media.poster) + '"\n'
-        + '                  data-title="' + esc(p.media.videoTitle || p.name + ' · 使用演示') + '"\n'
-        + '                  data-meta="' + esc(p.media.videoMeta || '20 秒 · 1080p · 音乐与动作音效') + '"\n'
-        + '                  data-foot="' + esc(p.media.videoNote || '用真实操作录的：每一步都由产品概念与界面动效构成。') + '">查看视频</button>';
-    }
-    var demoAct = '';
-    if (p.media && p.media.demo) {
-      demoAct = '          <button type="button" class="slot-act" data-open="demo"\n'
-        + '                  data-src="' + esc(p.media.demo) + '" data-title="' + esc(p.name) + ' · 在线试用"\n'
-        + '                  data-note="' + esc(p.media.demoNote) + '">在线试用</button>';
-    }
-    const acts = (videoAct || demoAct)
-      ? '        <div class="slot-acts">\n' + [videoAct, demoAct].filter(Boolean).join('\n') + '\n        </div>\n'
-      : '';
-
-    return `      <!-- ${esc(p.name)}：${esc(p.part)} -->
-      <article class="slot slot-${esc(p.slot)} reveal" data-accent="${esc(p.accent)}">
-        <p class="slot-domain">${esc(p.part)} · ${esc(p.k)}</p>
-        <h3 class="slot-name">${esc(p.name)}</h3>
-        <p class="slot-desc">
-          ${esc(p.desc)}
-        </p>
-        <dl class="slot-specs">
-${specs}
-        </dl>
-        <p class="slot-note">
-          ${esc(p.note)}
-        </p>
-${acts}        <div class="slot-links">
-${links}
-        </div>
-      </article>`;
-  }).join('\n\n');
-}
-
-// 2) 图版数据。形状与 JSON 一致，不再套一层 product，少一层心智负担。
-//    zone = 这条产品管着的人形区域（同部位共用；页面上靠它点亮与连线）。
-function genData() {
-  const slim = products.map(p => ({
-    id: p.id, part: p.part, k: p.k, accent: p.accent, zone: zoneOfPart.get(p.part),
-    name: p.name, short: p.short,
-    domain: domainOf(p),
-    desc: p.desc, note: p.note, links: p.links,
-  }));
-  const body = JSON.stringify(slim, null, 2)
-    .split('\n').map((l, i) => (i === 0 ? l : '    ' + l)).join('\n');
-  return `    var DATA = ${body};`;
-}
-
-// 3) 无 JS 清单。禁用脚本时信息不能缺，内容与图版逐字一致。
-function genNoscript() {
-  return products.map((p, i) => {
-    const links = p.links.map(l => `            <a href="${esc(l.href)}">${esc(l.label)}</a>`).join('\n');
-    const mt = i === 0 ? ' style="margin-top:16px"' : '';
-    return `        <div class="map-panel"${mt}>
-          <h3>${esc(p.name)}</h3>
-          <p class="p-domain">${esc(domainOf(p))}</p>
-          <p>${esc(p.desc)}</p>
-          <ul>
-            <li>${esc(p.note)}</li>
-          </ul>
-          <p class="p-actions">
-${links}
-          </p>
-        </div>`;
+    const media = p.media || {};
+    const still = media.still || media.poster;
+    return '        <a class="frame" href="#' + esc(p.id) + '" data-accent="' + esc(p.accent) + '">\n' +
+      '          <img class="frame-img" src="' + esc(still) + '" alt="' + esc(p.name) + '的片子画面" width="480" height="270" loading="lazy" decoding="async">\n' +
+      '          <span class="frame-meta"><span class="frame-no">' + noOf(p) + '</span><span class="frame-name">' + esc(p.name) + '</span><span class="frame-dur">' + (frameDur(p) ? '片 ' + frameDur(p) : '') + '</span></span>\n' +
+      '        </a>';
   }).join('\n');
 }
 
-// 4) 敬请期待
-//    只生成 <li>，自己不要再套一层 <ul>：外层已经是
-//    <ul class="planned reveal">，生成器再套一层就成了 ul 嵌 ul ——
-//    flex 布局失效、条目竖着堆成一列（页面凭空高 300 多像素）。
-function genPlanned() {
-  return data.planned.items
-    .map(it => `      <li><p class="p-k">${esc(it.k)}</p><p class="p-s">${esc(it.s)}</p></li>`)
-    .join('\n');
+function genIndex() {
+  return products.map(p => {
+    const media = p.media || {};
+    const tags = [];
+    if (media.video) tags.push('片 ' + tagDur(p));
+    if (media.demo) tags.push('试用');
+    return '        <li class="toc-row" data-accent="' + esc(p.accent) + '">\n' +
+      '          <a href="#' + esc(p.id) + '">\n' +
+      '            <span class="toc-no">' + noOf(p) + '</span>\n' +
+      '            <span class="toc-part">' + esc(p.part) + '</span>\n' +
+      '            <span class="toc-name">' + esc(p.name) + '</span>\n' +
+      '            <span class="toc-promise">' + esc(p.promise) + '</span>\n' +
+      '            <span class="toc-media">' + esc(tags.join(' · ')) + '</span>\n' +
+      '          </a>\n' +
+      '        </li>';
+  }).join('\n');
 }
 
-// 5) 页脚的产品链接。以前是手写的一串 <a>，加产品时最容易漏的就是它
-//    （同 §4.3 的理由：同一件事写在两处，迟早不一致）。
+function genRail() {
+  const byPart = new Map();
+  products.forEach(p => {
+    if (!byPart.has(p.part)) byPart.set(p.part, []);
+    byPart.get(p.part).push(p);
+  });
+  return PART_ORDER.filter(part => byPart.has(part)).map(part => {
+    const list = byPart.get(part);
+    const first = list[0];
+    const nums = list.map(noOf);
+    const count = nums.length > 1 ? nums[0] + '–' + nums[nums.length - 1] : nums[0];
+    return '          <a class="rail-item" href="#' + esc(first.id) + '" data-zone="' + esc(zoneOf(first)) + '" data-part="' + esc(part) + '" style="--accent:var(--' + esc(first.accent) + ')">\n' +
+      '            <span class="rail-dot" aria-hidden="true"></span><span class="rail-label">' + esc(part) + '</span><span class="rail-count">' + count + '</span>\n' +
+      '          </a>';
+  }).join('\n');
+}
+
+function mediaButtons(p) {
+  const media = p.media || {};
+  const out = [];
+  if (media.demo) {
+    out.push('          <button class="btn btn-line media-open" type="button" data-open="demo"\n' +
+      '                  data-src="' + esc(media.demo) + '" data-title="' + esc(p.name) + ' · 在线试用"\n' +
+      '                  data-note="' + esc(media.demoNote || '') + '">在线试用</button>');
+  }
+  return out.join('\n');
+}
+
+function genChapters() {
+  return products.map((p, i) => {
+    const media = p.media || {};
+    const primary = p.links[0];
+    const apk = p.links[1];
+    const extraLinks = p.links.slice(2).map(l =>
+      '                <a href="' + esc(l.href) + '">' + esc(l.label) + '</a>').join('\n');
+    const facts = [['平台', p.platform], ['版本', p.version], ['体积', p.size]]
+      .map(([k, v]) => '              <div><dt>' + esc(k) + '</dt><dd>' + esc(v) + '</dd></div>').join('\n');
+    let plate = '';
+    if (media.video) {
+      const still = media.still || media.poster;
+      const meta = metaOf(p);
+      plate = '          <button class="plate media-open" type="button" data-open="video"\n' +
+        '                  data-src="' + esc(media.video) + '" data-poster="' + esc(media.poster) + '"\n' +
+        '                  data-title="' + esc(media.videoTitle || p.name + ' · 产品宣传片') + '"\n' +
+        '                  data-meta="' + esc(meta) + '"\n' +
+        '                  data-foot="' + esc(media.videoNote || '学习流程示意 · 依据产品界面重绘。') + '"\n' +
+        '                  aria-label="播放' + esc(p.name) + '的片子">\n' +
+        '            <span class="plate-frame"><img class="plate-img" src="' + esc(still) + '" alt="' + esc(p.name) + '的片子画面" width="1280" height="720" loading="lazy" decoding="async">\n' +
+        '              <span class="plate-play" aria-hidden="true"><svg viewBox="0 0 13 15" fill="currentColor"><path d="M1 0.8v13.4L12.2 8 1 0.8z"/></svg></span></span>\n' +
+        '            <span class="plate-meta"><span>ORIGINAL FILM</span><span>' + esc(meta) + '</span></span>\n' +
+        '          </button>\n' +
+        '          <p class="plate-hint">点画面看片</p>';
+    }
+    const noscriptLinks = [];
+    if (media.video) noscriptLinks.push('<a href="' + esc(media.video) + '">直接看片</a>');
+    if (media.demo) noscriptLinks.push('<a href="' + esc(media.demo) + '">打开试用</a>');
+    const noscriptHtml = noscriptLinks.length
+      ? '          <noscript><p class="boundary">视频与试用需要 JavaScript：' + noscriptLinks.join(' · ') + '</p></noscript>\n'
+      : '';
+    return '        <article class="chapter" id="' + esc(p.id) + '" data-i="' + (i + 1) + '" data-zone="' + esc(zoneOf(p)) + '" data-accent="' + esc(p.accent) + '" aria-labelledby="t-' + esc(p.id) + '">\n' +
+      '          <header class="chapter-head">\n' +
+      '            <p class="chapter-meta"><span class="chapter-no">' + noOf(p) + '</span><span class="chapter-part">' + esc(p.part) + '</span><span class="chapter-k">' + esc(p.k) + '</span></p>\n' +
+      '            <h2 class="chapter-name" id="t-' + esc(p.id) + '">' + esc(p.name) + '</h2>\n' +
+      '            <p class="chapter-promise">' + esc(p.promise) + '</p>\n' +
+      '          </header>\n' +
+      '          <div class="chapter-body">\n' +
+      '            <div class="chapter-text">\n' +
+      '              <p class="desc">' + esc(p.desc) + '</p>\n' +
+      '              <dl class="facts">\n' + facts + '\n              </dl>\n' +
+      '              <div class="chapter-actions">\n' +
+      (mediaButtons(p) ? mediaButtons(p) + '\n' : '') +
+      '                <a class="btn btn-line" href="' + esc(primary.href) + '">' + esc(primary.label) + ' <span aria-hidden="true">→</span></a>\n' +
+      (apk ? '                <a class="link-quiet" href="' + esc(apk.href) + '">' + esc(apk.label) + '</a>\n' : '') +
+      (extraLinks ? extraLinks + '\n' : '') +
+      '              </div>\n' +
+
+      '              <details class="boundary"><summary>边界与前提</summary><p>' + esc(p.note) + '</p></details>\n' +
+      '            </div>\n' +
+      '            <div class="chapter-media">\n' + plate + '\n            </div>\n' +
+      '          </div>\n' + noscriptHtml +
+      '        </article>';
+  }).join('\n\n');
+}
+
 function genFooter() {
   return products.map(p =>
-    `        <a href="${esc(p.links[0].href)}">${esc(p.name)}</a>`
+    '          <a href="' + esc(p.links[0].href) + '">' + esc(p.name) + '</a>'
   ).join('\n');
 }
 
-/* ---------------------------------------------------------------- 404.html
+function genData() {
+  const slim = products.map((p, i) => ({
+    id: p.id, no: i + 1, part: p.part, k: p.k, accent: p.accent,
+    zone: zoneOf(p), name: p.name, short: p.short, promise: p.promise,
+    platform: p.platform, version: p.version, size: p.size,
+    media: p.media || null, links: p.links,
+  }));
+  const body = JSON.stringify(slim, null, 2).split('\n').map((l, i) => (i === 0 ? l : '  ' + l)).join('\n');
+  return '  var DATA = ' + body + ';';
+}
 
-   整份生成，不是只填一段 —— 免得 404 页的颜色/字体跟主页各走各的。
-   色值、字体子集、站点图标都从 index.html 现场读，主页改了这里自动跟上。 */
+/* ---------------------------------------------------------------- 404 */
 
 function gen404() {
   const src = readFileSync(HTML_PATH, 'utf8');
@@ -283,166 +296,76 @@ function gen404() {
     if (!m) throw new Error('index.html 里找不到令牌 --' + n + '（404 页要用）');
     return m[1];
   };
-  const fontB64 = src.match(/src: url\(data:font\/woff2;base64,([A-Za-z0-9+/=]+)\)/);
-  if (!fontB64) throw new Error('index.html 里找不到词标字体（404 页要用）');
   const icon = src.match(/<link rel="icon" href="([^"]+)">/);
   if (!icon) throw new Error('index.html 里找不到站点图标（404 页要用）');
-  const hair = 'rgba(232, 234, 237, .12)';
-
   const links = products.map(p =>
-    `        <li><a href="${esc(p.links[0].href)}"><b>${esc(p.part)} · ${esc(p.name)}</b><span>${esc(p.k)}</span></a></li>`
+    '    <li><a href="' + esc(p.links[0].href) + '"><b>' + esc(p.part) + ' · ' + esc(p.name) + '</b><span>' + esc(p.k) + '</span></a></li>'
   ).join('\n');
-
-  // 页面上的「几个产品」都用汉字（五个产品），这里跟着来，别写成 "5 个产品"
-  const CN = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
-  const cnNum = n => CN[n] != null ? CN[n] : String(n);
-
-  return `<!doctype html>
-<html lang="zh-CN">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>没有这个页面 · 从头到脚</title>
-<meta name="robots" content="noindex">
-<meta name="color-scheme" content="dark light">
-<meta name="theme-color" content="${tok('bg')}">
-<link rel="icon" href="${icon[1]}">
-<script>
-/* 与主页同一套主题逻辑，键名也一样：从主页跳到 404 不会突然变色 */
-(function () {
-  var t;
-  try { t = localStorage.getItem('ctdj-theme'); } catch (e) {}
-  if (t !== 'light' && t !== 'dark') {
-    t = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-  }
-  document.documentElement.setAttribute('data-theme', t);
-})();
-</script>
-<style>
-/* 本文件由 tools/build.mjs 生成，不要手改。改 data/products.json 或
-   index.html 的令牌后重跑 build.mjs。 */
-@font-face {
-  font-family: "CongtoudaojiaoWordmark";
-  src: url(data:font/woff2;base64,${fontB64[1]}) format("woff2");
-  font-weight: 500; font-style: normal; font-display: swap;
-}
-:root {
-  --bg: ${tok('bg')}; --ink: ${tok('ink')}; --ink-2: ${tok('ink-2')}; --ink-3: ${tok('ink-3')};
-  --hair: ${hair};
-  --wb: ${tok('wb')}; --pe: ${tok('pe')}; --wl: ${tok('wl')}; --os: ${tok('os')};
-  --se: ${tok('se')}; --eye: ${tok('eye')};
-  --sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB",
-          "Source Han Sans SC", "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif;
-  --serif: "CongtoudaojiaoWordmark", "Songti SC", "Source Han Serif SC", "Noto Serif SC", serif;
-  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
-}
-:root[data-theme="light"] {
-  --bg: #F3F3F1; --ink: #101214; --ink-2: #4A4F54; --ink-3: #62686C;
-  --hair: rgba(16, 18, 20, .12);
-  --wb: #44603B; --pe: #C0432A; --wl: #1B5E54; --os: #B45309;
-  --se: #A9583E; --eye: #3F5C8A;
-}
-*, *::before, *::after { box-sizing: border-box; }
-body {
-  margin: 0; background: var(--bg); color: var(--ink);
-  font-family: var(--sans); font-size: 16.5px; line-height: 1.78;
-  -webkit-font-smoothing: antialiased;
-  min-height: 100vh; display: flex; align-items: center;
-}
-.wrap { width: 100%; max-width: 1240px; margin: 0 auto; padding: 0 clamp(20px, 5vw, 64px); }
-a { color: inherit; text-decoration: none; }
-a:hover { text-decoration: underline; text-underline-offset: .18em; }
-:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 2px; }
-.mark {
-  font-family: var(--serif); font-weight: 500; font-size: clamp(30px, 5vw, 46px);
-  letter-spacing: .02em; line-height: 1;
-}
-.code { font-family: var(--mono); font-size: 12.5px; color: var(--ink-3); letter-spacing: .06em; }
-h1 { font-size: clamp(26px, 3.2vw, 40px); font-weight: 700; line-height: 1.34; margin: 18px 0 12px; text-wrap: balance; }
-.lead { color: var(--ink-2); font-size: 14.5px; max-width: 34em; margin: 0 0 44px; }
-.spine { display: flex; gap: 2px; height: 3px; max-width: 300px; margin: 26px 0 0; }
-.spine i { display: block; height: 100%; }
-.spine i:nth-child(1) { flex: 3; background: var(--wb); }
-.spine i:nth-child(2) { flex: 3; background: var(--pe); }
-.spine i:nth-child(3) { flex: 2; background: var(--wl); }
-.spine i:nth-child(4) { flex: 2; background: var(--os); }
-.spine i:nth-child(5) { flex: 2; background: var(--eye); }
-ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--hair); }
-li { border-bottom: 1px solid var(--hair); }
-li a { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; padding: 15px 2px; min-height: 56px; }
-li a:hover { text-decoration: none; }
-li a:hover b { text-decoration: underline; text-underline-offset: .2em; }
-li b { font-size: 16.5px; font-weight: 700; }
-li span { font-family: var(--mono); font-size: 12.5px; color: var(--ink-3); }
-.home { display: inline-flex; align-items: center; min-height: 44px; margin-top: 32px; font-size: 14.5px; color: var(--ink-2); }
-.home:hover { color: var(--ink); }
-</style>
-</head>
-<body>
-<div class="wrap">
-  <p class="code">404 · 没有这个页面</p>
-  <h1>这里没有东西。</h1>
-  <p class="lead">地址可能打错了，或者那个页面已经搬走。下面是全部${cnNum(products.length)}个产品。</p>
-  <div class="spine" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-  <ul style="margin-top:44px">
-${links}
-  </ul>
-  <a class="home" href="/">← 回首页</a>
-</div>
-</body>
-</html>
-`;
+  return '<!doctype html>\n' +
+'<html lang="zh-CN">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n' +
+'<title>没有这个页面 · 从头到脚</title>\n<meta name="robots" content="noindex">\n' +
+'<meta name="color-scheme" content="dark light">\n<meta name="theme-color" content="' + tok('bg') + '">\n' +
+'<link rel="icon" href="' + icon[1] + '">\n' +
+'<script>(function(){var t;try{t=localStorage.getItem("ctdj-theme");}catch(e){}if(t!=="light"&&t!=="dark"){t=window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";}document.documentElement.setAttribute("data-theme",t);})();</script>\n' +
+'<style>\n' +
+':root{--bg:#0E0C09;--ink:#ECE5D8;--ink-2:#B3AA9B;--ink-3:#8C8375;--hair:rgba(236,229,216,.14);--serif:"Source Han Serif SC","Noto Serif SC","Songti SC","STSong","SimSun",serif;--sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Source Han Sans SC","Noto Sans SC","Microsoft YaHei",system-ui,sans-serif;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;}\n' +
+':root[data-theme="light"]{--bg:#F2EDE3;--ink:#17140F;--ink-2:#575047;--ink-3:#6D6559;--hair:rgba(23,20,15,.14);}\n' +
+'@media (prefers-color-scheme: light){:root:not([data-theme]){--bg:#F2EDE3;--ink:#17140F;--ink-2:#575047;--ink-3:#6D6559;--hair:rgba(23,20,15,.14);}}\n' +
+'*,*::before,*::after{box-sizing:border-box}\n' +
+'body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16.5px;line-height:1.78;display:flex;align-items:center;min-height:100vh}\n' +
+'.wrap{width:100%;max-width:1200px;margin:0 auto;padding:0 clamp(20px,5vw,64px)}\n' +
+'a{color:inherit;text-decoration:none}a:hover{text-decoration:underline;text-underline-offset:.2em}\n' +
+'h1{font-family:var(--serif);font-size:clamp(32px,5vw,56px);font-weight:500;line-height:1.2;margin:16px 0 14px}\n' +
+'.mark{font-family:var(--serif);font-size:20px;letter-spacing:.02em}\n' +
+'.code{font-family:var(--mono);font-size:12.5px;letter-spacing:.06em;color:var(--ink-3)}\n' +
+'.lead{color:var(--ink-2);font-size:14.5px;max-width:34em;margin:0 0 40px}\n' +
+'ul{list-style:none;margin:0;padding:0;border-top:1px solid var(--hair)}\n' +
+'li{border-bottom:1px solid var(--hair)}\n' +
+'li a{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;padding:15px 2px;min-height:56px}\n' +
+'li b{font-family:var(--serif);font-weight:500;font-size:17px}\n' +
+'li span{font-family:var(--mono);font-size:12.5px;color:var(--ink-3)}\n' +
+'.home{display:inline-flex;align-items:center;min-height:44px;margin-top:32px;font-size:14.5px;color:var(--ink-2)}\n' +
+'</style>\n</head>\n<body>\n<div class="wrap">\n' +
+'<p class="code">404 · 没有这个页面</p>\n<h1>这里没有东西。</h1>\n' +
+'<p class="lead">地址可能打错了，或者那个页面已经搬走。下面是全部' + products.length + '个产品。</p>\n' +
+'<ul style="margin-top:32px">\n' + links + '\n</ul>\n' +
+'<a class="home" href="/">← 回首页</a>\n</div>\n</body>\n</html>\n';
 }
 
 /* ---------------------------------------------------------------- 替换 */
 
 const REGIONS = [
-  { name: 'slots',    open: '<!-- @generated:slots -->',    close: '<!-- @generated:end -->', body: genSlots() },
-  { name: 'noscript', open: '<!-- @generated:noscript -->', close: '<!-- @generated:end -->', body: genNoscript() },
-  { name: 'planned',  open: '<!-- @generated:planned -->',  close: '<!-- @generated:end -->', body: genPlanned() },
-  { name: 'footer',   open: '<!-- @generated:footer -->',   close: '<!-- @generated:end -->', body: genFooter() },
-  { name: 'data',     open: '/* @generated:data */',        close: '/* @generated:end */',    body: genData() },
+  { name: 'contact', open: '<!-- @generated:contact -->', close: '<!-- @generated:end -->', body: genContact() },
+  { name: 'figure-hero', open: '<!-- @generated:figure-hero -->', close: '<!-- @generated:end -->', body: genFigure('从头到脚的人形线稿：脑袋、眼睛、嘴巴、身体、着装') },
+  { name: 'figure-rail', open: '<!-- @generated:figure-rail -->', close: '<!-- @generated:end -->', body: genFigure('从头到脚的人形线稿') },
+  { name: 'index', open: '<!-- @generated:index -->', close: '<!-- @generated:end -->', body: genIndex() },
+  { name: 'rail', open: '<!-- @generated:rail -->', close: '<!-- @generated:end -->', body: genRail() },
+  { name: 'chapters', open: '<!-- @generated:chapters -->', close: '<!-- @generated:end -->', body: genChapters() },
+  { name: 'footer', open: '<!-- @generated:footer -->', close: '<!-- @generated:end -->', body: genFooter() },
+  { name: 'data', open: '/* @generated:data */', close: '/* @generated:end */', body: genData() },
 ];
 
 let html = readFileSync(HTML_PATH, 'utf8');
 const missing = [];
-
 for (const r of REGIONS) {
   const o = html.indexOf(r.open);
   const c = html.indexOf(r.close, o + r.open.length);
   if (o === -1 || c === -1) { missing.push(r.name); continue; }
-  const before = html.slice(0, o + r.open.length);
-  const after = html.slice(c);
-  html = before + '\n' + r.body + '\n' + after;
+  html = html.slice(0, o + r.open.length) + '\n' + r.body + '\n' + html.slice(c);
 }
-
 if (missing.length) {
   console.error('index.html 里找不到这些生成区的标记：' + missing.join(', '));
-  console.error('标记必须成对存在：<!-- @generated:名字 --> … <!-- @generated:end -->');
   process.exit(2);
 }
 
-/* 结构自检：生成的内容不能自带**外层容器本身**。
-   踩过一次：genPlanned 自己带了 <ul class="planned">，被塞进外层已有的
-   <ul class="planned"> 里，变成 ul 嵌 ul —— flex 布局失效、条目竖成一列，
-   页面凭空高 300 多像素，而所有门禁都是绿的（没有一条规则会因此报错）。
-
-   判据是「标签 + class 都相同」，不能只看标签：
-   生成区里本来就有重复单元（slots 的 <article>、noscript 的
-   <div class="map-panel">），那些是对的；错的只有"把外层容器又写了一遍"。
-   只看标签会把重复单元一起误杀。 */
-
-const structProblems = [];
-
-// 每个生成区外层容器的 标签 + class（已存在于手写 HTML 里）
 const OUTER = {
-  slots:    { tag: 'div', cls: 'slots' },
-  noscript: { tag: 'div', cls: 'map' },
-  planned:  { tag: 'ul',  cls: 'planned' },
-  footer:   { tag: 'div', cls: 'foot-links' },
-  data:     null,             // JS 变量声明，没有容器概念
+  contact: { tag: 'div', cls: 'contact-grid' },
+  index: { tag: 'ol', cls: 'toc' },
+  rail: { tag: 'nav', cls: 'rail-nav' },
+  chapters: { tag: 'div', cls: 'chapter-flow' },
+  footer: { tag: 'div', cls: 'foot-links' },
 };
-
+const structProblems = [];
 for (const r of REGIONS) {
   const outer = OUTER[r.name];
   if (outer) {
@@ -450,20 +373,13 @@ for (const r of REGIONS) {
     let m;
     while ((m = re.exec(r.body)) !== null) {
       if (m[1].split(/\s+/).includes(outer.cls)) {
-        structProblems.push(
-          `生成区 ${r.name} 里又写了一遍外层容器 <${outer.tag} class="${outer.cls}">。\n` +
-          `      外层已经有它了，生成器只应产出容器**内部**的内容` +
-          `（重复单元如 <li>/<article> 可以，容器本身不行）。`
-        );
+        structProblems.push('生成区 ' + r.name + ' 里又写了一遍外层容器 <' + outer.tag + ' class="' + outer.cls + '">');
         break;
       }
     }
   }
-  if (r.body.includes('@generated:')) {
-    structProblems.push(`生成区 ${r.name} 的内容里又出现了 @generated 标记`);
-  }
+  if (r.body.includes('@generated:')) structProblems.push('生成区 ' + r.name + ' 的内容里又出现了 @generated 标记');
 }
-
 if (structProblems.length) {
   console.error('生成内容的结构有问题，未写入：');
   structProblems.forEach(p => console.error('  ✗ ' + p));
@@ -475,39 +391,30 @@ if (structProblems.length) {
 const current = readFileSync(HTML_PATH, 'utf8');
 const notFound = gen404();
 let bad404 = null;
-try { bad404 = readFileSync(HTML_404_PATH, 'utf8'); } catch { /* 首次生成，还没有 */ }
+try { bad404 = readFileSync(HTML_404_PATH, 'utf8'); } catch {}
 
 if (CHECK) {
   const problemsOut = [];
   if (current !== html) {
-    // 指出第一处差异在哪一行，比丢一句"不同步"有用
     const a = current.split('\n'), b = html.split('\n');
     let line = 0;
     while (line < Math.max(a.length, b.length) && a[line] === b[line]) line++;
-    problemsOut.push(
-      '✗ index.html 与 data/products.json 不同步\n' +
-      `  第一处差异在第 ${line + 1} 行：\n` +
-      `    现在: ${(a[line] ?? '(文件结束)').trim().slice(0, 90)}\n` +
-      `    应为: ${(b[line] ?? '(文件结束)').trim().slice(0, 90)}`
-    );
+    problemsOut.push('✗ index.html 与 data/products.json 不同步\n  第一处差异在第 ' + (line + 1) + ' 行：\n' +
+      '    现在: ' + String(a[line] ?? '(文件结束)').trim().slice(0, 90) + '\n' +
+      '    应为: ' + String(b[line] ?? '(文件结束)').trim().slice(0, 90));
   }
   if (bad404 !== notFound) problemsOut.push('✗ 404.html 与数据/令牌不同步');
-
   if (problemsOut.length) {
     problemsOut.forEach(p => console.error(p));
-    console.error('  跑 `node tools/build.mjs` 重新生成。');
+    console.error('  跑 node tools/build.mjs 重新生成。');
     process.exit(1);
   }
-  console.log(`✓ 生成物与 data/products.json 同步（${products.length} 个产品，index.html + 404.html）`);
+  console.log('✓ 生成物与 data/products.json 同步（' + products.length + ' 个产品，index.html + 404.html）');
   process.exit(0);
 }
 
 const written = [];
 if (current !== html) { writeFileSync(HTML_PATH, html); written.push('index.html'); }
 if (bad404 !== notFound) { writeFileSync(HTML_404_PATH, notFound); written.push('404.html'); }
-
-if (written.length) {
-  console.log(`✓ 已生成 ${products.length} 个产品：${written.join(' + ')}`);
-} else {
-  console.log(`已是最新，无需改动（${products.length} 个产品）`);
-}
+if (written.length) console.log('✓ 已生成 ' + products.length + ' 个产品：' + written.join(' + '));
+else console.log('已是最新，无需改动（' + products.length + ' 个产品）');

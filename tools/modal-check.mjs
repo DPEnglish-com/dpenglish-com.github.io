@@ -133,8 +133,7 @@ try {
   const before = await ev(`(function(){
     return { videos: document.querySelectorAll('video').length,
              iframes: document.querySelectorAll('iframe').length,
-             acts: document.querySelectorAll('.slot-act').length,
-             slots: document.querySelectorAll('.slot').length };
+             acts: document.querySelectorAll('.media-open').length };
   })()`);
   ck(before.acts === EXPECTED_VIDEOS + EXPECTED_DEMOS, '视频/试用入口与数据一致（实为 ' + before.acts + ' 个，期望 ' + (EXPECTED_VIDEOS + EXPECTED_DEMOS) + ' 个）');
   ck(before.videos === 0 && before.iframes === 0, '打开前页面上没有 video / iframe');
@@ -143,7 +142,7 @@ try {
 
   // ---------- 2) 查看视频 ----------
   console.log('\n=== B) 查看视频 ===');
-  await ev(`document.querySelector('.slot-act[data-open="video"]').click()`); await sleep(500);
+  await ev(`document.querySelector('.media-open[data-open="video"]').click()`); await sleep(500);
   const v = await ev(`(function(){
     var m=document.getElementById('modal'), v=document.querySelector('#modalBody video');
     return { hidden:m.hidden, kind:m.querySelector('.modal-box').getAttribute('data-kind'),
@@ -177,7 +176,7 @@ try {
   const afterEsc = await ev(`(function(){
     var m=document.getElementById('modal');
     return { hidden:m.hidden, videos:document.querySelectorAll('video').length,
-             focusIsAct: document.activeElement && document.activeElement.classList.contains('slot-act'),
+             focusIsAct: document.activeElement && document.activeElement.classList.contains('media-open'),
              unlocked: !document.body.classList.contains('modal-open') };
   })()`);
   ck(afterEsc.hidden, 'Esc 能关闭');
@@ -187,10 +186,10 @@ try {
 
   // ---------- 2b) 每个视频入口：文件在、能播 ----------
   console.log('\n=== B2) 所有视频入口 ===');
-  const vidCount = await ev("document.querySelectorAll('.slot-act[data-open=video]').length");
+  const vidCount = await ev("document.querySelectorAll('.media-open[data-open=video]').length");
   ck(vidCount === EXPECTED_VIDEOS, '视频入口数量与数据一致（实为 ' + vidCount + ' 个，期望 ' + EXPECTED_VIDEOS + ' 个）');
   for (let vi = 0; vi < vidCount; vi++) {
-    const vInfo = await ev("(function(){var b=document.querySelectorAll('.slot-act[data-open=video]')[" + vi + "];var src=b.getAttribute('data-src');b.click();return {src:src,title:b.getAttribute('data-title'),meta:b.getAttribute('data-meta')};})()");
+    const vInfo = await ev("(function(){var b=document.querySelectorAll('.media-open[data-open=video]')[" + vi + "];var src=b.getAttribute('data-src');b.click();return {src:src,title:b.getAttribute('data-title'),meta:b.getAttribute('data-meta')};})()");
     await sleep(500);
     const vMeta = await ev("new Promise(function(res){var v=document.querySelector('#modalBody video');if(!v)return res({err:'no video'});var done=false;function fin(o){if(!done){done=true;res(o);}}if(v.readyState>=1)return fin({dur:Math.round(v.duration*10)/10,w:v.videoWidth,h:v.videoHeight});v.addEventListener('loadedmetadata',function(){fin({dur:Math.round(v.duration*10)/10,w:v.videoWidth,h:v.videoHeight});},{once:true});v.addEventListener('error',function(){fin({err:'error'});},{once:true});setTimeout(function(){fin({err:'timeout',rs:v.readyState});},12000);v.load();})");
     const vPath = vInfo && vInfo.src && !/^[a-z]+:/i.test(vInfo.src) ? join(ROOT, vInfo.src.replace(/^\.?\//, '')) : null;
@@ -199,12 +198,12 @@ try {
     await ev("document.querySelector('#modal .modal-x').click()");
     await sleep(200);
   }
-  const filmBtn = await ev("(function(){var b=document.querySelector('.slot-f .slot-act[data-open=video]');return b?{title:b.getAttribute('data-title'),meta:b.getAttribute('data-meta'),foot:b.getAttribute('data-foot')}:null;})()");
-  ck(!!filmBtn && !!filmBtn.meta && !!filmBtn.foot, '宣传片入口带自己的时长说明（' + (filmBtn && filmBtn.meta) + '）');
+  const filmBtn = await ev("(function(){var b=document.querySelector('#eye .media-open[data-open=video]');return b?{title:b.getAttribute('data-title'),meta:b.getAttribute('data-meta'),foot:b.getAttribute('data-foot')}:null;})()");
+  ck(!!filmBtn && !!filmBtn.meta && !!filmBtn.foot && /56/.test(filmBtn.meta), '宣传片入口带自己的时长说明（' + (filmBtn && filmBtn.meta) + '）');
 
   // ---------- 3) 在线试用 ----------
   console.log('\n=== C) 在线试用 ===');
-  await ev(`document.querySelectorAll('.slot-act[data-open="demo"]')[0].click()`); await sleep(900);
+  await ev(`document.querySelectorAll('.media-open[data-open="demo"]')[0].click()`); await sleep(900);
   const d = await ev(`(function(){
     var m=document.getElementById('modal'), f=document.querySelector('#modalBody iframe');
     return { hidden:m.hidden, kind:m.querySelector('.modal-box').getAttribute('data-kind'),
@@ -238,7 +237,7 @@ try {
   const afterIframeEsc = await ev(`(function(){
     var m=document.getElementById('modal');
     return { hidden:m.hidden, frames:document.querySelectorAll('#modalBody iframe').length,
-             focusIsAct: document.activeElement && document.activeElement.classList.contains('slot-act') };
+             focusIsAct: document.activeElement && document.activeElement.classList.contains('media-open') };
   })()`);
   ck(afterIframeEsc.hidden, '焦点在试用页里按 Esc 也能关闭');
   ck(afterIframeEsc.frames === 0, '从试用页关闭后 iframe 被丢掉');
@@ -246,7 +245,7 @@ try {
 
   // 四份 demo 都能开、都能切设备
   console.log('\n=== D) 每份试用页与设备切换 ===');
-  const srcs = await ev(`Array.prototype.map.call(document.querySelectorAll('.slot-act[data-open="demo"]'), function(b){return b.getAttribute('data-src');})`);
+  const srcs = await ev(`Array.prototype.map.call(document.querySelectorAll('.media-open[data-open="demo"]'), function(b){return b.getAttribute('data-src');})`);
 
   ck(srcs.length === EXPECTED_DEMOS, '试用入口数量与数据一致（实为 ' + srcs.length + ' 个，期望 ' + EXPECTED_DEMOS + ' 个）');  for (const s of srcs) {
     const ok = await ev(`new Promise(function(res){

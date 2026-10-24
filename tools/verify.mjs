@@ -23,11 +23,11 @@ const GATES = [
   ['0) 生成物同步', ['node', ['tools/build.mjs', '--check']], false, false],
   ['1) 静态令牌对比度', ['python3', ['tools/contrast-audit.py', 'index.html']], false, false],
   ['2) 真实渲染审计', ['node', ['tools/render-audit.mjs', TARGET]], true, true],
-  ['3) 图版交互', ['node', ['tools/map-interact.mjs', TARGET, '/tmp/verify-map', '1440', 'dark']], true, true],
-  ['4) 动画时序', ['node', ['tools/map-anim.mjs', TARGET, '/tmp/verify-anim', 'dark']], true, true],
+  ['3) 目录与脊柱交互', ['node', ['tools/map-interact.mjs', TARGET, '/tmp/verify-map', '1440', 'dark']], true, true],
+  ['4) 人形逐层绘制', ['node', ['tools/map-anim.mjs', TARGET, '/tmp/verify-anim', 'dark']], true, true],
   ['5) 边界路径', ['node', ['tools/edge-cases.mjs', TARGET]], true, true],
   ['6) 设计规则检测', ['node', ['tools/design-lint.mjs', 'index.html']], false, false],
-  ['7) 豁免依据复核', ['node', ['tools/measure-exemptions.mjs']], true, false],
+  ['7) 间距依据复核', ['node', ['tools/measure-exemptions.mjs']], true, false],
   // 母站声明了子站的版本/体积/包名，但那些数字的真正来源是子站仓库，
   // 母站这边没有东西会跟着更新。子站换包后母站会继续显示旧体积，
   // 页面照常渲染、照常通过其余门禁 —— 只有人去点开子站才发现对不上。
