@@ -10,9 +10,10 @@
 //   2) 点「查看视频」：开的是窗、装的是 video、src 指向存在的文件
 //   3) 点「在线试用」：开的是窗、装的是 iframe、src 指向存在的文件
 //   4) 键盘与焦点：Esc 关闭；关闭后焦点回到当初那个按钮；Tab 不出窗
+//   5) 每个视频入口：文件存在、元数据读得出来（不只测第一支）
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:http';
-import { existsSync, createReadStream, statSync, mkdtempSync, rmSync } from 'node:fs';
+import { existsSync, createReadStream, readFileSync, statSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -20,6 +21,11 @@ import { sleep, waitReady } from './wait-ready.mjs';
 import { CHROME } from './chrome.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+
+// 视频/试用入口的数量以数据为准，不写死数字
+const PRODUCTS = JSON.parse(readFileSync(join(ROOT, 'data/products.json'), 'utf8')).products;
+const EXPECTED_VIDEOS = PRODUCTS.filter(p => p.media && p.media.video).length;
+const EXPECTED_DEMOS = PRODUCTS.filter(p => p.media && p.media.demo).length;
 const [target = 'index.html'] = process.argv.slice(2);
 const PORT = 9393;
 const REMOTE = /^https?:\/\//.test(target);
@@ -130,7 +136,7 @@ try {
              acts: document.querySelectorAll('.slot-act').length,
              slots: document.querySelectorAll('.slot').length };
   })()`);
-  ck(before.acts >= 8, `四个产品各有视频与试用两个按钮（实为 ${before.acts} 个）`);
+  ck(before.acts === EXPECTED_VIDEOS + EXPECTED_DEMOS, '视频/试用入口与数据一致（实为 ' + before.acts + ' 个，期望 ' + (EXPECTED_VIDEOS + EXPECTED_DEMOS) + ' 个）');
   ck(before.videos === 0 && before.iframes === 0, '打开前页面上没有 video / iframe');
   const reqBefore = await ev(`performance.getEntriesByType('resource').filter(r=>/\\.mp4$/.test(r.name)).length`);
   ck(reqBefore === 0, `打开前没有请求过任何 mp4（实为 ${reqBefore} 次）`);
@@ -178,6 +184,23 @@ try {
   ck(afterEsc.videos === 0, '关闭后播放器被丢掉（不在后台继续占用）');
   ck(afterEsc.unlocked, '关闭后恢复滚动');
   ck(afterEsc.focusIsAct, '关闭后焦点回到当初那个按钮');
+
+  // ---------- 2b) 每个视频入口：文件在、能播 ----------
+  console.log('\n=== B2) 所有视频入口 ===');
+  const vidCount = await ev("document.querySelectorAll('.slot-act[data-open=video]').length");
+  ck(vidCount === EXPECTED_VIDEOS, '视频入口数量与数据一致（实为 ' + vidCount + ' 个，期望 ' + EXPECTED_VIDEOS + ' 个）');
+  for (let vi = 0; vi < vidCount; vi++) {
+    const vInfo = await ev("(function(){var b=document.querySelectorAll('.slot-act[data-open=video]')[" + vi + "];var src=b.getAttribute('data-src');b.click();return {src:src,title:b.getAttribute('data-title'),meta:b.getAttribute('data-meta')};})()");
+    await sleep(500);
+    const vMeta = await ev("new Promise(function(res){var v=document.querySelector('#modalBody video');if(!v)return res({err:'no video'});var done=false;function fin(o){if(!done){done=true;res(o);}}if(v.readyState>=1)return fin({dur:Math.round(v.duration*10)/10,w:v.videoWidth,h:v.videoHeight});v.addEventListener('loadedmetadata',function(){fin({dur:Math.round(v.duration*10)/10,w:v.videoWidth,h:v.videoHeight});},{once:true});v.addEventListener('error',function(){fin({err:'error'});},{once:true});setTimeout(function(){fin({err:'timeout',rs:v.readyState});},12000);v.load();})");
+    const vPath = vInfo && vInfo.src && !/^[a-z]+:/i.test(vInfo.src) ? join(ROOT, vInfo.src.replace(/^\.?\//, '')) : null;
+    ck(!!vPath && existsSync(vPath), '视频入口 ' + (vi + 1) + ' 指向真实文件（' + (vInfo && vInfo.src) + '）');
+    ck(!!vMeta && !vMeta.err && vMeta.dur > 0 && vMeta.w > 0, '视频入口 ' + (vi + 1) + ' 能读出元数据（' + JSON.stringify(vMeta) + '）');
+    await ev("document.querySelector('#modal .modal-x').click()");
+    await sleep(200);
+  }
+  const filmBtn = await ev("(function(){var b=document.querySelector('.slot-f .slot-act[data-open=video]');return b?{title:b.getAttribute('data-title'),meta:b.getAttribute('data-meta'),foot:b.getAttribute('data-foot')}:null;})()");
+  ck(!!filmBtn && !!filmBtn.meta && !!filmBtn.foot, '宣传片入口带自己的时长说明（' + (filmBtn && filmBtn.meta) + '）');
 
   // ---------- 3) 在线试用 ----------
   console.log('\n=== C) 在线试用 ===');

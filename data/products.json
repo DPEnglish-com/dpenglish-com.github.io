@@ -7,8 +7,10 @@
     "跑 `node tools/build.mjs --check` 会报不同步（CI 也跑这个）。",
     "",
     "media 是每个产品的片子与在线试用，都是本仓库内的同源文件，无外部请求：",
-    "  video / poster —— 用 onetake 拍的使用演示片（21–22 秒，1080p30，无解说，只有现场音）",
-    "  demo           —— 可交互的离线试用页（手机/平板两种布局）",
+    "  video / poster —— 产品片与封面：前四支是 onetake 拍的使用演示（21–22 秒，1080p30，无解说）；",
+    "                    课蒸馏是 56 秒宣传片（1080p，无旁白，原创配乐）",
+    "  videoTitle / videoMeta / videoNote —— 可选：弹窗标题、副标题（时长/规格）、脚注；不写就用演示片的默认文案",
+    "  demo / demoNote —— 可交互的离线试用页（手机/平板两种布局）与一句说明；没有试用页的产品可省略",
     "video 用 preload=none，只有点开弹窗才加载；demo 用 iframe，只有点开才创建。",
     "",
     "事实基线：核对于 2026-10-17，取自各产品自己的线上页面与仓库文档。",
@@ -140,6 +142,13 @@
       "size": "13.2 MB",
       "desc": "贴一个课程链接，它把一门网课摊成可检索的讲义、词条与师承。每一讲按概念、公式、推导、例题、易混与坑、考点分栏，每条带一个能点回视频的时间锚点；术语收成词条，全课连成大纲。",
       "note": "需要联网，蒸馏在后端完成。账号可选：登录后书架跟着账号走，不登录也能用；免费档书架最多 3 门、单次最多 10 讲，会员用兑换码开通。当前为 release 签名包（从 0.1.0 debug 升级需先卸载旧版），后端地址编译期内置，可在 App 的「设置」里改。只做个人学习用途的文字化：不下载、不重分发视频与音频。",
+      "media": {
+        "video": "assets/video/keliuzheng-promo.mp4",
+        "poster": "assets/video/keliuzheng-promo-poster.jpg",
+        "videoTitle": "课蒸馏 · 产品宣传片",
+        "videoMeta": "56 秒 · 1080P · 无旁白",
+        "videoNote": "实机录制 · 真实蒸馏数据 · 原创配乐"
+      },
       "links": [
         { "label": "前往站点", "href": "https://dpenglish-com.github.io/keliuzheng-site/" },
         { "label": "下载 APK", "href": "https://dpenglish-com.github.io/keliuzheng-site/downloads/Keliuzheng-0.3.0-release.apk" }

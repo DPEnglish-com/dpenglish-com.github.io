@@ -41,21 +41,30 @@ products.forEach((p, i) => {
     if (!l.label || !l.href) problems.push(`${where}.links[${j}] 缺 label 或 href`);
     if (l.href && !/^https:\/\//.test(l.href)) problems.push(`${where}.links[${j}] 必须是 https: ${l.href}`);
   });
-  // media：可选。有的必须字段齐全、文件落在仓库里（写成 https:// 会打破
-  // "零外部请求"，写成绝对路径会在子路径部署时 404 —— 两者都在生成前拦下）；
-  // 没有的（还没拍片 / 没有离线试用页）就不生成「查看视频 / 在线试用」两个按钮。
-  if (p.media != null && typeof p.media !== 'object') problems.push(`${where} media 不是对象`);
+  // media：可选。video + poster 必须有；demo + demoNote 可选（没有试用页的
+  // 产品只生成「查看视频」）；videoTitle / videoMeta / videoNote 覆盖弹窗标题、
+  // 副标题与脚注。文件必须是仓库内的相对路径，且真的存在。
+  if (p.media != null && typeof p.media !== 'object') problems.push(where + ' media 不是对象');
   else if (p.media) {
-    for (const f of ['video', 'poster', 'demo', 'demoNote']) {
-      if (!p.media[f] || typeof p.media[f] !== 'string') problems.push(`${where}.media 缺字段: ${f}`);
+    for (const f of ['video', 'poster']) {
+      if (!p.media[f] || typeof p.media[f] !== 'string') problems.push(where + '.media 缺字段: ' + f);
+    }
+    if (p.media.demo || p.media.demoNote) {
+      for (const f of ['demo', 'demoNote']) {
+        if (!p.media[f] || typeof p.media[f] !== 'string') problems.push(where + '.media 缺字段: ' + f);
+      }
+    }
+    for (const f of ['videoTitle', 'videoMeta', 'videoNote']) {
+      if (p.media[f] != null && typeof p.media[f] !== 'string') problems.push(where + '.media.' + f + ' 必须是字符串');
     }
     for (const f of ['video', 'poster', 'demo']) {
       const v = p.media[f];
       if (!v) continue;
-      if (/^([a-z]+:|\/)/i.test(v)) problems.push(`${where}.media.${f} 必须是仓库内的相对路径: ${v}`);
-      else if (!existsSync(join(ROOT, v))) problems.push(`${where}.media.${f} 指向的文件不存在: ${v}`);
+      if (/^([a-z]+:|\/)/i.test(v)) problems.push(where + '.media.' + f + ' 必须是仓库内的相对路径: ' + v);
+      else if (!existsSync(join(ROOT, v))) problems.push(where + '.media.' + f + ' 指向的文件不存在: ' + v);
     }
   }
+
 });
 
 // 声明了几个产品就得是真几个：site.count 写错时页面上「收录产品」那个读数会是假的
@@ -171,17 +180,26 @@ function genSlots() {
     }).join('\n');
     // 「查看视频」「在线试用」不是链接，是打开悬浮窗的按钮：写成 <a href> 的话，
     // 中键或回车会直接跳到一段裸的 mp4 / 一个裸的 demo 页，那是另一条没人维护的路径。
-    // 地址与标题都挂在 data-* 上，脚本里不为任何产品写死内容。
-    // 没有 media 的产品（还没拍片 / 没有离线试用页）不生成这两个按钮。
-    const acts = p.media ? `        <div class="slot-acts">
-          <button type="button" class="slot-act" data-open="video"
-                  data-src="${esc(p.media.video)}" data-poster="${esc(p.media.poster)}"
-                  data-title="${esc(p.name)} · 使用演示">查看视频</button>
-          <button type="button" class="slot-act" data-open="demo"
-                  data-src="${esc(p.media.demo)}" data-title="${esc(p.name)} · 在线试用"
-                  data-note="${esc(p.media.demoNote)}">在线试用</button>
-        </div>
-` : '';
+    // 地址、标题、副标题、脚注都挂在 data-* 上，脚本里不为任何产品写死内容。
+    // 有 video 才生成「查看视频」，有 demo 才生成「在线试用」。
+    var videoAct = '';
+    if (p.media && p.media.video) {
+      videoAct = '          <button type="button" class="slot-act" data-open="video"\n'
+        + '                  data-src="' + esc(p.media.video) + '" data-poster="' + esc(p.media.poster) + '"\n'
+        + '                  data-title="' + esc(p.media.videoTitle || p.name + ' · 使用演示') + '"\n'
+        + '                  data-meta="' + esc(p.media.videoMeta || '20 秒 · 1080p · 音乐与动作音效') + '"\n'
+        + '                  data-foot="' + esc(p.media.videoNote || '用真实操作录的：每一步都由产品概念与界面动效构成。') + '">查看视频</button>';
+    }
+    var demoAct = '';
+    if (p.media && p.media.demo) {
+      demoAct = '          <button type="button" class="slot-act" data-open="demo"\n'
+        + '                  data-src="' + esc(p.media.demo) + '" data-title="' + esc(p.name) + ' · 在线试用"\n'
+        + '                  data-note="' + esc(p.media.demoNote) + '">在线试用</button>';
+    }
+    const acts = (videoAct || demoAct)
+      ? '        <div class="slot-acts">\n' + [videoAct, demoAct].filter(Boolean).join('\n') + '\n        </div>\n'
+      : '';
+
     return `      <!-- ${esc(p.name)}：${esc(p.part)} -->
       <article class="slot slot-${esc(p.slot)} reveal" data-accent="${esc(p.accent)}">
         <p class="slot-domain">${esc(p.part)} · ${esc(p.k)}</p>

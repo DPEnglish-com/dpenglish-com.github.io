@@ -916,7 +916,9 @@ body.modal-open { overflow: hidden; }
         <div class="slot-acts">
           <button type="button" class="slot-act" data-open="video"
                   data-src="assets/video/wenbian.mp4" data-poster="assets/video/wenbian-poster.jpg"
-                  data-title="问辩 Wenbian · 使用演示">查看视频</button>
+                  data-title="问辩 Wenbian · 使用演示"
+                  data-meta="20 秒 · 1080p · 音乐与动作音效"
+                  data-foot="用真实操作录的：每一步都由产品概念与界面动效构成。">查看视频</button>
           <button type="button" class="slot-act" data-open="demo"
                   data-src="assets/demo/wenbian.html" data-title="问辩 Wenbian · 在线试用"
                   data-note="范围澄清 → 正方发言 → 你回应 → 切 AI 与 AI">在线试用</button>
@@ -945,7 +947,9 @@ body.modal-open { overflow: hidden; }
         <div class="slot-acts">
           <button type="button" class="slot-act" data-open="video"
                   data-src="assets/video/paperecho.mp4" data-poster="assets/video/paperecho-poster.jpg"
-                  data-title="PaperEcho 纸上回声 · 使用演示">查看视频</button>
+                  data-title="PaperEcho 纸上回声 · 使用演示"
+                  data-meta="20 秒 · 1080p · 音乐与动作音效"
+                  data-foot="用真实操作录的：每一步都由产品概念与界面动效构成。">查看视频</button>
           <button type="button" class="slot-act" data-open="demo"
                   data-src="assets/demo/paperecho.html" data-title="PaperEcho 纸上回声 · 在线试用"
                   data-note="听写 → 核对 → 词条 → 长文精读">在线试用</button>
@@ -974,7 +978,9 @@ body.modal-open { overflow: hidden; }
         <div class="slot-acts">
           <button type="button" class="slot-act" data-open="video"
                   data-src="assets/video/workoutloop.mp4" data-poster="assets/video/workoutloop-poster.jpg"
-                  data-title="WorkoutLoop · 使用演示">查看视频</button>
+                  data-title="WorkoutLoop · 使用演示"
+                  data-meta="20 秒 · 1080p · 音乐与动作音效"
+                  data-foot="用真实操作录的：每一步都由产品概念与界面动效构成。">查看视频</button>
           <button type="button" class="slot-act" data-open="demo"
                   data-src="assets/demo/workoutloop.html" data-title="WorkoutLoop · 在线试用"
                   data-note="环 → 音量键完成本组 → 休息 → 队列推进">在线试用</button>
@@ -1003,7 +1009,9 @@ body.modal-open { overflow: hidden; }
         <div class="slot-acts">
           <button type="button" class="slot-act" data-open="video"
                   data-src="assets/video/outerstyle.mp4" data-poster="assets/video/outerstyle-poster.jpg"
-                  data-title="外在 OuterStyle · 使用演示">查看视频</button>
+                  data-title="外在 OuterStyle · 使用演示"
+                  data-meta="20 秒 · 1080p · 音乐与动作音效"
+                  data-foot="用真实操作录的：每一步都由产品概念与界面动效构成。">查看视频</button>
           <button type="button" class="slot-act" data-open="demo"
                   data-src="assets/demo/outerstyle.html" data-title="外在 OuterStyle · 在线试用"
                   data-note="录入单品 → 生成搭配 → 颜色角色 → 审美训练">在线试用</button>
@@ -1050,6 +1058,13 @@ body.modal-open { overflow: hidden; }
         <p class="slot-note">
           需要联网，蒸馏在后端完成。账号可选：登录后书架跟着账号走，不登录也能用；免费档书架最多 3 门、单次最多 10 讲，会员用兑换码开通。当前为 release 签名包（从 0.1.0 debug 升级需先卸载旧版），后端地址编译期内置，可在 App 的「设置」里改。只做个人学习用途的文字化：不下载、不重分发视频与音频。
         </p>
+        <div class="slot-acts">
+          <button type="button" class="slot-act" data-open="video"
+                  data-src="assets/video/keliuzheng-promo.mp4" data-poster="assets/video/keliuzheng-promo-poster.jpg"
+                  data-title="课蒸馏 · 产品宣传片"
+                  data-meta="56 秒 · 1080P · 无旁白"
+                  data-foot="实机录制 · 真实蒸馏数据 · 原创配乐">查看视频</button>
+        </div>
         <div class="slot-links">
           <a href="https://dpenglish-com.github.io/keliuzheng-site/">前往站点 <span class="arw" aria-hidden="true">→</span></a>
           <a href="https://dpenglish-com.github.io/keliuzheng-site/downloads/Keliuzheng-0.3.0-release.apk">下载 APK</a>
@@ -1598,7 +1613,7 @@ body.modal-open { overflow: hidden; }
 <script>
 /* 悬浮窗。两条硬规则：
    1) 不点开不加载：视频的 src 在打开时才写上，demo 的 iframe 在打开时才创建。
-      四个片子加起来约 4.6 MB，挂在首屏上就是让所有人替想看的人付流量。
+      片子都只在点开之后才加载（最长的课蒸馏宣传片 16.9 MB），挂在首屏上就是让所有人替想看的人付流量。
    2) 键盘可用、焦点不逃逸：Esc 关闭，Tab 在窗内循环，关掉之后焦点回到刚才那个按钮。 */
 (function () {
   var modal = document.getElementById('modal');
@@ -1618,9 +1633,10 @@ body.modal-open { overflow: hidden; }
     title.textContent = btn.getAttribute('data-title') || '';
     // 视频：写明它是什么、多长、有没有声音；这几件事观众点开之前就该知道
     if (kind === 'video') {
-      sub.textContent = '20 秒 · 1080p · 音乐与动作音效';
+      // 时长/规格/脚注由 data-* 提供：使用演示 20 秒，课蒸馏宣传片 56 秒
+      sub.textContent = btn.getAttribute('data-meta') || '20 秒 · 1080p · 音乐与动作音效';
       sub.hidden = false;
-      foot.textContent = '用真实操作录的：每一步都由产品概念与界面动效构成。';
+      foot.textContent = btn.getAttribute('data-foot') || '用真实操作录的：每一步都由产品概念与界面动效构成。';
       foot.hidden = false;
       var v = document.createElement('video');
       v.controls = true; v.playsInline = true; v.preload = 'none';
