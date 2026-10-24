@@ -230,6 +230,20 @@ try {
   })`);
   ck(rendered.ok, rendered.ok ? `试用页渲染出内容（${rendered.chars} 字，标题「${rendered.title}」）` : `试用页没有渲染出内容（${rendered.why}）`);
 
+  // 焦点进到 iframe 之后按 Esc：父页收不到 keydown，必须在 iframe 里也关得掉
+  await ev("(function(){var f=document.querySelector('#modalBody iframe'); if(f){f.contentWindow.focus(); f.focus();} return !!f;})()");
+  await cdp.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 }, sessionId);
+  await cdp.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 }, sessionId);
+  await sleep(300);
+  const afterIframeEsc = await ev(`(function(){
+    var m=document.getElementById('modal');
+    return { hidden:m.hidden, frames:document.querySelectorAll('#modalBody iframe').length,
+             focusIsAct: document.activeElement && document.activeElement.classList.contains('slot-act') };
+  })()`);
+  ck(afterIframeEsc.hidden, '焦点在试用页里按 Esc 也能关闭');
+  ck(afterIframeEsc.frames === 0, '从试用页关闭后 iframe 被丢掉');
+  ck(afterIframeEsc.focusIsAct, '从试用页关闭后焦点回到按钮');
+
   // 四份 demo 都能开、都能切设备
   console.log('\n=== D) 每份试用页与设备切换 ===');
   const srcs = await ev(`Array.prototype.map.call(document.querySelectorAll('.slot-act[data-open="demo"]'), function(b){return b.getAttribute('data-src');})`);

@@ -395,6 +395,10 @@ quiet /ˈkwaɪət/、It is quiet here.、词义回想、语境填空、掌握度
 掌握度（模糊/勉强/答对/秒答对应不同下次复习）。页头写明「离线演示 · 内容只在本页」，
 不联网、不写账号；真实进度以 SE English 账号为准。
 
+**键盘**：Esc 关闭；焦点进到试用页（同源 iframe）之后，父页收不到 keydown，
+所以父页把 Esc 监听同时挂在 iframe 的 document 上，在试用页里按 Esc 也能关，
+关掉后焦点回到「在线试用」按钮。
+
 **数据结构**：沿用 §4.1d 的 media 结构（video/poster 必填，demo/demoNote 可选），
 没有新增字段、没有新增门禁；modal-check 的入口数量由 data 推导，因此自动覆盖这一支。
 片源 1.1 MB，演示页纯文件，不点开不加载。

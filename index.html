@@ -1667,6 +1667,15 @@ body.modal-open { overflow: hidden; }
       f.setAttribute('src', src);
       f.setAttribute('title', title.textContent);
       f.setAttribute('loading', 'eager');
+      // 焦点进到试用页之后，父页收不到 keydown：Esc 会被 iframe 吃掉。
+      // 试用页是同源的静态文件，所以在它的 document 上也挂一份 Esc。
+      f.addEventListener('load', function () {
+        try {
+          f.contentDocument.addEventListener('keydown', function (ev) {
+            if (ev.key === 'Escape') close();
+          });
+        } catch (err) {}
+      });
       body.appendChild(f);
     }
     box.setAttribute('data-kind', kind);
