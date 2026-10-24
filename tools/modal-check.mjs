@@ -231,9 +231,10 @@ try {
   ck(rendered.ok, rendered.ok ? `试用页渲染出内容（${rendered.chars} 字，标题「${rendered.title}」）` : `试用页没有渲染出内容（${rendered.why}）`);
 
   // 四份 demo 都能开、都能切设备
-  console.log('\n=== D) 四份试用页与设备切换 ===');
+  console.log('\n=== D) 每份试用页与设备切换 ===');
   const srcs = await ev(`Array.prototype.map.call(document.querySelectorAll('.slot-act[data-open="demo"]'), function(b){return b.getAttribute('data-src');})`);
-  for (const s of srcs) {
+
+  ck(srcs.length === EXPECTED_DEMOS, '试用入口数量与数据一致（实为 ' + srcs.length + ' 个，期望 ' + EXPECTED_DEMOS + ' 个）');  for (const s of srcs) {
     const ok = await ev(`new Promise(function(res){
       var f=document.createElement('iframe'); f.style.cssText='position:fixed;left:-9999px;width:1100px;height:800px';
       f.src=${JSON.stringify(s)}; document.body.appendChild(f);

@@ -147,7 +147,9 @@
         "poster": "assets/video/keliuzheng-promo-poster.jpg",
         "videoTitle": "课蒸馏 · 产品宣传片",
         "videoMeta": "56 秒 · 1080P · 无旁白",
-        "videoNote": "实机录制 · 真实蒸馏数据 · 原创配乐"
+        "videoNote": "实机录制 · 真实蒸馏数据 · 原创配乐",
+        "demo": "assets/demo/keliuzheng.html",
+        "demoNote": "贴链接 → 选讲次 → 蒸馏 → 读六栏"
       },
       "links": [
         { "label": "前往站点", "href": "https://dpenglish-com.github.io/keliuzheng-site/" },

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>课蒸馏 · 在线试用</title>
+<!--
+  离线试用版。零外部请求、零依赖。
+  视觉照 App 的 INK 卷：宣纸 #F5F2EB / 书页 #FCFAF6 / 焦墨 #0B0B0A / 朱砂 #B23A26 /
+  发丝线 #E2DCCE / 结构线 #C6BFAD；标题宋体、正文系统无衬线、数字与标签等宽；
+  直角、细线、零投影。
+  页面里的课程、讲次、条目、时间码全部是虚构的示例数据（示例课 · 微观经济学 12 讲），
+  不是真实蒸馏结果，也不联网。真实产品需要联网调用转写与模型。
+-->
+<style>
+:root{
+  --paper:#F5F2EB; --page:#FCFAF6; --ink:#0B0B0A; --ink2:#22211D; --ink3:#45423B; --ink4:#6A665C;
+  --vermilion:#B23A26; --hair:#E2DCCE; --rule:#C6BFAD;
+  --serif:"Noto Serif SC","Source Han Serif SC","Songti SC","Noto Serif",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Segoe UI",system-ui,sans-serif;
+  --mono:"JetBrains Mono","SF Mono",Menlo,ui-monospace,monospace;
+  --r:2px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink3);
+  font-family:var(--sans);font-size:15px;line-height:1.75;-webkit-font-smoothing:antialiased}
+body{padding:24px 20px 40px}
+.wrap{max-width:1120px;margin:0 auto}
+[hidden]{display:none !important}
+h1,h2,h3{font-family:var(--serif);font-weight:400;color:var(--ink);margin:0;line-height:1.45;letter-spacing:0}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* ── 页头与设备开关 ── */
+.bar{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;
+  padding-bottom:16px;border-bottom:1px solid var(--hair)}
+.bar h1{margin:0;font-size:24px}
+.bar p{margin:6px 0 0;font-size:12.5px;color:var(--ink4);max-width:46em}
+.toggle{display:flex;border:1px solid var(--rule);border-radius:var(--r);overflow:hidden;flex:none}
+.toggle button{appearance:none;border:0;background:transparent;color:var(--ink4);
+  font:inherit;font-size:12.5px;padding:9px 18px;cursor:pointer;min-height:40px}
+.toggle button + button{border-left:1px solid var(--rule)}
+.toggle button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.hint{margin:12px 0 0;font-size:12.5px;color:var(--ink4);min-height:20px}
+
+/* ── 设备壳 ── */
+.stage{margin-top:18px;display:flex;justify-content:center}
+.device{width:100%;display:flex;flex-direction:column;align-items:center}
+.device[data-device="phone"] .shell{max-width:412px}
+.device[data-device="tablet"] .shell{max-width:1000px}
+.shell{width:100%;border:1px solid var(--rule);border-radius:var(--r);background:var(--page);overflow:hidden}
+
+/* ── 步骤标签 ── */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--hair);overflow-x:auto;
+  scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{appearance:none;background:none;border:0;border-bottom:2px solid transparent;
+  margin-bottom:-1px;padding:13px 16px;font:inherit;font-size:12.5px;color:var(--ink4);
+  cursor:pointer;white-space:nowrap;min-height:44px}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+.tab:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--vermilion);outline-offset:2px}
+
+/* ── 屏幕内容 ── */
+.screen{padding:22px 22px 26px}
+.eyebrow{margin:0 0 8px;font-family:var(--mono);font-size:11px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink4)}
+.screen h2{margin:0 0 8px;font-size:25px}
+.sub{margin:0 0 18px;font-size:13px;color:var(--ink4)}
+.sub .mono{color:var(--ink2);font-size:12px}
+.field{display:block}
+.lbl{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink4);margin-bottom:6px}
+.field input{width:100%;height:46px;padding:0 12px;border:1px solid var(--rule);border-radius:var(--r);
+  background:var(--paper);color:var(--ink);font:inherit;font-family:var(--mono);font-size:14px}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:16px}
+.primary,.ghost{appearance:none;font:inherit;font-size:13px;min-height:44px;padding:0 18px;
+  border-radius:var(--r);cursor:pointer}
+.primary{background:var(--ink);color:var(--paper);border:1px solid var(--ink)}
+.primary[disabled]{background:var(--hair);border-color:var(--hair);color:var(--ink4);cursor:not-allowed}
+.ghost{background:transparent;color:var(--ink2);border:1px solid var(--rule)}
+.status{margin:12px 0 0;font-size:12px;color:var(--ink4);min-height:18px}
+
+/* 课程卡 */
+.course{margin-top:20px;border:1px solid var(--hair);background:var(--paper);padding:16px}
+.course .tag{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--vermilion)}
+.course h3{margin:6px 0 4px;font-size:18px}
+.course .meta{font-family:var(--mono);font-size:11px;color:var(--ink4)}
+
+/* 讲次列表 */
+.partlist{margin-top:6px;display:grid;gap:6px}
+.part{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:10px;
+  width:100%;text-align:left;appearance:none;font:inherit;padding:11px 10px;
+  background:var(--paper);border:1px solid var(--hair);border-radius:var(--r);
+  color:var(--ink3);cursor:pointer;min-height:48px}
+.part .no{font-family:var(--mono);font-size:11px;color:var(--ink4)}
+.part .tt{font-size:13.5px;color:var(--ink2)}
+.part .du{font-family:var(--mono);font-size:11px;color:var(--ink4)}
+.part[aria-pressed="true"]{border-color:var(--ink);background:var(--page)}
+.part[aria-pressed="true"] .no{color:var(--vermilion)}
+.summary{margin-top:16px;padding-top:14px;border-top:1px solid var(--hair);
+  display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px}
+.summary .n{font-family:var(--mono);font-size:12px;color:var(--ink2)}
+.summary .muted{font-size:12px;color:var(--ink4)}
+.summary .primary{margin-left:auto}
+
+/* 进度 */
+.prog{height:2px;background:var(--hair);margin:6px 0 8px;overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:var(--vermilion);transition:width .18s linear}
+.stages{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:0;border-top:1px solid var(--hair)}
+.stages li{display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;
+  padding:9px 0;border-bottom:1px solid var(--hair);font-size:13px;color:var(--ink4)}
+.stages li .no{font-family:var(--mono);font-size:11px}
+.stages li .st{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em}
+.stages li[data-on="1"]{color:var(--ink)}
+.stages li[data-on="1"] .no,.stages li[data-on="1"] .st{color:var(--vermilion)}
+.stages li[data-done="1"] .st{color:var(--ink4)}
+
+/* 讲义 */
+.anchor{margin:0 0 16px;padding:9px 12px;border-left:2px solid var(--vermilion);
+  background:var(--paper);font-size:12.5px;color:var(--ink3)}
+.anchor b{color:var(--vermilion)}
+.cols{display:grid;gap:10px;margin-top:4px}
+.k{border:1px solid var(--hair);background:var(--paper);padding:12px 13px}
+.k .tag{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--ink4)}
+.k p{margin:6px 0 0;font-size:13.5px;color:var(--ink2);line-height:1.7}
+.k .tc{display:block;margin-top:8px;font-family:var(--mono);font-size:11px;color:var(--vermilion)}
+.terms{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+.terms span{font-family:var(--mono);font-size:11px;padding:4px 8px;border:1px solid var(--hair);
+  color:var(--ink3);background:var(--paper)}
+.outline{margin-top:16px;padding-top:12px;border-top:1px solid var(--hair);font-size:12.5px;color:var(--ink3)}
+.outline b{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;
+  color:var(--ink4);margin-bottom:6px}
+.persona{margin:14px 0 0;font-size:12.5px;color:var(--ink4)}
+.end{margin:18px 0 0;padding-top:12px;border-top:1px solid var(--hair);font-size:12px;color:var(--ink4)}
+.foot{margin:18px 0 0;font-size:11.5px;color:var(--ink4);text-align:center}
+
+/* ── 平板：讲次与六栏各两列 ── */
+.device[data-device="tablet"] .partlist{grid-template-columns:1fr 1fr}
+.device[data-device="tablet"] .cols{grid-template-columns:1fr 1fr}
+.device[data-device="tablet"] .screen{padding:26px 30px 30px}
+
+@media (max-width:480px){
+  body{padding:16px 12px 32px}
+  .bar{flex-direction:column;align-items:flex-start;gap:12px}
+  .screen{padding:18px 16px 22px}
+  .summary .primary{margin-left:0;width:100%}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="bar">
+    <div>
+      <h1>课蒸馏 · 在线试用</h1>
+      <p>把一门网课整理成讲义：贴链接 → 选讲次 → 蒸馏 → 读六栏。离线演示，数据是示例。</p>
+    </div>
+    <div class="toggle" role="group" aria-label="设备预览">
+      <button type="button" data-dev="phone" aria-pressed="true">手机</button>
+      <button type="button" data-dev="tablet" aria-pressed="false">平板</button>
+    </div>
+  </header>
+  <p class="hint" id="hint"></p>
+
+  <div class="stage">
+    <div class="device" id="device" data-device="phone">
+      <div class="shell">
+      <div class="tabs" role="tablist" aria-label="演示步骤">
+        <button class="tab" role="tab" data-view="add" aria-selected="true" type="button">① 收进书架</button>
+        <button class="tab" role="tab" data-view="parts" aria-selected="false" type="button">② 选讲次</button>
+        <button class="tab" role="tab" data-view="run" aria-selected="false" type="button">③ 蒸馏</button>
+        <button class="tab" role="tab" data-view="lecture" aria-selected="false" type="button">④ 读讲义</button>
+      </div>
+
+      <!-- ① 收进书架 -->
+      <section class="screen" id="view-add">
+        <p class="eyebrow">示例 · 收进书架</p>
+        <h2>贴一个课程链接。</h2>
+        <p class="sub">示例链接（演示用，不联网）：<span class="mono">BV1demo000001</span></p>
+        <label class="field" for="bv">
+          <span class="lbl">课程链接或 BV 号</span>
+          <input id="bv" value="BV1demo000001" autocomplete="off" spellcheck="false">
+        </label>
+        <div class="row">
+          <button class="primary" id="parse" type="button">解析这门课</button>
+          <button class="ghost" id="to-parts" type="button" hidden>继续选讲次</button>
+        </div>
+        <p class="status" id="add-status" aria-live="polite"></p>
+        <article class="course" id="course" hidden>
+          <span class="tag">示例课程 · 演示数据</span>
+          <h3>微观经济学 · 12 讲</h3>
+          <p class="meta">约 8 小时 20 分 · 上传者 示例老师 · 已收进书架</p>
+        </article>
+      </section>
+
+      <!-- ② 选讲次 -->
+      <section class="screen" id="view-parts" hidden>
+        <p class="eyebrow">示例 · 选讲次</p>
+        <h2>先看清有多少讲，再决定读到哪。</h2>
+        <p class="sub">示例课程共 12 讲，这里展开前 6 讲。真实产品会列出这门课的每一个分P。</p>
+        <div class="partlist" id="partlist"></div>
+        <div class="summary">
+          <span class="n" id="pick-count">已选 0 讲</span>
+          <span class="muted" id="pick-note">按讲蒸馏，不整门课一起跑</span>
+          <button class="primary" id="start" type="button" disabled>开始蒸馏</button>
+        </div>
+      </section>
+
+      <!-- ③ 蒸馏 -->
+      <section class="screen" id="view-run" hidden>
+        <p class="eyebrow">示例 · 蒸馏</p>
+        <h2>八道工序，机器做苦工。</h2>
+        <p class="sub">演示进度是假的：真实蒸馏要联网转写、校对与结构化，耗时按讲次计。</p>
+        <div class="prog" aria-hidden="true"><i id="prog"></i></div>
+        <p class="status mono" id="run-status" aria-live="polite">0%</p>
+        <ol class="stages" id="stages"></ol>
+        <div class="row">
+          <button class="primary" id="to-lecture" type="button" disabled>查看讲义</button>
+        </div>
+      </section>
+
+      <!-- ④ 读讲义 -->
+      <section class="screen" id="view-lecture" hidden>
+        <p class="eyebrow">示例 · 讲义</p>
+        <h2>第 03 讲 · 弹性与它的三种用法</h2>
+        <p class="sub mono">示例数据 · 已蒸馏 2 讲 · 44 条知识点 · 交付自检通过 · 缺转写 0</p>
+        <p class="anchor">当前行 <b>00:03</b> · 每条知识都带时间锚点，能回到原话那一秒（演示里不播视频）。</p>
+        <div class="cols">
+          <div class="k"><span class="tag">概念</span><p>需求价格弹性：需求量变化率 ÷ 价格变化率。</p><span class="tc">00:03</span></div>
+          <div class="k"><span class="tag">公式</span><p>PED = (ΔQ ÷ Q) ÷ (ΔP ÷ P)</p><span class="tc">00:07</span></div>
+          <div class="k"><span class="tag">推导</span><p>从需求曲线的斜率，走到弧弹性与点弹性。</p><span class="tc">00:12</span></div>
+          <div class="k"><span class="tag">例题</span><p>涨价 10%，销量会掉多少？先看弹性大小。</p><span class="tc">00:18</span></div>
+          <div class="k"><span class="tag">易混与坑</span><p>弹性大 ≠ 曲线陡：斜率的分母不同。</p><span class="tc">00:24</span></div>
+          <div class="k"><span class="tag">考点</span><p>谷贱伤农：为什么丰收反而减收入。</p><span class="tc">00:31</span></div>
+        </div>
+        <div class="terms" aria-label="词条">
+          <span>需求价格弹性</span><span>交叉价格弹性</span><span>收入弹性</span>
+        </div>
+        <div class="outline">
+          <b>大纲 · 全课连起来</b>
+          一、什么是弹性 · 二、三种弹性的用法 · 三、弹性与定价 · 四、谷贱伤农
+        </div>
+        <p class="persona">师承 · 示例老师：「先把变化率写清楚，再谈方向。」（演示占位，真实产品从讲稿里学口吻）</p>
+        <p class="end">演示结束。真实产品会继续蒸馏下一讲，并支持「继续听」回到原讲。</p>
+      </section>
+      </div>
+    </div>
+  </div>
+  <p class="foot">离线试用 · 本页不联网、不收集内容 · 课程、条目与时间码均为示例数据，不是真实蒸馏结果</p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var $ = function (id) { return document.getElementById(id); };
+  var device = $('device');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var HINT = {
+    phone: '手机：一次看一屏 —— 收进书架、选讲次、蒸馏、读讲义各占一屏。',
+    tablet: '平板：一屏两栏 —— 讲次列表与六栏讲义都能一次多看到一列。'
+  };
+
+  function setDevice(dev) {
+    device.dataset.device = dev;
+    Array.prototype.forEach.call(document.querySelectorAll('.toggle button'), function (b) {
+      b.setAttribute('aria-pressed', String(b.dataset.dev === dev));
+    });
+    $('hint').textContent = HINT[dev];
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.toggle button'), function (b) {
+    b.addEventListener('click', function () { setDevice(b.dataset.dev); });
+  });
+  setDevice(window.innerWidth >= 760 ? 'tablet' : 'phone');
+
+  /* ---------- 步骤切换 ---------- */
+  var VIEWS = ['add', 'parts', 'run', 'lecture'];
+  function show(view) {
+    VIEWS.forEach(function (v) { $('view-' + v).hidden = (v !== view); });
+    Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (t) {
+      t.setAttribute('aria-selected', String(t.dataset.view === view));
+    });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (t) {
+    t.addEventListener('click', function () { show(t.dataset.view); });
+  });
+
+  /* ---------- ① 解析：演示里只是把示例课程放出来 ---------- */
+  $('parse').addEventListener('click', function () {
+    var v = $('bv').value.trim() || 'BV1demo000001';
+    $('bv').value = v;
+    $('add-status').textContent = '解析中……';
+    window.setTimeout(function () {
+      $('course').hidden = false;
+      $('add-status').textContent = '已收进书架 · 示例课程（演示，不联网）';
+      $('to-parts').hidden = false;
+      window.setTimeout(function () { show('parts'); }, reduce ? 0 : 900);
+    }, reduce ? 0 : 650);
+  });
+  $('to-parts').addEventListener('click', function () { show('parts'); });
+
+  /* ---------- ② 选讲次 ---------- */
+  var PARTS = [
+    { no: 'P01', tt: '导论：经济学研究什么', du: '42:17' },
+    { no: 'P02', tt: '供给与需求', du: '49:02' },
+    { no: 'P03', tt: '弹性与它的三种用法', du: '38:44' },
+    { no: 'P04', tt: '消费者选择', du: '51:20' },
+    { no: 'P05', tt: '成本与生产', du: '44:08' },
+    { no: 'P06', tt: '竞争市场', du: '47:33' }
+  ];
+  var picked = {};
+  function renderParts() {
+    $('partlist').innerHTML = PARTS.map(function (p) {
+      return '<button class="part" type="button" data-no="' + p.no + '" aria-pressed="' + (picked[p.no] ? 'true' : 'false') + '">' +
+        '<span class="no">' + p.no + '</span>' +
+        '<span class="tt">' + p.tt + '</span>' +
+        '<span class="du">' + p.du + '</span></button>';
+    }).join('');
+    Array.prototype.forEach.call($('partlist').querySelectorAll('.part'), function (b) {
+      b.addEventListener('click', function () {
+        picked[b.dataset.no] = !picked[b.dataset.no];
+        syncPick();
+        b.setAttribute('aria-pressed', String(!!picked[b.dataset.no]));
+      });
+    });
+    syncPick();
+  }
+  function syncPick() {
+    var n = Object.keys(picked).filter(function (k) { return picked[k]; }).length;
+    $('pick-count').textContent = '已选 ' + n + ' 讲';
+    $('start').disabled = n === 0;
+  }
+
+  /* ---------- ③ 蒸馏：八道工序走一遍 ---------- */
+  var STAGES = ['列讲次', '取文字', '校词条', '读课件', '结构化', '大纲', '师承', '自检'];
+  var timer = null;
+  function renderStages() {
+    $('stages').innerHTML = STAGES.map(function (s, i) {
+      return '<li data-i="' + i + '"><span class="no">0' + (i + 1) + '</span>' +
+        '<span>' + s + '</span><span class="st">待处理</span></li>';
+    }).join('');
+  }
+  $('start').addEventListener('click', function () {
+    show('run');
+    runDemo();
+  });
+  $('to-lecture').addEventListener('click', function () { show('lecture'); });
+
+  function runDemo() {
+    renderStages();
+    $('prog').style.width = '0%';
+    $('run-status').textContent = '0%';
+    $('to-lecture').disabled = true;
+    var rows = $('stages').querySelectorAll('li');
+    var i = 0;
+    var step = reduce ? 0 : 260;
+    function tick() {
+      if (i > 0) {
+        rows[i - 1].dataset.on = '0';
+        rows[i - 1].dataset.done = '1';
+        rows[i - 1].querySelector('.st').textContent = '完成';
+      }
+      if (i >= STAGES.length) {
+        $('prog').style.width = '100%';
+        $('run-status').textContent = '100% · 已完成';
+        $('to-lecture').disabled = false;
+        return;
+      }
+      rows[i].dataset.on = '1';
+      rows[i].querySelector('.st').textContent = '进行中';
+      var pct = Math.round((i / STAGES.length) * 100);
+      $('prog').style.width = pct + '%';
+      $('run-status').textContent = pct + '%';
+      i += 1;
+      timer = window.setTimeout(tick, step);
+    }
+    window.clearTimeout(timer);
+    tick();
+  }
+
+  renderParts();
+  setDevice(device.dataset.device);
+})();
+</script>
+</body>
+</html>
