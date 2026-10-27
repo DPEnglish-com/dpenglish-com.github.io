@@ -44,7 +44,17 @@ if (apkNames.length !== 1) {
 }
 const apkName = apkNames[0];
 
-const subHash = (sub.match(/<code class="hash">([0-9a-f]{64})<\/code>/) || [])[1];
+/* 子站的哈希标记换过一次：旧页面用 <code class="hash">，当前页面用 <code id="sha">。
+   两种都认，但仍然只接受完整的 64 位小写 hex；同一页出现不同哈希即失败。 */
+const subHashes = [
+  ...sub.matchAll(/<code\s+id="sha">([0-9a-f]{64})<\/code>/g),
+  ...sub.matchAll(/<code\s+class="hash">([0-9a-f]{64})<\/code>/g),
+].map(m => m[1]);
+const uniqueHashes = [...new Set(subHashes)];
+if (uniqueHashes.length !== 1) {
+  fails.push(`子站 index.html 里的 SHA-256 不唯一或不是 64 位小写 hex：${uniqueHashes.join(' / ') || '（一个都没找到）'}`);
+}
+const subHash = uniqueHashes[0];
 const subSizes = [...new Set([...sub.matchAll(/(\d+\.\d+) MB/g)].map(m => m[1] + ' MB'))];
 if (subSizes.length !== 1) {
   fails.push(`子站 index.html 里的体积不唯一：${subSizes.join(' / ') || '（一个都没找到）'}`);
@@ -75,7 +85,7 @@ if (apkName && subHash) {
       }
     }
   }
-} else {
+} else if (!fails.length) {
   fails.push('子站 index.html 里读不到包名或 SHA-256');
 }
 

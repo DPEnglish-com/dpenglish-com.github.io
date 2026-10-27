@@ -3,16 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>从头到脚 · 六个产品，各管一处</title>
-<meta name="description" content="同一个作者做的六个产品：问辩 Wenbian、CourseDistill 课蒸馏、PaperEcho 纸上回声、SE English 英语训练、WorkoutLoop 训练环、外在 OuterStyle。从头到脚，各管一处。">
+<title>HeadToToe 从头到脚 · 六个产品，各管一处</title>
+<meta name="description" content="HeadToToe 从头到脚：同一个作者做的六个产品：Wenbian 问辩、CourseDistill 课蒸馏、PaperEcho 纸上回声、SE English 英语训练、WorkoutLoop 训练环、OuterStyle 外在。从头到脚，各管一处。">
 <meta name="color-scheme" content="dark light">
 <meta name="theme-color" content="#0E0C09">
 <link rel="canonical" href="https://dpenglish-com.github.io/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23F2EDE3'/%3E%3Cpath d='M15.4 6.9C14.9 12.6 12.3 19.6 7.7 25.3' fill='none' stroke='%2317140F' stroke-width='2.8' stroke-linecap='round'/%3E%3Cpath d='M16.9 7.9C17.8 13.6 20.4 20.2 24.2 25.3' fill='none' stroke='%2317140F' stroke-width='2.8' stroke-linecap='round'/%3E%3C/svg%3E">
 
 <meta property="og:type" content="website">
-<meta property="og:title" content="从头到脚 · 六个产品，各管一处">
-<meta property="og:description" content="脑袋管思辨，眼睛管听课，嘴巴管语言，身体管训练，最外一层管穿搭。一个作者，六个产品，各管一处。">
+<meta property="og:title" content="HeadToToe 从头到脚 · 六个产品，各管一处">
+<meta property="og:site_name" content="HeadToToe 从头到脚">
+<meta property="og:description" content="HeadToToe 从头到脚：脑袋管思辨，眼睛管听课，嘴巴管语言，身体管训练，最外一层管穿搭。一个作者，六个产品，各管一处。">
 <meta property="og:url" content="https://dpenglish-com.github.io/">
 <meta property="og:image" content="https://dpenglish-com.github.io/assets/og.png">
 <meta property="og:image:width" content="1200">
@@ -151,9 +152,9 @@ img, svg { display: block; max-width: 100%; }
 .site-head[data-stuck] { border-bottom-color: var(--hair); }
 @supports (backdrop-filter: blur(12px)) { .site-head { backdrop-filter: blur(12px); } }
 .head-in { display: flex; align-items: center; gap: 26px; min-height: 64px; }
-.brand { display: inline-flex; align-items: baseline; gap: 10px; min-height: 44px; flex: none; }
-.brand-mark { font-family: var(--serif); font-size: 20px; font-weight: 500; letter-spacing: .02em; }
-.brand-en { font-family: var(--serif); font-size: 11px; letter-spacing: .18em; color: var(--ink-3); text-transform: uppercase; }
+.brand { display: inline-flex; align-items: baseline; gap: 8px; min-height: 44px; flex: none; }
+.brand-en { font-family: var(--serif); font-size: 16px; font-weight: 500; letter-spacing: .03em; }
+.brand-mark { font-family: var(--serif); font-size: 14px; letter-spacing: .04em; color: var(--ink-2); }
 .nav { display: flex; gap: 24px; margin-left: auto; font-size: var(--t-small); color: var(--ink-2); }
 .nav a { display: inline-flex; align-items: center; min-height: 44px; }
 .nav a:hover { color: var(--ink); text-decoration: none; }
@@ -175,12 +176,14 @@ img, svg { display: block; max-width: 100%; }
   gap: clamp(24px, 5vw, 64px);
   align-items: center;
 }
-.hero-en { font-family: var(--serif); font-size: 12px; letter-spacing: .24em; color: var(--ink-3); text-transform: uppercase; }
 .hero-title {
   margin-top: 10px;
   font-family: var(--serif); font-size: var(--t-display); font-weight: 500;
-  line-height: .95; letter-spacing: .01em; white-space: nowrap;
+  line-height: .95; letter-spacing: .01em;
+  display: flex; flex-direction: column; align-items: flex-start;
 }
+.hero-en { font-size: clamp(39px, 7.4vw, 92px); line-height: .95; }
+.hero-cn { margin-top: .12em; font-size: clamp(24px, 3.4vw, 48px); line-height: 1.05; letter-spacing: .02em; color: var(--ink-2); }
 .hero-line {
   margin-top: clamp(28px, 4vw, 44px);
   font-family: var(--serif); font-size: var(--t-promise); font-weight: 500;
@@ -368,6 +371,9 @@ img, svg { display: block; max-width: 100%; }
 .about-copy p { color: var(--ink-2); font-size: var(--t-small); line-height: 1.85; max-width: 38em; }
 .about-copy p + p { margin-top: 14px; }
 .about-next { margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--hair); color: var(--ink-3); font-size: var(--t-micro); }
+.account { padding-top: 0; scroll-margin-top: 88px; }
+.account-login { margin-top: 20px; }
+.account-note { margin-top: 12px; color: var(--ink-3); font-size: var(--t-micro); line-height: 1.8; max-width: 38em; }
 .foot { border-top: 1px solid var(--hair); padding-top: 40px; padding-bottom: 48px; }
 .foot-grid { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 4fr) minmax(0, 5fr); gap: clamp(24px, 5vw, 64px); }
 .foot h2 { font-family: var(--mono); font-size: var(--t-micro); font-weight: 400; letter-spacing: .08em; color: var(--ink-3); margin-bottom: 14px; }
@@ -448,10 +454,13 @@ body.modal-open { overflow: hidden; }
 }
 @media (max-width: 640px) {
   :root { --gutter: 20px; }
-  .head-in { gap: 12px; }
-  .nav { gap: 14px; font-size: 13px; }
+  .head-in { flex-wrap: wrap; gap: 0 12px; padding-top: 4px; }
+  .nav { order: 3; width: 100%; margin-left: 0; gap: 18px; font-size: 13px; }
   .nav a:nth-child(3) { display: none; }
-  .brand-en { display: none; }
+  .theme { margin-left: auto; }
+  .rail { top: 92px; }
+  .chapter { scroll-margin-top: 152px; }
+  .account { scroll-margin-top: 104px; }
   .hero-line { font-size: 22px; }
   .hero-actions { gap: 14px; }
   .contact-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -488,14 +497,15 @@ body.modal-open { overflow: hidden; }
 
 <header class="site-head" id="top">
   <div class="head-in wrap">
-    <a class="brand" href="#top" aria-label="从头到脚 · 回到顶部">
-      <span class="brand-mark">从头到脚</span>
+    <a class="brand" href="#top" aria-label="HeadToToe 从头到脚 · 回到顶部">
       <span class="brand-en">HeadToToe</span>
+      <span class="brand-mark">从头到脚</span>
     </a>
     <nav class="nav" aria-label="页面导航">
       <a href="#index">目录</a>
       <a href="#chapters">产品</a>
       <a href="#about">关于</a>
+      <a href="#account">账号</a>
     </nav>
     <button class="theme" id="themeToggle" type="button" aria-label="切换主题">深色</button>
   </div>
@@ -504,7 +514,10 @@ body.modal-open { overflow: hidden; }
 <main id="main">
   <section class="hero wrap" aria-labelledby="heroTitle">
     <div class="hero-copy">
-      <h1 class="hero-title" id="heroTitle">从头到脚</h1>
+      <h1 class="hero-title" id="heroTitle" aria-label="HeadToToe 从头到脚">
+        <span class="hero-en">HeadToToe</span>
+        <span class="hero-cn">从头到脚</span>
+      </h1>
       <p class="hero-line">六个产品，各管一处。</p>
       <p class="hero-intro">脑袋管思辨，眼睛管听课，嘴巴管语言，身体管训练，最外一层管穿搭。往下读，就是从头顶看到脚。</p>
       <div class="hero-actions">
@@ -557,8 +570,8 @@ body.modal-open { overflow: hidden; }
       <div class="contact-grid">
         <!-- @generated:contact -->
         <a class="frame" href="#argue" data-accent="wb">
-          <img class="frame-img" src="assets/video/wenbian-poster.jpg" alt="问辩 Wenbian的片子画面" width="480" height="270" loading="lazy" decoding="async">
-          <span class="frame-meta"><span class="frame-no">01</span><span class="frame-name">问辩 Wenbian</span><span class="frame-dur">片 20 秒</span></span>
+          <img class="frame-img" src="assets/video/wenbian-poster.jpg" alt="Wenbian 问辩的片子画面" width="480" height="270" loading="lazy" decoding="async">
+          <span class="frame-meta"><span class="frame-no">01</span><span class="frame-name">Wenbian 问辩</span><span class="frame-dur">片 20 秒</span></span>
         </a>
         <a class="frame" href="#eye" data-accent="eye">
           <img class="frame-img" src="assets/video/keliuzheng-promo-poster.jpg" alt="CourseDistill 课蒸馏的片子画面" width="480" height="270" loading="lazy" decoding="async">
@@ -577,8 +590,8 @@ body.modal-open { overflow: hidden; }
           <span class="frame-meta"><span class="frame-no">05</span><span class="frame-name">WorkoutLoop 训练环</span><span class="frame-dur">片 20 秒</span></span>
         </a>
         <a class="frame" href="#outer" data-accent="os">
-          <img class="frame-img" src="assets/video/outerstyle-poster.jpg" alt="外在 OuterStyle的片子画面" width="480" height="270" loading="lazy" decoding="async">
-          <span class="frame-meta"><span class="frame-no">06</span><span class="frame-name">外在 OuterStyle</span><span class="frame-dur">片 20 秒</span></span>
+          <img class="frame-img" src="assets/video/outerstyle-poster.jpg" alt="OuterStyle 外在的片子画面" width="480" height="270" loading="lazy" decoding="async">
+          <span class="frame-meta"><span class="frame-no">06</span><span class="frame-name">OuterStyle 外在</span><span class="frame-dur">片 20 秒</span></span>
         </a>
 <!-- @generated:end -->
       </div>
@@ -597,7 +610,7 @@ body.modal-open { overflow: hidden; }
           <a href="#argue">
             <span class="toc-no">01</span>
             <span class="toc-part">脑袋</span>
-            <span class="toc-name">问辩 Wenbian</span>
+            <span class="toc-name">Wenbian 问辩</span>
             <span class="toc-promise">把没说清的前提，问出来。</span>
             <span class="toc-media">片 20″ · 试用</span>
           </a>
@@ -642,7 +655,7 @@ body.modal-open { overflow: hidden; }
           <a href="#outer">
             <span class="toc-no">06</span>
             <span class="toc-part">着装</span>
-            <span class="toc-name">外在 OuterStyle</span>
+            <span class="toc-name">OuterStyle 外在</span>
             <span class="toc-promise">看懂一套衣服为什么这样搭。</span>
             <span class="toc-media">片 20″ · 试用</span>
           </a>
@@ -717,7 +730,7 @@ body.modal-open { overflow: hidden; }
         <article class="chapter" id="argue" data-i="1" data-zone="argue" data-accent="wb" aria-labelledby="t-argue">
           <header class="chapter-head">
             <p class="chapter-meta"><span class="chapter-no">01</span><span class="chapter-part">脑袋</span><span class="chapter-k">思辨 · 论证</span></p>
-            <h2 class="chapter-name" id="t-argue">问辩 Wenbian</h2>
+            <h2 class="chapter-name" id="t-argue">Wenbian 问辩</h2>
             <p class="chapter-promise">把没说清的前提，问出来。</p>
           </header>
           <div class="chapter-body">
@@ -730,21 +743,20 @@ body.modal-open { overflow: hidden; }
               </dl>
               <div class="chapter-actions">
           <button class="btn btn-line media-open" type="button" data-open="demo"
-                  data-src="assets/demo/wenbian.html" data-title="问辩 Wenbian · 在线试用"
+                  data-src="assets/demo/wenbian.html" data-title="Wenbian 问辩 · 在线试用"
                   data-note="范围澄清 → 正方发言 → 你回应 → 切 AI 与 AI">在线试用</button>
                 <a class="btn btn-line" href="https://dpenglish-com.github.io/wenbian-site/">前往站点 <span aria-hidden="true">→</span></a>
-                <a class="link-quiet" href="https://dpenglish-com.github.io/wenbian-site/downloads/wenbian-android-debug.apk">下载 APK</a>
               </div>
-              <details class="boundary"><summary>边界与前提</summary><p>需要账户（当前邀请制），账户与数据归属从第一版建立。</p></details>
+              <details class="boundary"><summary>边界与前提</summary><p>需要账户（当前邀请制），账户与数据归属从第一版建立。Android 内测包已下架，暂不公开下载；当前只提供邀请制 Web 内测。</p></details>
             </div>
             <div class="chapter-media">
           <button class="plate media-open" type="button" data-open="video"
                   data-src="assets/video/wenbian.mp4" data-poster="assets/video/wenbian-poster.jpg"
-                  data-title="问辩 Wenbian · 产品宣传片"
+                  data-title="Wenbian 问辩 · 产品宣传片"
                   data-meta="20 秒 · 1080p · 无旁白"
                   data-foot="学习流程示意 · 依据产品界面重绘。"
-                  aria-label="播放问辩 Wenbian的片子">
-            <span class="plate-frame"><img class="plate-img" src="assets/video/wenbian-poster.jpg" alt="问辩 Wenbian的片子画面" width="1280" height="720" loading="lazy" decoding="async">
+                  aria-label="播放Wenbian 问辩的片子">
+            <span class="plate-frame"><img class="plate-img" src="assets/video/wenbian-poster.jpg" alt="Wenbian 问辩的片子画面" width="1280" height="720" loading="lazy" decoding="async">
               <span class="plate-play" aria-hidden="true"><svg viewBox="0 0 13 15" fill="currentColor"><path d="M1 0.8v13.4L12.2 8 1 0.8z"/></svg></span></span>
             <span class="plate-meta"><span>ORIGINAL FILM</span><span>20 秒 · 1080p · 无旁白</span></span>
           </button>
@@ -917,7 +929,7 @@ body.modal-open { overflow: hidden; }
         <article class="chapter" id="outer" data-i="6" data-zone="outer" data-accent="os" aria-labelledby="t-outer">
           <header class="chapter-head">
             <p class="chapter-meta"><span class="chapter-no">06</span><span class="chapter-part">着装</span><span class="chapter-k">穿搭 · 审美</span></p>
-            <h2 class="chapter-name" id="t-outer">外在 OuterStyle</h2>
+            <h2 class="chapter-name" id="t-outer">OuterStyle 外在</h2>
             <p class="chapter-promise">看懂一套衣服为什么这样搭。</p>
           </header>
           <div class="chapter-body">
@@ -930,7 +942,7 @@ body.modal-open { overflow: hidden; }
               </dl>
               <div class="chapter-actions">
           <button class="btn btn-line media-open" type="button" data-open="demo"
-                  data-src="assets/demo/outerstyle.html" data-title="外在 OuterStyle · 在线试用"
+                  data-src="assets/demo/outerstyle.html" data-title="OuterStyle 外在 · 在线试用"
                   data-note="录入单品 → 生成搭配 → 颜色角色 → 审美训练">在线试用</button>
                 <a class="btn btn-line" href="https://dpenglish-com.github.io/outerstyle-site/">前往站点 <span aria-hidden="true">→</span></a>
                 <a class="link-quiet" href="https://dpenglish-com.github.io/outerstyle-site/downloads/OuterStyle-0.2.0-debug.apk">下载 APK</a>
@@ -940,11 +952,11 @@ body.modal-open { overflow: hidden; }
             <div class="chapter-media">
           <button class="plate media-open" type="button" data-open="video"
                   data-src="assets/video/outerstyle.mp4" data-poster="assets/video/outerstyle-poster.jpg"
-                  data-title="外在 OuterStyle · 产品宣传片"
+                  data-title="OuterStyle 外在 · 产品宣传片"
                   data-meta="20 秒 · 1080p · 无旁白"
                   data-foot="学习流程示意 · 依据产品界面重绘。"
-                  aria-label="播放外在 OuterStyle的片子">
-            <span class="plate-frame"><img class="plate-img" src="assets/video/outerstyle-poster.jpg" alt="外在 OuterStyle的片子画面" width="1280" height="720" loading="lazy" decoding="async">
+                  aria-label="播放OuterStyle 外在的片子">
+            <span class="plate-frame"><img class="plate-img" src="assets/video/outerstyle-poster.jpg" alt="OuterStyle 外在的片子画面" width="1280" height="720" loading="lazy" decoding="async">
               <span class="plate-play" aria-hidden="true"><svg viewBox="0 0 13 15" fill="currentColor"><path d="M1 0.8v13.4L12.2 8 1 0.8z"/></svg></span></span>
             <span class="plate-meta"><span>ORIGINAL FILM</span><span>20 秒 · 1080p · 无旁白</span></span>
           </button>
@@ -969,6 +981,21 @@ body.modal-open { overflow: hidden; }
     </div>
     <p class="about-next">还没开始：注意力、财务、情绪、手艺。</p>
   </section>
+
+  <section class="account about wrap" id="account" aria-labelledby="accountTitle">
+    <!-- @generated:account -->
+      <div class="about-grid">
+        <h2 id="accountTitle">账号</h2>
+        <div class="about-copy account-copy">
+          <p>统一账号尚未接入。这里没有登录表单，也不会把任何会话写成本机已登录状态。</p>
+          <p>六个产品的账号与项目数据仍各自保管：PaperEcho、WorkoutLoop 不需要账号，数据只在设备上；Wenbian、CourseDistill、SE English、OuterStyle 的账户和项目数据仍在各自服务里。母站不读取也不汇总。</p>
+          <p>这一页展示的是公开的项目简介，不是你的学习进度或项目摘要。</p>
+          <p class="account-login"><a class="btn btn-line" href="https://www.seandictation.site/login" rel="noopener">登录 SE English <span aria-hidden="true">→</span></a></p>
+          <p class="account-note mono">这是 SE English 自己的登录页，同一服务可注册；登录后的会话只在 SE English 有效，不等于统一账号。</p>
+        </div>
+      </div>
+<!-- @generated:end -->
+  </section>
 </main>
 
 <footer class="foot wrap">
@@ -981,12 +1008,12 @@ body.modal-open { overflow: hidden; }
       <h2>六个产品</h2>
       <div class="foot-links">
         <!-- @generated:footer -->
-          <a href="https://dpenglish-com.github.io/wenbian-site/">问辩 Wenbian</a>
+          <a href="https://dpenglish-com.github.io/wenbian-site/">Wenbian 问辩</a>
           <a href="https://dpenglish-com.github.io/keliuzheng-site/">CourseDistill 课蒸馏</a>
           <a href="https://dpenglish-com.github.io/paperecho-site/">PaperEcho 纸上回声</a>
           <a href="https://www.seandictation.site/">SE English 英语训练</a>
           <a href="https://dpenglish-com.github.io/workoutloop-site/">WorkoutLoop 训练环</a>
-          <a href="https://dpenglish-com.github.io/outerstyle-site/">外在 OuterStyle</a>
+          <a href="https://dpenglish-com.github.io/outerstyle-site/">OuterStyle 外在</a>
 <!-- @generated:end -->
       </div>
     </div>
@@ -1000,7 +1027,7 @@ body.modal-open { overflow: hidden; }
     </div>
   </div>
   <div class="foot-base">
-    <span class="mono">没有账号系统 · 没有追踪 · 没有外部请求</span>
+    <span class="mono">统一账号尚未接入 · 没有追踪 · 没有外部请求</span>
     <a class="mono" href="#top">返回顶部 ↑</a>
   </div>
 </footer>
@@ -1031,7 +1058,7 @@ body.modal-open { overflow: hidden; }
       "k": "思辨 · 论证",
       "accent": "wb",
       "zone": "argue",
-      "name": "问辩 Wenbian",
+      "name": "Wenbian 问辩",
       "short": "Web · Android",
       "promise": "把没说清的前提，问出来。",
       "platform": "Web · Android",
@@ -1047,10 +1074,6 @@ body.modal-open { overflow: hidden; }
         {
           "label": "前往站点",
           "href": "https://dpenglish-com.github.io/wenbian-site/"
-        },
-        {
-          "label": "下载 APK",
-          "href": "https://dpenglish-com.github.io/wenbian-site/downloads/wenbian-android-debug.apk"
         }
       ]
     },
@@ -1187,7 +1210,7 @@ body.modal-open { overflow: hidden; }
       "k": "穿搭 · 审美",
       "accent": "os",
       "zone": "outer",
-      "name": "外在 OuterStyle",
+      "name": "OuterStyle 外在",
       "short": "Android · 0.2.0",
       "promise": "看懂一套衣服为什么这样搭。",
       "platform": "Android 8.0+",

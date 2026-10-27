@@ -25,6 +25,21 @@ const products = data.products;
 const PART_ZONE = { 脑袋: 'argue', 眼睛: 'eye', 嘴巴: 'lang', 身体: 'body', 着装: 'outer' };
 const PART_ORDER = ['脑袋', '眼睛', '嘴巴', '身体', '着装'];
 
+/* 2026-10-27 起母站统一为「英文在前」。品牌与产品名逐字固定，
+   避免子站改名后母站漏跟，也避免有人只把两种语言塞进同一个字符串。 */
+const BRAND = 'HeadToToe 从头到脚';
+const NAME_BY_ID = {
+  argue: 'Wenbian 问辩',
+  eye: 'CourseDistill 课蒸馏',
+  lang: 'PaperEcho 纸上回声',
+  se: 'SE English 英语训练',
+  body: 'WorkoutLoop 训练环',
+  outer: 'OuterStyle 外在',
+};
+const firstCjk = s => s.search(/[\u3400-\u9FFF]/);
+const firstLatin = s => s.search(/[A-Za-z]/);
+const englishFirst = s => firstLatin(s) >= 0 && firstCjk(s) >= 0 && firstLatin(s) < firstCjk(s);
+
 /* ---------------------------------------------------------------- 校验 */
 
 const problems = [];
@@ -37,8 +52,14 @@ products.forEach((p, i) => {
   }
   if (p.id && !ID_RE.test(p.id)) problems.push(where + ' id 只能是小写字母/数字/连字符: ' + p.id);
   if (p.promise && p.promise.length > 40) problems.push(where + ' promise 太长（≤40 字）: ' + p.promise);
-  // 2026-10-24 起，六个产品的对外名字统一为中英双语；只写一种语言会在母站上缺一半。
-  if (p.name && (!/[\u3400-\u9FFF]/.test(p.name) || !/[A-Za-z]/.test(p.name))) problems.push(where + ' name 必须中英双语: ' + p.name);
+  // 2026-10-24 起，六个产品的对外名字统一为中英双语；2026-10-27 起英文在前。
+  // 只写一种语言、两种语言都有但中文在前、或不是约定写法，都会在母站上漏出不一致。
+  if (p.name) {
+    if (!englishFirst(p.name)) problems.push(where + ' name 必须英文在前（英文 + 中文）: ' + p.name);
+    if (NAME_BY_ID[p.id] && p.name !== NAME_BY_ID[p.id]) {
+      problems.push(where + ' name 必须准确等于「' + NAME_BY_ID[p.id] + '」，现在是「' + p.name + '」');
+    }
+  }
   if (!PART_ZONE[p.part]) problems.push(where + ' 未知部位: ' + p.part + '（可用：' + Object.keys(PART_ZONE).join(' / ') + '）');
   if (!Array.isArray(p.links) || p.links.length === 0) problems.push(where + ' links 不能为空');
   (p.links || []).forEach((l, j) => {
@@ -69,6 +90,22 @@ products.forEach((p, i) => {
 
 if (data.site && data.site.count !== products.length) {
   problems.push('site.count = ' + data.site.count + '，但 products 有 ' + products.length + ' 个');
+}
+/* 账号区只陈述边界：统一账号未接入，只给 SE English 自己的登录页。
+   这里拦下缺字段与任何非 https 链接，避免生成器把假入口带上线。 */
+const account = data.site && data.site.account;
+if (!account) problems.push('site.account 缺账号区数据');
+else {
+  for (const f of ['title', 'status']) {
+    if (!account[f] || typeof account[f] !== 'string') problems.push('site.account 缺字段: ' + f);
+  }
+  if (!Array.isArray(account.body) || account.body.length === 0) problems.push('site.account.body 必须是非空数组');
+  else account.body.forEach((t, i) => {
+    if (!t || typeof t !== 'string') problems.push('site.account.body[' + i + '] 必须是非空字符串');
+  });
+  if (!account.link || !account.link.label || !account.link.href) problems.push('site.account.link 缺 label 或 href');
+  else if (!/^https:\/\//.test(account.link.href)) problems.push('site.account.link 必须是 https: ' + account.link.href);
+  if (account.link && !account.link.note) problems.push('site.account.link 缺 note（要说明这不是统一账号）');
 }
 for (const key of ['id', 'accent']) {
   const seen = new Map();
@@ -278,6 +315,18 @@ function genFooter() {
   ).join('\n');
 }
 
+function genAccount() {
+  const a = data.site.account;
+  const paras = a.body.map(t => '          <p>' + esc(t) + '</p>').join('\n');
+  return '      <div class="about-grid">\n' +
+    '        <h2 id="accountTitle">' + esc(a.title) + '</h2>\n' +
+    '        <div class="about-copy account-copy">\n' + paras + '\n' +
+    '          <p class="account-login"><a class="btn btn-line" href="' + esc(a.link.href) + '" rel="noopener">' + esc(a.link.label) + ' <span aria-hidden="true">→</span></a></p>\n' +
+    '          <p class="account-note mono">' + esc(a.link.note) + '</p>\n' +
+    '        </div>\n' +
+    '      </div>';
+}
+
 function genData() {
   const slim = products.map((p, i) => ({
     id: p.id, no: i + 1, part: p.part, k: p.k, accent: p.accent,
@@ -305,7 +354,7 @@ function gen404() {
   ).join('\n');
   return '<!doctype html>\n' +
 '<html lang="zh-CN">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n' +
-'<title>没有这个页面 · 从头到脚</title>\n<meta name="robots" content="noindex">\n' +
+'<title>没有这个页面 · ' + BRAND + '</title>\n<meta name="robots" content="noindex">\n' +
 '<meta name="color-scheme" content="dark light">\n<meta name="theme-color" content="' + tok('bg') + '">\n' +
 '<link rel="icon" href="' + icon[1] + '">\n' +
 '<script>(function(){var t;try{t=localStorage.getItem("ctdj-theme");}catch(e){}if(t!=="light"&&t!=="dark"){t=window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";}document.documentElement.setAttribute("data-theme",t);})();</script>\n' +
@@ -328,6 +377,7 @@ function gen404() {
 'li span{font-family:var(--mono);font-size:12.5px;color:var(--ink-3)}\n' +
 '.home{display:inline-flex;align-items:center;min-height:44px;margin-top:32px;font-size:14.5px;color:var(--ink-2)}\n' +
 '</style>\n</head>\n<body>\n<div class="wrap">\n' +
+'<p class="mark"><a href="/">' + BRAND + '</a></p>\n' +
 '<p class="code">404 · 没有这个页面</p>\n<h1>这里没有东西。</h1>\n' +
 '<p class="lead">地址可能打错了，或者那个页面已经搬走。下面是全部' + products.length + '个产品。</p>\n' +
 '<ul style="margin-top:32px">\n' + links + '\n</ul>\n' +
@@ -343,6 +393,7 @@ const REGIONS = [
   { name: 'index', open: '<!-- @generated:index -->', close: '<!-- @generated:end -->', body: genIndex() },
   { name: 'rail', open: '<!-- @generated:rail -->', close: '<!-- @generated:end -->', body: genRail() },
   { name: 'chapters', open: '<!-- @generated:chapters -->', close: '<!-- @generated:end -->', body: genChapters() },
+  { name: 'account', open: '<!-- @generated:account -->', close: '<!-- @generated:end -->', body: genAccount() },
   { name: 'footer', open: '<!-- @generated:footer -->', close: '<!-- @generated:end -->', body: genFooter() },
   { name: 'data', open: '/* @generated:data */', close: '/* @generated:end */', body: genData() },
 ];

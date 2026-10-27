@@ -18,7 +18,21 @@
   "site": {
     "verifiedOn": "2026-10-17",
     "count": 6,
-    "redesignedOn": "2026-10-24"
+    "redesignedOn": "2026-10-24",
+    "account": {
+      "title": "账号",
+      "status": "统一账号尚未接入",
+      "body": [
+        "统一账号尚未接入。这里没有登录表单，也不会把任何会话写成本机已登录状态。",
+        "六个产品的账号与项目数据仍各自保管：PaperEcho、WorkoutLoop 不需要账号，数据只在设备上；Wenbian、CourseDistill、SE English、OuterStyle 的账户和项目数据仍在各自服务里。母站不读取也不汇总。",
+        "这一页展示的是公开的项目简介，不是你的学习进度或项目摘要。"
+      ],
+      "link": {
+        "label": "登录 SE English",
+        "href": "https://www.seandictation.site/login",
+        "note": "这是 SE English 自己的登录页，同一服务可注册；登录后的会话只在 SE English 有效，不等于统一账号。"
+      }
+    }
   },
   "products": [
     {
@@ -26,21 +40,17 @@
       "part": "脑袋",
       "k": "思辨 · 论证",
       "accent": "wb",
-      "name": "问辩 Wenbian",
+      "name": "Wenbian 问辩",
       "short": "Web · Android",
       "platform": "Web · Android",
       "version": "内测包",
       "size": "13.04 MB",
       "desc": "你提出命题，它围绕你的实际发言继续推进，定位当前争议，每次只追问一个可以回答的问题。它不生产结论，只负责把你没说清的前提、没给出的证据和跳过的推理挑出来。",
-      "note": "需要账户（当前邀请制），账户与数据归属从第一版建立。",
+      "note": "需要账户（当前邀请制），账户与数据归属从第一版建立。Android 内测包已下架，暂不公开下载；当前只提供邀请制 Web 内测。",
       "links": [
         {
           "label": "前往站点",
           "href": "https://dpenglish-com.github.io/wenbian-site/"
-        },
-        {
-          "label": "下载 APK",
-          "href": "https://dpenglish-com.github.io/wenbian-site/downloads/wenbian-android-debug.apk"
         }
       ],
       "media": {
@@ -182,7 +192,7 @@
       "part": "着装",
       "k": "穿搭 · 审美",
       "accent": "os",
-      "name": "外在 OuterStyle",
+      "name": "OuterStyle 外在",
       "short": "Android · 0.2.0",
       "platform": "Android 8.0+",
       "version": "0.2.0",

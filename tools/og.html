@@ -21,7 +21,10 @@ body{padding:54px 64px;display:flex;flex-direction:column;justify-content:space-
 h1{margin:0;font-family:var(--serif);font-weight:500;font-size:118px;line-height:.98;letter-spacing:.01em}
 .lead{margin:18px 0 0;font-family:var(--serif);font-size:29px;color:var(--ink);line-height:1.4}
 .meta{margin:14px 0 0;font-family:var(--mono);font-size:13px;color:var(--ink-3);letter-spacing:.04em}
-.row{display:flex;align-items:flex-end;gap:14px;border-top:1px solid rgba(23,20,15,.14);padding-top:20px}
+/* 六项横排一行时，末项会被右边界裁掉（1200−64 的安全边距装不下），
+   所以改三列两行网格：列宽 1fr，行间距 16px，顶部细线不变。 */
+.row{display:grid;grid-template-columns:repeat(3,1fr);column-gap:24px;row-gap:16px;
+  border-top:1px solid rgba(23,20,15,.14);padding-top:20px}
 .item .k{display:flex;align-items:baseline;gap:7px}
 .dot{display:inline-block;width:8px;height:8px;flex:none;transform:translateY(-2px);border-radius:50%}
 .item .n{font-family:var(--serif);font-size:14px;font-weight:500;white-space:nowrap}
@@ -35,11 +38,11 @@ h1{margin:0;font-family:var(--serif);font-weight:500;font-size:118px;line-height
   <p class="meta">一个作者 · 六件东西 · 六支片 · 六份在线试用</p>
 </div>
 <div class="row">
-  <div class="item"><div class="k"><span class="dot" style="background:var(--wb)"></span><span class="n">脑袋 · 问辩 Wenbian</span></div><div class="s">思辨 · 论证</div></div>
+  <div class="item"><div class="k"><span class="dot" style="background:var(--wb)"></span><span class="n">脑袋 · Wenbian 问辩</span></div><div class="s">思辨 · 论证</div></div>
   <div class="item"><div class="k"><span class="dot" style="background:var(--eye)"></span><span class="n">眼睛 · CourseDistill 课蒸馏</span></div><div class="s">听课 · 蒸馏</div></div>
   <div class="item"><div class="k"><span class="dot" style="background:var(--pe)"></span><span class="n">嘴巴 · PaperEcho 纸上回声</span></div><div class="s">语言 · 考试</div></div>
   <div class="item"><div class="k"><span class="dot" style="background:var(--se)"></span><span class="n">嘴巴 · SE English 英语训练</span></div><div class="s">语言 · 课程</div></div>
   <div class="item"><div class="k"><span class="dot" style="background:var(--wl)"></span><span class="n">身体 · WorkoutLoop 训练环</span></div><div class="s">训练 · 编排</div></div>
-  <div class="item"><div class="k"><span class="dot" style="background:var(--os)"></span><span class="n">着装 · 外在 OuterStyle</span></div><div class="s">穿搭 · 审美</div></div>
+  <div class="item"><div class="k"><span class="dot" style="background:var(--os)"></span><span class="n">着装 · OuterStyle 外在</span></div><div class="s">穿搭 · 审美</div></div>
 </div>
 </body></html>

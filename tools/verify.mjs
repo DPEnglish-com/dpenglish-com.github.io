@@ -21,6 +21,9 @@ const REMOTE = /^https?:\/\//.test(TARGET);
 // [名称, 命令, 是否用浏览器, 是否可在线上跑]
 const GATES = [
   ['0) 生成物同步', ['node', ['tools/build.mjs', '--check']], false, false],
+  // 名称顺序、title/description/og/aria/404 同步、账号区边界。都是静态可判定的，
+  // 渲染截图看不出来，build 也不管文案。
+  ['0b) 名称与账号契约', ['node', ['tools/site-contract.mjs']], false, false],
   ['1) 静态令牌对比度', ['python3', ['tools/contrast-audit.py', 'index.html']], false, false],
   ['2) 真实渲染审计', ['node', ['tools/render-audit.mjs', TARGET]], true, true],
   ['3) 目录与脊柱交互', ['node', ['tools/map-interact.mjs', TARGET, '/tmp/verify-map', '1440', 'dark']], true, true],
